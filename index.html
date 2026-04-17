@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>cursors</title>
+<style>
+  body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; background: #fff; cursor: none; font-family: monospace; }
+  #overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; z-index: 999; }
+  #overlay input { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; }
+  #overlay button { font-family: monospace; font-size: 14px; border: 1px solid #000; background: #fff; padding: 4px 12px; cursor: pointer; }
+  #overlay button:hover { background: #000; color: #fff; }
+  #count { position: fixed; top: 8px; left: 8px; font-family: monospace; font-size: 12px; color: #999; z-index: 100; pointer-events: none; }
+  #chatbar { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: none; align-items: center; gap: 4px; font-family: monospace; font-size: 13px; border: 1px solid #000; background: #fff; padding: 4px 8px; z-index: 900; }
+  #chatbar input { font-family: monospace; font-size: 13px; border: none; outline: none; width: 240px; }
+  .cursor { position: fixed; pointer-events: none; z-index: 500; }
+  .cursor-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; background: #000; color: #fff; padding: 1px 4px; }
+  .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; }
+  .cursor-bubble.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div style="font-family:monospace;font-size:13px;">what's your name?</div>
+  <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="name..." />
+  <button id="joinBtn">join</button>
+</div>
+
+<div id="count">0 online</div>
+
+<div id="chatbar">
+  <span style="color:#999">/</span>
+  <input id="chatInput" type="text" maxlength="80" placeholder="say something..." autocomplete="off" />
+  <span style="color:#999;font-size:11px;">enter to send</span>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+
+// PASTE YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+  apiKey: "AIzaSyDFniinqSfTtpJaq9uM3ayXz-z8njAHTMg",
+  authDomain: "cursor-wars-96326.firebaseapp.com",
+  databaseURL: "https://cursor-wars-96326-default-rtdb.firebaseio.com",
+  projectId: "cursor-wars-96326",
+  storageBucket: "cursor-wars-96326.firebasestorage.app",
+  messagingSenderId: "182917855465",
+  appId: "1:182917855465:web:b7881211afc05549999878",
+  measurementId: "G-LNK1B5ZHFF"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63'];
+function pickColor(uid) {
+  let h = 0; for (let c of uid) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+
+const cursorSVG = (color) =>
+  `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${color}" stroke="#fff" stroke-width="1"/>
+  </svg>`;
+
+let myId = null, myRef = null, myName = '', myCursorEl = null;
+let chatOpen = false, chatTimeout = null;
+const others = {};
+const THROTTLE = 40;
+let lastSent = 0;
+
+const overlay = document.getElementById('overlay');
+const nameInput = document.getElementById('nameInput');
+const chatbar = document.getElementById('chatbar');
+const chatInput = document.getElementById('chatInput');
+const countEl = document.getElementById('count');
+
+function join() {
+  const name = nameInput.value.trim();
+  if (!name) return nameInput.focus();
+  myName = name;
+  myId = db.ref().push().key;
+  myRef = db.ref('cursors/' + myId);
+  myRef.set({ name, x: 0.5, y: 0.5, msg: '', ts: Date.now() });
+  myRef.onDisconnect().remove();
+  overlay.style.display = 'none';
+
+  myCursorEl = makeCursorEl(myId, name, '#000');
+  document.body.appendChild(myCursorEl);
+
+  listenCursors();
+  trackMouse();
+  setupChat();
+  db.ref('cursors').on('value', s => countEl.textContent = s.numChildren() + ' online');
+}
+
+function makeCursorEl(uid, name, color) {
+  const el = document.createElement('div');
+  el.className = 'cursor';
+  el.id = 'c-' + uid;
+  el.innerHTML = cursorSVG(color) +
+    `<div class="cursor-name">${esc(name)}</div>` +
+    `<div class="cursor-bubble"></div>`;
+  return el;
+}
+
+function listenCursors() {
+  db.ref('cursors').on('child_added', s => {
+    if (s.key === myId) return;
+    const d = s.val();
+    const color = pickColor(s.key);
+    const el = makeCursorEl(s.key, d.name, color);
+    document.body.appendChild(el);
+    others[s.key] = { el, bt: null };
+    move(el, d.x, d.y);
+    if (d.msg) showBubble(s.key, d.msg);
+  });
+  db.ref('cursors').on('child_changed', s => {
+    if (s.key === myId) return;
+    const d = s.val();
+    if (!others[s.key]) {
+      const color = pickColor(s.key);
+      const el = makeCursorEl(s.key, d.name, color);
+      document.body.appendChild(el);
+      others[s.key] = { el, bt: null };
+    }
+    move(others[s.key].el, d.x, d.y);
+    if (d.msg) showBubble(s.key, d.msg);
+  });
+  db.ref('cursors').on('child_removed', s => {
+    if (others[s.key]) { others[s.key].el.remove(); delete others[s.key]; }
+  });
+}
+
+function move(el, nx, ny) {
+  el.style.left = (nx * window.innerWidth) + 'px';
+  el.style.top = (ny * window.innerHeight) + 'px';
+}
+
+function showBubble(uid, msg) {
+  const entry = others[uid];
+  if (!entry) return;
+  const bubble = entry.el.querySelector('.cursor-bubble');
+  bubble.textContent = msg;
+  bubble.classList.add('show');
+  if (entry.bt) clearTimeout(entry.bt);
+  entry.bt = setTimeout(() => bubble.classList.remove('show'), 6000);
+}
+
+function trackMouse() {
+  document.addEventListener('mousemove', e => {
+    if (myCursorEl) {
+      myCursorEl.style.left = e.clientX + 'px';
+      myCursorEl.style.top = e.clientY + 'px';
+    }
+    const now = Date.now();
+    if (now - lastSent < THROTTLE) return;
+    lastSent = now;
+    myRef.update({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
+  });
+}
+
+function setupChat() {
+  document.addEventListener('keydown', e => {
+    if (overlay.style.display !== 'none') return;
+    if (e.key === '/' && !chatOpen) { e.preventDefault(); openChat(); }
+    if (e.key === 'Escape' && chatOpen) closeChat();
+  });
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat();
+    if (e.key === 'Escape') closeChat();
+    e.stopPropagation();
+  });
+}
+
+function openChat() {
+  chatOpen = true;
+  chatbar.style.display = 'flex';
+  chatInput.value = '';
+  setTimeout(() => chatInput.focus(), 20);
+}
+
+function closeChat() {
+  chatOpen = false;
+  chatbar.style.display = 'none';
+  chatInput.blur();
+}
+
+function sendChat() {
+  const msg = chatInput.value.trim();
+  closeChat();
+  if (!msg || !myCursorEl) return;
+  const bubble = myCursorEl.querySelector('.cursor-bubble');
+  bubble.textContent = msg;
+  bubble.classList.add('show');
+  if (chatTimeout) clearTimeout(chatTimeout);
+  chatTimeout = setTimeout(() => { bubble.classList.remove('show'); myRef.update({ msg: '' }); }, 6000);
+  myRef.update({ msg, ts: Date.now() });
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('joinBtn').addEventListener('click', join);
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
+setTimeout(() => nameInput.focus(), 50);
+</script>
+</body>
+</html>
