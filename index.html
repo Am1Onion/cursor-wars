@@ -5,7 +5,8 @@
 <title>Cursor Wars</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; background: #fff; cursor: none; font-family: monospace; }
+  body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; background: #fff; font-family: monospace; }
+  body.in-game { cursor: none; }
 
   #overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; z-index: 999; }
   #overlay input { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; width: 180px; }
@@ -135,7 +136,10 @@ async function join() {
   myRef = db.ref('cursors/' + myId);
   myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now() });
   myRef.onDisconnect().remove();
+
+  /* hide overlay, enable in-game cursor hiding */
   overlay.style.display = 'none';
+  document.body.classList.add('in-game');
 
   myCursorEl = makeCursorEl(myId, myName, '#000');
   document.body.appendChild(myCursorEl);
@@ -148,8 +152,12 @@ async function join() {
   trackMouse();
   setupChat();
   scheduleIdleKick();
+
+  /* only count cursors that are actually in-game (have a name) */
   db.ref('cursors').on('value', s => {
-    const n = s.exists() ? s.numChildren() : 0;
+    if (!s.exists()) { countEl.textContent = '0 online'; return; }
+    const vals = Object.values(s.val());
+    const n = vals.filter(v => v && v.name).length;
     countEl.textContent = n + ' online';
   });
 }
@@ -224,8 +232,8 @@ function showBubble(uid, msg) {
 }
 
 /* ── idle kick ── */
-const IDLE_WARN = 2.5 * 60 * 1000;  // warn at 2.5 min
-const IDLE_KICK = 3 * 60 * 1000;    // kick at 3 min
+const IDLE_WARN = 2.5 * 60 * 1000;
+const IDLE_KICK = 3 * 60 * 1000;
 let lastActivity = Date.now();
 let kickWarnTimer = null, kickTimer = null, kickCountdownInterval = null;
 
@@ -257,9 +265,10 @@ function scheduleIdleKick() {
 
 function kickPlayer() {
   if (myRef) myRef.remove();
-  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';
+  /* restore normal cursor on the kicked screen */
+  document.body.classList.remove('in-game');
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';
 }
-
 
 function trackMouse() {
   document.addEventListener('mousemove', e => {
@@ -275,7 +284,7 @@ function trackMouse() {
   });
 }
 
-/* ── chat history (stored in firebase) ── */
+/* ── chat history ── */
 function listenChat() {
   db.ref('chat').limitToLast(20).on('child_added', s => {
     const d = s.val();
