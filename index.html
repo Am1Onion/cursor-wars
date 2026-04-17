@@ -9,10 +9,16 @@
   body.in-game { cursor: none; }
 
   #overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; z-index: 999; }
-  #overlay input { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; width: 180px; }
+  #overlay input[type=text] { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; width: 180px; }
   #overlay button { font-family: monospace; font-size: 14px; border: 1px solid #000; background: #fff; padding: 4px 12px; cursor: pointer; }
   #overlay button:hover { background: #000; color: #fff; }
   #name-error { font-family: monospace; font-size: 11px; color: #c0392b; min-height: 14px; }
+
+  #color-row { display: flex; align-items: center; gap: 6px; }
+  #color-row span { font-family: monospace; font-size: 12px; color: #666; }
+  .color-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.selected { border-color: #000; }
 
   #count { position: fixed; top: 8px; left: 8px; font-family: monospace; font-size: 12px; color: #999; z-index: 100; pointer-events: none; }
 
@@ -34,6 +40,15 @@
   .cursor-bubble.show { display: block; }
 
   #kick-warning { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 12px; color: #c0392b; border: 1px solid #c0392b; background: #fff; padding: 4px 12px; z-index: 800; display: none; pointer-events: none; }
+
+  #color-picker-btn { position: fixed; top: 8px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer; z-index: 200; display: none; align-items: center; gap: 6px; }
+  #color-picker-btn:hover { border-color: #000; }
+  #cpb-dot { width: 10px; height: 10px; border-radius: 50%; }
+  #color-picker-panel { position: fixed; top: 34px; right: 8px; background: #fff; border: 1px solid #000; padding: 8px 10px; z-index: 300; display: none; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; }
+  #ig-swatches { display: flex; gap: 6px; flex-wrap: wrap; width: 132px; }
+  .ig-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s; }
+  .ig-swatch:hover { transform: scale(1.2); }
+  .ig-swatch.selected { border-color: #000; }
 </style>
 </head>
 <body>
@@ -42,6 +57,7 @@
   <div style="font-family:monospace;font-size:13px;">what's your name?</div>
   <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="name..." />
   <div id="name-error"></div>
+  <div id="color-row"><span>color:</span></div>
   <button id="joinBtn">join</button>
 </div>
 
@@ -57,6 +73,12 @@
     <span id="chat-cooldown"></span>
     <span style="color:#999;font-size:11px;">↵ send</span>
   </div>
+</div>
+
+<div id="color-picker-btn"><div id="cpb-dot"></div>color</div>
+<div id="color-picker-panel">
+  <div style="color:#666;">cursor color</div>
+  <div id="ig-swatches"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -76,7 +98,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* ── profanity filter ── */
 const BAD = ['fuck','shit','ass','bitch','cunt','dick','cock','pussy','bastard','damn','crap',
   'piss','whore','slut','fag','nigger','nigga','retard','twat','wank','bollocks','arse'];
 function hasProfanity(s) {
@@ -84,47 +105,92 @@ function hasProfanity(s) {
   return BAD.some(w => low.includes(w));
 }
 
-/* ── color ── */
-const COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e91e63'];
-function pickColor(uid) {
-  let h = 0; for (let c of uid) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return COLORS[h % COLORS.length];
-}
+const COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#ffffff','#111111'];
+let myColor = COLORS[5];
+
+function strokeFor(c) { return c === '#ffffff' ? '#999' : '#fff'; }
 
 const cursorSVG = (color) =>
   `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${color}" stroke="#fff" stroke-width="1"/>
+    <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${color}" stroke="${strokeFor(color)}" stroke-width="1"/>
   </svg>`;
+
+/* ── overlay swatches ── */
+const colorRow = document.getElementById('color-row');
+COLORS.forEach(c => {
+  const sw = document.createElement('div');
+  sw.className = 'color-swatch' + (c === myColor ? ' selected' : '');
+  sw.style.background = c;
+  if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
+  sw.addEventListener('click', () => {
+    myColor = c;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected');
+  });
+  colorRow.appendChild(sw);
+});
 
 /* ── state ── */
 let myId = null, myRef = null, myName = '', myCursorEl = null;
-let chatOpen = false, chatTimeout = null;
-let lastChatSent = 0;
+let chatOpen = false, chatTimeout = null, lastChatSent = 0;
 const CHAT_COOLDOWN = 5000;
 const others = {};
 const THROTTLE = 40;
 let lastSent = 0;
 const chatMessages = [];
 
-const overlay = document.getElementById('overlay');
-const nameInput = document.getElementById('nameInput');
-const nameError = document.getElementById('name-error');
-const chatbar = document.getElementById('chatbar');
-const chatInput = document.getElementById('chatInput');
-const countEl = document.getElementById('count');
-const chatHistEl = document.getElementById('chat-history');
+const overlay      = document.getElementById('overlay');
+const nameInput    = document.getElementById('nameInput');
+const nameError    = document.getElementById('name-error');
+const chatbar      = document.getElementById('chatbar');
+const chatInput    = document.getElementById('chatInput');
+const countEl      = document.getElementById('count');
+const chatHistEl   = document.getElementById('chat-history');
 const chatCooldownEl = document.getElementById('chat-cooldown');
-const chatHint = document.getElementById('chat-hint');
+const chatHint     = document.getElementById('chat-hint');
+const cpBtn        = document.getElementById('color-picker-btn');
+const cpPanel      = document.getElementById('color-picker-panel');
+const cpbDot       = document.getElementById('cpb-dot');
+const igSwatches   = document.getElementById('ig-swatches');
+
+/* ── in-game swatches ── */
+function buildIgSwatches() {
+  igSwatches.innerHTML = '';
+  COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'ig-swatch' + (c === myColor ? ' selected' : '');
+    sw.style.background = c;
+    if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
+    sw.addEventListener('click', () => {
+      myColor = c;
+      if (myCursorEl) {
+        const path = myCursorEl.querySelector('svg path');
+        path.setAttribute('fill', myColor);
+        path.setAttribute('stroke', strokeFor(myColor));
+      }
+      if (myRef) myRef.update({ color: myColor });
+      cpbDot.style.background = myColor;
+      igSwatches.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      cpPanel.style.display = 'none';
+    });
+    igSwatches.appendChild(sw);
+  });
+}
+
+cpBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  cpPanel.style.display = cpPanel.style.display === 'flex' ? 'none' : 'flex';
+});
+document.addEventListener('click', () => { cpPanel.style.display = 'none'; });
+cpPanel.addEventListener('click', e => e.stopPropagation());
 
 /* ── join ── */
 async function join() {
   const raw = nameInput.value.trim();
   if (!raw) { nameInput.focus(); return; }
-
   if (hasProfanity(raw)) { nameError.textContent = 'name not allowed.'; return; }
-
   const safe = esc(raw).slice(0, 20);
-
   nameError.textContent = 'checking...';
   const snap = await db.ref('cursors').get();
   const taken = snap.exists() && Object.values(snap.val()).some(v => v.name && v.name.toLowerCase() === safe.toLowerCase());
@@ -134,15 +200,18 @@ async function join() {
   myName = safe;
   myId = db.ref().push().key;
   myRef = db.ref('cursors/' + myId);
-  myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now() });
+  myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor });
   myRef.onDisconnect().remove();
 
-  /* hide overlay, enable in-game cursor hiding */
   overlay.style.display = 'none';
   document.body.classList.add('in-game');
 
-  myCursorEl = makeCursorEl(myId, myName, '#000');
+  myCursorEl = makeCursorEl(myId, myName, myColor);
   document.body.appendChild(myCursorEl);
+
+  cpBtn.style.display = 'flex';
+  cpbDot.style.background = myColor;
+  buildIgSwatches();
 
   chatHint.style.display = 'block';
   setTimeout(() => { chatHint.style.opacity = '0'; }, 8000);
@@ -153,16 +222,13 @@ async function join() {
   setupChat();
   scheduleIdleKick();
 
-  /* only count cursors that are actually in-game (have a name) */
   db.ref('cursors').on('value', s => {
     if (!s.exists()) { countEl.textContent = '0 online'; return; }
-    const vals = Object.values(s.val());
-    const n = vals.filter(v => v && v.name).length;
+    const n = Object.values(s.val()).filter(v => v && v.name).length;
     countEl.textContent = n + ' online';
   });
 }
 
-/* ── cursor elements ── */
 function makeCursorEl(uid, name, color) {
   const el = document.createElement('div');
   el.className = 'cursor';
@@ -173,14 +239,12 @@ function makeCursorEl(uid, name, color) {
   return el;
 }
 
-/* ── listen cursors ── */
 const idleTimers = {};
 function listenCursors() {
   db.ref('cursors').on('child_added', s => {
     if (s.key === myId) return;
     const d = s.val();
-    const color = pickColor(s.key);
-    const el = makeCursorEl(s.key, d.name, color);
+    const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
     document.body.appendChild(el);
     others[s.key] = { el, bt: null };
     move(el, d.x, d.y);
@@ -191,11 +255,14 @@ function listenCursors() {
     if (s.key === myId) return;
     const d = s.val();
     if (!others[s.key]) {
-      const color = pickColor(s.key);
-      const el = makeCursorEl(s.key, d.name, color);
+      const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
       document.body.appendChild(el);
       others[s.key] = { el, bt: null };
     }
+    const path = others[s.key].el.querySelector('svg path');
+    const c = d.color || '#3498db';
+    path.setAttribute('fill', c);
+    path.setAttribute('stroke', strokeFor(c));
     move(others[s.key].el, d.x, d.y);
     others[s.key].el.classList.remove('idle');
     if (d.msg) showBubble(s.key, d.msg);
@@ -233,15 +300,11 @@ function showBubble(uid, msg) {
 
 /* ── idle kick ── */
 const IDLE_WARN = 2.5 * 60 * 1000;
-const IDLE_KICK = 3 * 60 * 1000;
-let lastActivity = Date.now();
 let kickWarnTimer = null, kickTimer = null, kickCountdownInterval = null;
-
 const kickWarningEl = document.getElementById('kick-warning');
 const kickCountdownEl = document.getElementById('kick-countdown');
 
 function resetIdleKick() {
-  lastActivity = Date.now();
   kickWarningEl.style.display = 'none';
   if (kickWarnTimer) { clearTimeout(kickWarnTimer); kickWarnTimer = null; }
   if (kickTimer) { clearTimeout(kickTimer); kickTimer = null; }
@@ -265,7 +328,6 @@ function scheduleIdleKick() {
 
 function kickPlayer() {
   if (myRef) myRef.remove();
-  /* restore normal cursor on the kicked screen */
   document.body.classList.remove('in-game');
   document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';
 }
@@ -284,7 +346,6 @@ function trackMouse() {
   });
 }
 
-/* ── chat history ── */
 function listenChat() {
   db.ref('chat').limitToLast(20).on('child_added', s => {
     const d = s.val();
@@ -301,13 +362,13 @@ function renderChatHistory() {
     div.className = 'chat-hist-msg';
     const t = new Date(m.ts);
     const timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
-    div.innerHTML = `<span class="chat-who" style="color:${esc(m.color)}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;
+    const nameColor = (m.color === '#ffffff' || m.color === '#f1c40f') ? '#888' : esc(m.color);
+    div.innerHTML = `<span class="chat-who" style="color:${nameColor}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;
     chatHistEl.appendChild(div);
   });
   chatHistEl.scrollTop = chatHistEl.scrollHeight;
 }
 
-/* ── chat controls ── */
 function setupChat() {
   document.addEventListener('keydown', e => {
     if (overlay.style.display !== 'none') return;
@@ -333,6 +394,7 @@ function openChat() {
 function closeChat() {
   chatOpen = false;
   chatbar.style.display = 'none';
+  chatInput.value = '';
   chatInput.blur();
 }
 
@@ -357,26 +419,22 @@ function sendChat() {
   lastChatSent = now;
   resetIdleKick();
 
-  closeChat();
-
-  const color = '#000';
   const bubble = myCursorEl.querySelector('.cursor-bubble');
   bubble.textContent = msg;
   bubble.classList.add('show');
   if (chatTimeout) clearTimeout(chatTimeout);
   chatTimeout = setTimeout(() => { bubble.classList.remove('show'); myRef.update({ msg: '' }); }, 6000);
   myRef.update({ msg, ts: now });
+  db.ref('chat').push({ name: myName, text: msg, ts: now, color: myColor });
 
-  db.ref('chat').push({ name: myName, text: msg, ts: now, color });
+  closeChat();
 }
 
-/* ── utils ── */
 function esc(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ── init ── */
 document.getElementById('joinBtn').addEventListener('click', join);
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
 setTimeout(() => nameInput.focus(), 50);
