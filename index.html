@@ -36,7 +36,7 @@
   .cursor { position: fixed; pointer-events: none; z-index: 500; transition: opacity 0.5s; }
   .cursor.idle { opacity: 0.3; }
   .cursor-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; background: #000; color: #fff; padding: 1px 4px; }
-  .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; }
+  .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; transition: opacity 0.4s; }
   .cursor-bubble.show { display: block; }
 
   #kick-warning { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 12px; color: #c0392b; border: 1px solid #c0392b; background: #fff; padding: 4px 12px; z-index: 800; display: none; pointer-events: none; }
@@ -49,8 +49,23 @@
   .ig-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s; }
   .ig-swatch:hover { transform: scale(1.2); }
   .ig-swatch.selected { border-color: #000; }
+
+  /* ── ripple ── */
+  .ripple { position: fixed; border-radius: 50%; border: 2px solid; pointer-events: none; z-index: 490; animation: ripple-out 0.8s ease-out forwards; }
+  @keyframes ripple-out { 0% { width: 0; height: 0; opacity: 0.8; margin: 0; } 100% { width: 120px; height: 120px; opacity: 0; margin: -60px; } }
+
+  /* ── floating balls ── */
+  .ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: 200; transition: left 0.12s linear, top 0.12s linear; }
+
+  /* ── draggable boxes ── */
+  .dbox { position: fixed; z-index: 300; border: 1.5px solid #000; background: #81a3ff; font-family: monospace; font-size: 11px; padding: 8px 8px; cursor: grab; user-select: none; white-space: nowrap; }
+  .dbox:active { cursor: grabbing; }
+  .dbox.grabbed { border-style: dashed; opacity: 0.85; }
+
 </style>
 </head>
+
+<head><link rel="icon" type="image/png" href="favicon.png"></head>
 <body>
 
 <div id="overlay">
@@ -63,7 +78,7 @@
 
 <div id="count">0 online</div>
 <div id="kick-warning">you've been idle — disconnecting in <span id="kick-countdown">30</span>s</div>
-<div id="chat-hint" style="display:none;">press / to chat</div>
+<div id="chat-hint" style="display:none;">press / to chat · click to ripple</div>
 
 <div id="chatbar">
   <div id="chat-history"></div>
@@ -132,6 +147,7 @@ COLORS.forEach(c => {
 
 /* ── state ── */
 let myId = null, myRef = null, myName = '', myCursorEl = null;
+let myX = 0, myY = 0;
 let chatOpen = false, chatTimeout = null, lastChatSent = 0;
 const CHAT_COOLDOWN = 5000;
 const others = {};
@@ -218,9 +234,14 @@ async function join() {
 
   listenCursors();
   listenChat();
+  listenRipples();
+  listenBoxes();
   trackMouse();
   setupChat();
+  setupClick();
+  setupBoxes();
   scheduleIdleKick();
+  initBalls();
 
   db.ref('cursors').on('value', s => {
     if (!s.exists()) { countEl.textContent = '0 online'; return; }
@@ -246,7 +267,7 @@ function listenCursors() {
     const d = s.val();
     const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
     document.body.appendChild(el);
-    others[s.key] = { el, bt: null };
+    others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5 };
     move(el, d.x, d.y);
     if (d.msg) showBubble(s.key, d.msg);
     scheduleIdle(s.key, d.lastMove || d.ts);
@@ -257,15 +278,17 @@ function listenCursors() {
     if (!others[s.key]) {
       const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
       document.body.appendChild(el);
-      others[s.key] = { el, bt: null };
+      others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5 };
     }
+    others[s.key].x = d.x || 0.5;
+    others[s.key].y = d.y || 0.5;
     const path = others[s.key].el.querySelector('svg path');
     const c = d.color || '#3498db';
     path.setAttribute('fill', c);
     path.setAttribute('stroke', strokeFor(c));
     move(others[s.key].el, d.x, d.y);
     others[s.key].el.classList.remove('idle');
-    if (d.msg) showBubble(s.key, d.msg);
+    if (d.msg !== undefined) updateBubbleProximity(s.key, d.msg);
     scheduleIdle(s.key, d.lastMove || d.ts);
   });
   db.ref('cursors').on('child_removed', s => {
@@ -288,14 +311,48 @@ function move(el, nx, ny) {
   el.style.top = (ny * window.innerHeight) + 'px';
 }
 
-function showBubble(uid, msg) {
+/* ── proximity bubble ── */
+const BUBBLE_MAX_DIST = 200;
+
+function dist(uid) {
+  const o = others[uid];
+  if (!o) return Infinity;
+  const ox = o.x * window.innerWidth;
+  const oy = o.y * window.innerHeight;
+  return Math.hypot(ox - myX, oy - myY);
+}
+
+function updateBubbleProximity(uid, msg) {
   const entry = others[uid];
   if (!entry) return;
   const bubble = entry.el.querySelector('.cursor-bubble');
+  if (!msg) { bubble.classList.remove('show'); return; }
+  const d = dist(uid);
+  const visible = d < BUBBLE_MAX_DIST;
   bubble.textContent = msg;
-  bubble.classList.add('show');
-  if (entry.bt) clearTimeout(entry.bt);
-  entry.bt = setTimeout(() => bubble.classList.remove('show'), 6000);
+  bubble.style.opacity = visible ? Math.max(0.2, 1 - d / BUBBLE_MAX_DIST).toFixed(2) : '0';
+  if (visible) {
+    bubble.classList.add('show');
+    if (entry.bt) clearTimeout(entry.bt);
+    entry.bt = setTimeout(() => bubble.classList.remove('show'), 6000);
+  } else {
+    bubble.classList.remove('show');
+  }
+}
+
+/* recalculate all bubble visibilities when I move */
+function refreshAllBubbles() {
+  Object.keys(others).forEach(uid => {
+    const entry = others[uid];
+    if (!entry) return;
+    const bubble = entry.el.querySelector('.cursor-bubble');
+    if (!bubble.textContent) return;
+    updateBubbleProximity(uid, bubble.textContent);
+  });
+}
+
+function showBubble(uid, msg) {
+  updateBubbleProximity(uid, msg);
 }
 
 /* ── idle kick ── */
@@ -335,10 +392,13 @@ function kickPlayer() {
 function trackMouse() {
   document.addEventListener('mousemove', e => {
     resetIdleKick();
+    myX = e.clientX;
+    myY = e.clientY;
     if (myCursorEl) {
       myCursorEl.style.left = e.clientX + 'px';
       myCursorEl.style.top = e.clientY + 'px';
     }
+    refreshAllBubbles();
     const now = Date.now();
     if (now - lastSent < THROTTLE) return;
     lastSent = now;
@@ -346,6 +406,229 @@ function trackMouse() {
   });
 }
 
+/* ── RIPPLE feature ── */
+function setupClick() {
+  document.addEventListener('click', e => {
+    if (!myId) return;
+    if (chatOpen) return;
+    spawnRipple(e.clientX, e.clientY, myColor);
+    db.ref('ripples').push({
+      x: e.clientX / window.innerWidth,
+      y: e.clientY / window.innerHeight,
+      color: myColor,
+      ts: Date.now()
+    });
+    db.ref('ripples').orderByChild('ts').endAt(Date.now() - 5000).limitToFirst(50).get().then(snap => {
+      if (snap.exists()) snap.forEach(c => c.ref.remove());
+    });
+  });
+}
+
+function spawnRipple(cx, cy, color) {
+  const el = document.createElement('div');
+  el.className = 'ripple';
+  el.style.left = cx + 'px';
+  el.style.top = cy + 'px';
+  el.style.borderColor = color === '#ffffff' ? '#ccc' : color;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+function listenRipples() {
+  db.ref('ripples').on('child_added', s => {
+    const d = s.val();
+    if (Date.now() - d.ts > 2000) return;
+    spawnRipple(d.x * window.innerWidth, d.y * window.innerHeight, d.color);
+  });
+}
+
+/* ── FLOATING BALLS feature ── */
+const BALL_COUNT = 5;
+const BALL_COLORS = ['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6'];
+const BALL_SIZES  = [28, 20, 24, 18, 22];
+const ballEls = {};
+let amBallMaster = false;
+let ballPhysics = {};
+
+function initBalls() {
+  db.ref('balls').get().then(snap => {
+    if (!snap.exists()) {
+      amBallMaster = true;
+      const init = {};
+      for (let i = 0; i < BALL_COUNT; i++) {
+        init[i] = {
+          x: 0.1 + Math.random() * 0.8,
+          y: 0.1 + Math.random() * 0.8,
+          vx: (Math.random() - 0.5) * 0.003,
+          vy: (Math.random() - 0.5) * 0.003
+        };
+        ballPhysics[i] = { ...init[i] };
+      }
+      db.ref('balls').set(init);
+    }
+  });
+
+  for (let i = 0; i < BALL_COUNT; i++) {
+    const el = document.createElement('div');
+    el.className = 'ball';
+    const sz = BALL_SIZES[i];
+    el.style.width = sz + 'px';
+    el.style.height = sz + 'px';
+    el.style.background = BALL_COLORS[i];
+    el.style.opacity = '0.55';
+    el.style.left = '50%';
+    el.style.top = '50%';
+    document.body.appendChild(el);
+    ballEls[i] = el;
+  }
+
+  db.ref('balls').on('child_changed', s => {
+    const i = s.key;
+    const d = s.val();
+    const el = ballEls[i];
+    if (!el) return;
+    const sz = BALL_SIZES[i];
+    el.style.left = (d.x * window.innerWidth - sz/2) + 'px';
+    el.style.top  = (d.y * window.innerHeight - sz/2) + 'px';
+    if (amBallMaster) ballPhysics[i] = { ...d };
+  });
+
+  db.ref('balls').on('child_added', s => {
+    const i = s.key;
+    const d = s.val();
+    const el = ballEls[i];
+    if (!el) return;
+    const sz = BALL_SIZES[i];
+    el.style.left = (d.x * window.innerWidth - sz/2) + 'px';
+    el.style.top  = (d.y * window.innerHeight - sz/2) + 'px';
+    ballPhysics[i] = { ...d };
+  });
+
+  db.ref('.info/connected').on('value', snap => {
+    if (!snap.val()) return;
+    db.ref('ballmaster').transaction(cur => {
+      if (!cur) { amBallMaster = true; return myId; }
+      return undefined;
+    }, (err, committed) => {
+      if (committed) {
+        amBallMaster = true;
+        db.ref('ballmaster').onDisconnect().remove();
+        runBallPhysics();
+      }
+    });
+  });
+}
+
+function runBallPhysics() {
+  if (!amBallMaster) return;
+  setInterval(() => {
+    const W = window.innerWidth, H = window.innerHeight;
+    const updates = {};
+    for (let i = 0; i < BALL_COUNT; i++) {
+      const b = ballPhysics[i];
+      if (!b) continue;
+      b.x += b.vx;
+      b.y += b.vy;
+      if (b.x < 0.03 || b.x > 0.97) b.vx *= -1;
+      if (b.y < 0.03 || b.y > 0.97) b.vy *= -1;
+      b.x = Math.max(0.03, Math.min(0.97, b.x));
+      b.y = Math.max(0.03, Math.min(0.97, b.y));
+      updates[i] = { x: b.x, y: b.y, vx: b.vx, vy: b.vy };
+      const sz = BALL_SIZES[i];
+      ballEls[i].style.left = (b.x * W - sz/2) + 'px';
+      ballEls[i].style.top  = (b.y * H - sz/2) + 'px';
+    }
+    db.ref('balls').update(updates);
+  }, 80);
+}
+
+/* ── DRAGGABLE BOXES feature ── */
+const BOX_LABELS = ['📦 crate A','📦 crate B','🪨 rock','🌀 thing','💾 data'];
+const BOX_COLORS = ['#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec'];
+let dragState = null;
+
+function setupBoxes() {
+  db.ref('boxes').get().then(snap => {
+    if (!snap.exists()) {
+      const init = {};
+      BOX_LABELS.forEach((lbl, i) => {
+        init[i] = {
+          label: lbl,
+          x: 0.1 + (i * 0.18),
+          y: 0.15 + (i % 2) * 0.08,
+          bg: BOX_COLORS[i],
+          grabbedBy: null
+        };
+      });
+      db.ref('boxes').set(init);
+    }
+  });
+}
+
+function listenBoxes() {
+  db.ref('boxes').on('child_added', s => renderBox(s.key, s.val()));
+  db.ref('boxes').on('child_changed', s => renderBox(s.key, s.val()));
+}
+
+function renderBox(key, d) {
+  let el = document.getElementById('box-' + key);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'dbox';
+    el.id = 'box-' + key;
+    el.addEventListener('mousedown', e => startDrag(e, key));
+    document.body.appendChild(el);
+  }
+  el.textContent = d.label;
+  el.style.background = d.bg || '#fff';
+  el.style.left = (d.x * window.innerWidth) + 'px';
+  el.style.top  = (d.y * window.innerHeight) + 'px';
+  if (d.grabbedBy && d.grabbedBy !== myId) {
+    el.classList.add('grabbed');
+    el.style.cursor = 'not-allowed';
+  } else if (!d.grabbedBy) {
+    el.classList.remove('grabbed');
+    el.style.cursor = 'grab';
+  }
+}
+
+function startDrag(e, key) {
+  if (dragState) return;
+  e.stopPropagation();
+  const el = document.getElementById('box-' + key);
+  const rect = el.getBoundingClientRect();
+  const offX = e.clientX - rect.left;
+  const offY = e.clientY - rect.top;
+  db.ref('boxes/' + key).transaction(d => {
+    if (d && d.grabbedBy && d.grabbedBy !== myId) return;
+    if (d) d.grabbedBy = myId;
+    return d;
+  }, (err, committed) => {
+    if (!committed) return;
+    dragState = { key, offX, offY };
+    el.style.cursor = 'grabbing';
+    db.ref('boxes/' + key + '/grabbedBy').onDisconnect().set(null);
+  });
+}
+
+document.addEventListener('mousemove', e => {
+  if (!dragState) return;
+  const { key, offX, offY } = dragState;
+  const nx = (e.clientX - offX) / window.innerWidth;
+  const ny = (e.clientY - offY) / window.innerHeight;
+  db.ref('boxes/' + key).update({ x: Math.max(0, Math.min(0.95, nx)), y: Math.max(0, Math.min(0.92, ny)) });
+});
+
+document.addEventListener('mouseup', () => {
+  if (!dragState) return;
+  const key = dragState.key;
+  dragState = null;
+  db.ref('boxes/' + key).update({ grabbedBy: null });
+  const el = document.getElementById('box-' + key);
+  if (el) { el.classList.remove('grabbed'); el.style.cursor = 'grab'; }
+});
+
+/* ── chat ── */
 function listenChat() {
   db.ref('chat').limitToLast(20).on('child_added', s => {
     const d = s.val();
