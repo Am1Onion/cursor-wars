@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Cursor Wars</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; background: #fff; font-family: monospace; }
@@ -41,10 +42,13 @@
 
   #kick-warning { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 12px; color: #c0392b; border: 1px solid #c0392b; background: #fff; padding: 4px 12px; z-index: 800; display: none; pointer-events: none; }
 
-  #color-picker-btn { position: fixed; top: 8px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer; z-index: 200; display: none; align-items: center; gap: 6px; }
+  #color-picker-btn { position: fixed; top: 8px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 600; display: none; align-items: center; gap: 6px; }
   #color-picker-btn:hover { border-color: #000; }
   #cpb-dot { width: 10px; height: 10px; border-radius: 50%; }
-  #color-picker-panel { position: fixed; top: 34px; right: 8px; background: #fff; border: 1px solid #000; padding: 8px 10px; z-index: 300; display: none; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; }
+  #color-picker-panel { position: fixed; top: 34px; right: 8px; background: #fff; border: 1px solid #000; padding: 8px 10px; z-index: 600; display: none; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; cursor: default !important; }
+  body.in-game #color-picker-btn { cursor: pointer !important; }
+  body.in-game #color-picker-panel { cursor: default !important; }
+  body.in-game .ig-swatch { cursor: pointer !important; }
   #ig-swatches { display: flex; gap: 6px; flex-wrap: wrap; width: 132px; }
   .ig-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s; }
   .ig-swatch:hover { transform: scale(1.2); }
@@ -75,7 +79,7 @@
 
   /* ── notes ── */
   .note-pin { position: fixed; z-index: 400; pointer-events: all; cursor: default; }
-  .note-pin-head { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgb(41, 0, 0); }
+  .note-pin-head { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.3); }
   .note-stem { width: 1px; height: 10px; background: #999; margin: 0 auto; }
   .note-card { position: absolute; bottom: 22px; left: -6px; background: #fffde7; border: 1px solid #e0cc60; font-family: monospace; font-size: 10px; padding: 4px 6px; white-space: nowrap; max-width: 160px; overflow: hidden; text-overflow: ellipsis; pointer-events: none; box-shadow: 1px 1px 0 rgba(0,0,0,0.08); }
   .note-card .note-author { color: #999; font-size: 9px; display: block; margin-top: 2px; }
@@ -95,11 +99,36 @@
   @keyframes clap-rise { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.4); } }
   .clap-burst { position: fixed; pointer-events: none; z-index: 601; font-size: 28px; animation: clap-burst-anim 0.9s ease-out forwards; }
   @keyframes clap-burst-anim { 0% { opacity: 1; transform: translate(-50%,-50%) scale(0.5); } 60% { opacity: 1; transform: translate(-50%,-50%) scale(1.6); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(2); } }
+
+  /* ── arrival tooltip ── */
+  .cursor-arrival { position: absolute; top: 32px; left: 10px; font-family: monospace; font-size: 10px; color: #aaa; background: #fff; border: 1px solid #eee; padding: 1px 5px; white-space: nowrap; display: none; pointer-events: none; z-index: 10; }
+  .cursor:hover .cursor-arrival { display: block; }
+  .cursor-name-wrap { pointer-events: all; position: relative; display: inline-block; }
+
+  /* ── last words ghost ── */
+  .ghost-cursor { position: fixed; pointer-events: none; z-index: 499; animation: ghost-fade 30s ease-out forwards; }
+  @keyframes ghost-fade { 0% { opacity: 0.55; } 70% { opacity: 0.3; } 100% { opacity: 0; } }
+  .ghost-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; font-style: italic; background: #f9f9f9; border: 1px dashed #ccc; padding: 2px 6px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; color: #888; }
+  .ghost-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; background: #888; color: #fff; padding: 1px 4px; white-space: nowrap; }
+
+  /* ── pixel canvas ── */
+  #pixel-panel { position: fixed; bottom: 16px; right: 16px; z-index: 600; background: #fff; border: 1px solid #000; font-family: monospace; font-size: 11px; display: none; flex-direction: column; gap: 6px; padding: 8px; cursor: default !important; }
+  #pixel-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  #pixel-panel-header span { font-size: 11px; color: #666; }
+  #pixel-canvas-el { display: block; image-rendering: pixelated; cursor: crosshair !important; border: 1px solid #eee; }
+  #pixel-cooldown-msg { font-size: 10px; color: #aaa; min-height: 13px; text-align: center; }
+  #pixel-toggle { position: fixed; bottom: 16px; right: 16px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 600; display: none; }
+  #pixel-toggle:hover { border-color: #000; }
+  /* restore real cursor over all interactive UI while in-game */
+  body.in-game #pixel-toggle,
+  body.in-game #pixel-panel,
+  body.in-game #pixel-panel * { cursor: inherit; }
+  body.in-game #pixel-toggle { cursor: pointer !important; }
+  body.in-game #pixel-canvas-el { cursor: crosshair !important; }
+  body.in-game #pixel-close { cursor: pointer !important; }
 </style>
 </head>
 <body>
-
-<head><link rel="icon" type="image/png" href="favicon.png"></head>
 
 <canvas id="warmth-canvas"></canvas>
 
@@ -109,6 +138,17 @@
   <div id="name-error"></div>
   <div id="color-row"><span>color:</span></div>
   <button id="joinBtn">join</button>
+</div>
+
+<div id="pixel-toggle" style="display:none;">pixel art</div>
+<div id="pixel-panel">
+  <div id="pixel-panel-header">
+    <b>shared pixel canvas</b>
+    <span id="pixel-cooldown-msg"></span>
+    <span style="cursor:pointer;color:#999;" id="pixel-close">✕</span>
+  </div>
+  <canvas id="pixel-canvas-el" width="640" height="640" style="width:280px;height:280px;"></canvas>
+  <div style="font-size:10px;color:#bbb;text-align:center;">click a cell to place your color · 1 pixel per hour</div>
 </div>
 
 <div id="note-composer">
@@ -264,7 +304,7 @@ async function join() {
   myName = safe;
   myId = db.ref().push().key;
   myRef = db.ref('cursors/' + myId);
-  myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor });
+  myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor, joinedAt: Date.now() });
   myRef.onDisconnect().remove();
 
   overlay.style.display = 'none';
@@ -291,11 +331,13 @@ async function join() {
   listenPokes();
   listenNotes();
   listenApplause();
+  listenPixelCanvas();
   trackMouse();
   setupChat();
   setupClick();
   setupBoxes();
   setupNotes();
+  setupPixelCanvas();
   scheduleIdleKick();
   initBalls();
   initWarmth();
@@ -307,12 +349,14 @@ async function join() {
   });
 }
 
-function makeCursorEl(uid, name, color) {
+function makeCursorEl(uid, name, color, joinedAt) {
   const el = document.createElement('div');
   el.className = 'cursor followable';
   el.id = 'c-' + uid;
+  const arrivalText = joinedAt ? formatArrival(joinedAt) : '';
   el.innerHTML = cursorSVG(color) +
     `<div class="cursor-name" data-uid="${uid}">${esc(name)}</div>` +
+    `<div class="cursor-arrival">${arrivalText}</div>` +
     `<div class="cursor-bubble"></div>`;
 
   /* name tag click = follow */
@@ -328,9 +372,29 @@ function makeCursorEl(uid, name, color) {
     sendPoke(uid);
   });
 
-  el.style.pointerEvents = 'none'; /* outer shell still passthrough */
+  el.style.pointerEvents = 'none';
   el.querySelector('.cursor-name').style.pointerEvents = 'all';
   return el;
+}
+
+function formatArrival(ts) {
+  const mins = Math.floor((Date.now() - ts) / 60000);
+  if (mins < 1) return 'just arrived';
+  if (mins < 60) return `here ${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return `here ${hrs}h ${rem}m`;
+}
+
+/* tick arrival labels every 60s */
+function tickArrivalLabels() {
+  setInterval(() => {
+    Object.entries(others).forEach(([uid, o]) => {
+      if (!o.joinedAt) return;
+      const el = o.el.querySelector('.cursor-arrival');
+      if (el) el.textContent = formatArrival(o.joinedAt);
+    });
+  }, 60000);
 }
 
 const idleTimers = {};
@@ -338,9 +402,9 @@ function listenCursors() {
   db.ref('cursors').on('child_added', s => {
     if (s.key === myId) return;
     const d = s.val();
-    const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
+    const el = makeCursorEl(s.key, d.name, d.color || '#3498db', d.joinedAt);
     document.body.appendChild(el);
-    others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5 };
+    others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5, joinedAt: d.joinedAt || Date.now() };
     move(el, d.x, d.y);
     if (d.msg) showBubble(s.key, d.msg);
     scheduleIdle(s.key, d.lastMove || d.ts);
@@ -349,9 +413,9 @@ function listenCursors() {
     if (s.key === myId) return;
     const d = s.val();
     if (!others[s.key]) {
-      const el = makeCursorEl(s.key, d.name, d.color || '#3498db');
+      const el = makeCursorEl(s.key, d.name, d.color || '#3498db', d.joinedAt);
       document.body.appendChild(el);
-      others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5 };
+      others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5, joinedAt: d.joinedAt || Date.now() };
     }
     others[s.key].x = d.x || 0.5;
     others[s.key].y = d.y || 0.5;
@@ -365,10 +429,15 @@ function listenCursors() {
     scheduleIdle(s.key, d.lastMove || d.ts);
   });
   db.ref('cursors').on('child_removed', s => {
-    if (others[s.key]) { others[s.key].el.remove(); delete others[s.key]; }
+    if (others[s.key]) {
+      spawnGhost(others[s.key]);
+      others[s.key].el.remove();
+      delete others[s.key];
+    }
     if (idleTimers[s.key]) { clearTimeout(idleTimers[s.key]); delete idleTimers[s.key]; }
     if (followingId === s.key) stopFollow();
   });
+  tickArrivalLabels();
 }
 
 function scheduleIdle(uid, lastMove) {
@@ -1091,6 +1160,168 @@ document.addEventListener('dblclick', e => {
   if (e.target.closest('.dbox, .note-pin, #chatbar, #overlay, .cursor-name')) return;
   sendClap();
 });
+
+/* ══════════════════════════════════
+   LAST WORDS GHOST
+══════════════════════════════════ */
+function spawnGhost(entry) {
+  const lastMsg = entry.el.querySelector('.cursor-bubble').textContent;
+  const nameEl  = entry.el.querySelector('.cursor-name');
+  const svgEl   = entry.el.querySelector('svg');
+  if (!svgEl) return;
+
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost-cursor';
+  ghost.style.left = entry.el.style.left;
+  ghost.style.top  = entry.el.style.top;
+
+  const nameColor = svgEl.querySelector('path').getAttribute('fill') || '#888';
+  ghost.innerHTML = svgEl.outerHTML +
+    `<div class="ghost-name" style="background:${nameColor === '#ffffff' ? '#ccc' : nameColor}">${nameEl.textContent} ✦</div>` +
+    (lastMsg ? `<div class="ghost-bubble">${esc(lastMsg)}</div>` : '');
+
+  document.body.appendChild(ghost);
+  ghost.addEventListener('animationend', () => ghost.remove());
+}
+
+/* ══════════════════════════════════
+   PIXEL CANVAS  (64×64 grid)
+   Cooldown stored in Firebase keyed
+   by device fingerprint — persists
+   across refreshes.
+══════════════════════════════════ */
+const GRID_W = 64, GRID_H = 64;
+const CELL_PX = 10; /* display size per cell */
+const PIXEL_COOLDOWN_MS = 60 * 60 * 1000; /* 1 hour */
+
+let pixelCanvasEl, pixelCtx;
+let pixelGrid = {}; /* "x,y" -> color */
+let myFingerprint = '';
+let canPlacePixel = true;
+let pixelCooldownTimer = null;
+
+function makeFingerprint() {
+  const raw = [
+    navigator.userAgent,
+    screen.width, screen.height, screen.colorDepth,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+    navigator.language,
+    navigator.hardwareConcurrency || 0
+  ].join('|');
+  /* simple djb2 hash */
+  let h = 5381;
+  for (let i = 0; i < raw.length; i++) h = ((h << 5) + h) ^ raw.charCodeAt(i);
+  return 'fp_' + (h >>> 0).toString(36);
+}
+
+function setupPixelCanvas() {
+  pixelCanvasEl = document.getElementById('pixel-canvas-el');
+  pixelCanvasEl.width  = GRID_W * CELL_PX;
+  pixelCanvasEl.height = GRID_H * CELL_PX;
+  pixelCtx = pixelCanvasEl.getContext('2d');
+
+  myFingerprint = makeFingerprint();
+
+  /* show/hide panel */
+  const toggle = document.getElementById('pixel-toggle');
+  const panel  = document.getElementById('pixel-panel');
+  toggle.style.display = 'block';
+  toggle.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+    toggle.style.display = 'none';
+  });
+  document.getElementById('pixel-close').addEventListener('click', () => {
+    panel.style.display = 'none';
+    toggle.style.display = 'block';
+  });
+
+  /* check cooldown in Firebase */
+  db.ref('pixel_cooldowns/' + myFingerprint).get().then(snap => {
+    if (snap.exists()) {
+      const lastPlace = snap.val();
+      const elapsed = Date.now() - lastPlace;
+      if (elapsed < PIXEL_COOLDOWN_MS) {
+        canPlacePixel = false;
+        startCooldownUI(PIXEL_COOLDOWN_MS - elapsed);
+      }
+    }
+  });
+
+  /* place pixel on click */
+  pixelCanvasEl.addEventListener('click', e => {
+    if (!canPlacePixel) return;
+    const rect = pixelCanvasEl.getBoundingClientRect();
+    const scaleX = GRID_W / rect.width;
+    const scaleY = GRID_H / rect.height;
+    const gx = Math.floor((e.clientX - rect.left) * scaleX);
+    const gy = Math.floor((e.clientY - rect.top)  * scaleY);
+    if (gx < 0 || gx >= GRID_W || gy < 0 || gy >= GRID_H) return;
+
+    const color = myColor === '#ffffff' ? '#eeeeee' : myColor;
+    db.ref('pixels/' + gx + '_' + gy).set({ color, by: myName, ts: Date.now() });
+    db.ref('pixel_cooldowns/' + myFingerprint).set(Date.now());
+    canPlacePixel = false;
+    startCooldownUI(PIXEL_COOLDOWN_MS);
+    showToast('pixel placed! come back in 1 hour 🎨');
+  });
+}
+
+function startCooldownUI(remaining) {
+  const msgEl = document.getElementById('pixel-cooldown-msg');
+  function tick() {
+    const left = Math.max(0, remaining - (Date.now() - startedAt));
+    if (left <= 0) {
+      canPlacePixel = true;
+      msgEl.textContent = 'your turn!';
+      return;
+    }
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    msgEl.textContent = `next pixel in ${m}m ${s}s`;
+    pixelCooldownTimer = setTimeout(tick, 1000);
+  }
+  const startedAt = Date.now();
+  tick();
+}
+
+function listenPixelCanvas() {
+  /* load all existing pixels */
+  db.ref('pixels').get().then(snap => {
+    if (!snap.exists()) return;
+    snap.forEach(s => {
+      const d = s.val();
+      const [gx, gy] = s.key.split('_').map(Number);
+      pixelGrid[s.key] = d.color;
+      drawCell(gx, gy, d.color);
+    });
+  });
+
+  /* listen for new placements */
+  db.ref('pixels').on('child_added', s => {
+    if (pixelGrid[s.key]) return; /* already loaded */
+    const d = s.val();
+    const [gx, gy] = s.key.split('_').map(Number);
+    pixelGrid[s.key] = d.color;
+    drawCell(gx, gy, d.color);
+  });
+
+  db.ref('pixels').on('child_changed', s => {
+    const d = s.val();
+    const [gx, gy] = s.key.split('_').map(Number);
+    pixelGrid[s.key] = d.color;
+    drawCell(gx, gy, d.color);
+  });
+}
+
+function drawCell(gx, gy, color) {
+  if (!pixelCtx) return;
+  pixelCtx.fillStyle = color;
+  pixelCtx.fillRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
+  /* subtle grid line */
+  pixelCtx.strokeStyle = 'rgba(0,0,0,0.06)';
+  pixelCtx.lineWidth = 0.5;
+  pixelCtx.strokeRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
+}
 
 function esc(s) {
   if (!s) return '';
