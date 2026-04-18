@@ -7,24 +7,33 @@
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; background: #fff; font-family: monospace; }
-  body.in-game, body.in-game * {
-    cursor: none !important;
-  }
+  body.in-game, body.in-game * { cursor: none !important; }
 
   #overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; z-index: 999; }
-  #overlay input[type=text] { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; width: 180px; }
-  #overlay button { font-family: monospace; font-size: 14px; border: 1px solid #000; background: #fff; padding: 4px 12px; cursor: pointer; }
-  #overlay button:hover { background: #000; color: #fff; }
-  #name-error { font-family: monospace; font-size: 11px; color: #c0392b; min-height: 14px; }
+  #overlay input[type=text],
+  #overlay input[type=email],
+  #overlay input[type=password] { font-family: monospace; font-size: 14px; border: 1px solid #000; padding: 4px 6px; outline: none; width: 210px; }
+  #overlay button.main-btn { font-family: monospace; font-size: 14px; border: 1px solid #000; background: #fff; padding: 4px 12px; cursor: pointer; width: 210px; }
+  #overlay button.main-btn:hover { background: #000; color: #fff; }
+  #overlay button.sec-btn { font-family: monospace; font-size: 12px; border: 1px solid #bbb; background: #fff; color: #666; padding: 3px 10px; cursor: pointer; width: 210px; }
+  #overlay button.sec-btn:hover { border-color: #000; color: #000; background: none; }
+  .or-row { font-family: monospace; font-size: 11px; color: #bbb; display: flex; align-items: center; gap: 8px; width: 210px; }
+  .or-row::before, .or-row::after { content:''; flex:1; height:1px; background:#eee; }
+  #name-error { font-family: monospace; font-size: 11px; color: #c0392b; min-height: 14px; width: 210px; }
+  #auth-error  { font-family: monospace; font-size: 11px; color: #c0392b; min-height: 14px; width: 210px; }
 
-  #color-row { display: flex; align-items: center; gap: 6px; }
+  #color-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 210px; }
   #color-row span { font-family: monospace; font-size: 12px; color: #666; }
   .color-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; transition: transform 0.1s; }
   .color-swatch:hover { transform: scale(1.2); }
   .color-swatch.selected { border-color: #000; }
+  #hex-input-row { display: none; align-items: center; gap: 6px; width: 210px; }
+  #hex-input-row label { font-family: monospace; font-size: 12px; color: #666; }
+  #hexColorInput { font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 2px 5px; outline: none; width: 80px; }
+  #hexPreview { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ccc; flex-shrink: 0; }
 
   #count { position: fixed; top: 8px; left: 8px; font-family: monospace; font-size: 12px; color: #999; z-index: 100; pointer-events: none; }
-
+  #acct-badge { position: fixed; top: 22px; left: 8px; font-family: monospace; font-size: 10px; color: #bbb; z-index: 100; pointer-events: none; display: none; }
   #chat-hint { position: fixed; bottom: 52px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 11px; color: #bbb; z-index: 100; pointer-events: none; opacity: 1; transition: opacity 1s; }
 
   #chatbar { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: stretch; gap: 0; font-family: monospace; font-size: 13px; border: 1px solid #000; background: #fff; z-index: 900; width: 320px; }
@@ -36,67 +45,21 @@
   #chatbar input { font-family: monospace; font-size: 13px; border: none; outline: none; flex: 1; }
   #chat-cooldown { font-size: 10px; color: #aaa; }
 
-  /* ── cursor elements ──
-     The outer .cursor div is ALWAYS pointer-events:none.
-     Only .cursor-hit-zone (wraps svg + name) gets pointer-events:all.
-     This means cursors NEVER block clicks on notes, boxes, or canvas beneath them.
-     z-index 150 keeps cursors visible but below notes(400), boxes(300), pixel panel(600). */
-  .cursor {
-    position: fixed;
-    pointer-events: none;   /* never block anything underneath */
-    z-index: 150;
-    transition: opacity 0.5s;
-  }
+  .cursor { position: fixed; pointer-events: none; z-index: 150; transition: opacity 0.5s; }
   .cursor.idle { opacity: 0.3; }
-
-  /* tiny interactive zone around just the arrow tip + name tag */
-  .cursor-hit-zone {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 80px;      /* covers arrow(16px) + name tag */
-    height: 36px;     /* covers arrow(20px) + name tag */
-    pointer-events: all;
-    cursor: pointer;
-  }
-
-  .cursor-name {
-    position: absolute;
-    top: 18px;
-    left: 10px;
-    font-family: monospace;
-    font-size: 11px;
-    white-space: nowrap;
-    background: #000;
-    color: #fff;
-    padding: 1px 4px;
-    /* pointer-events inherited from hit-zone parent */
-  }
-  .cursor-bubble {
-    position: absolute;
-    bottom: 24px;
-    left: 10px;
-    font-family: monospace;
-    font-size: 11px;
-    white-space: nowrap;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    background: #fff;
-    border: 1px solid #000;
-    padding: 2px 6px;
-    display: none;
-    transition: opacity 0.4s;
-    pointer-events: none;   /* bubble never blocks */
-  }
+  .cursor-hit-zone { position: absolute; top: 0; left: 0; width: 80px; height: 36px; pointer-events: all; cursor: pointer; }
+  .cursor-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; background: #000; color: #fff; padding: 1px 4px; }
+  .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; transition: opacity 0.4s; pointer-events: none; }
   .cursor-bubble.show { display: block; }
+  .cursor-arrival { position: absolute; top: 32px; left: 10px; font-family: monospace; font-size: 10px; color: #aaa; background: #fff; border: 1px solid #eee; padding: 1px 5px; white-space: nowrap; display: none; pointer-events: none; z-index: 10; }
+  .cursor-hit-zone:hover .cursor-arrival { display: block; }
 
   #kick-warning { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 12px; color: #c0392b; border: 1px solid #c0392b; background: #fff; padding: 4px 12px; z-index: 800; display: none; pointer-events: none; }
 
   #color-picker-btn { position: fixed; top: 8px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 600; display: none; align-items: center; gap: 6px; }
   #color-picker-btn:hover { border-color: #000; }
   #cpb-dot { width: 10px; height: 10px; border-radius: 50%; }
-  #color-picker-panel { position: fixed; top: 34px; right: 8px; background: #fff; border: 1px solid #000; padding: 8px 10px; z-index: 600; display: none; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; cursor: default !important; }
+  #color-picker-panel { position: fixed; top: 34px; right: 8px; background: #fff; border: 1px solid #000; padding: 8px 10px; z-index: 600; display: none; flex-direction: column; gap: 8px; font-family: monospace; font-size: 11px; cursor: default !important; min-width: 152px; }
   body.in-game #color-picker-btn { cursor: pointer !important; }
   body.in-game #color-picker-panel { cursor: default !important; }
   body.in-game .ig-swatch { cursor: pointer !important; }
@@ -104,28 +67,25 @@
   .ig-swatch { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.1s; }
   .ig-swatch:hover { transform: scale(1.2); }
   .ig-swatch.selected { border-color: #000; }
+  #ig-hex-row { display: none; align-items: center; gap: 5px; margin-top: 2px; }
+  #ig-hex-input { font-family: monospace; font-size: 11px; border: 1px solid #ccc; padding: 2px 4px; outline: none; width: 70px; }
+  #ig-hex-preview { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #ccc; flex-shrink: 0; }
 
-  /* ── ripple ── */
   .ripple { position: fixed; border-radius: 50%; border: 2px solid; pointer-events: none; z-index: 140; animation: ripple-out 0.8s ease-out forwards; }
-  @keyframes ripple-out { 0% { width: 0; height: 0; opacity: 0.8; margin: 0; } 100% { width: 120px; height: 120px; opacity: 0; margin: -60px; } }
-
-  /* ── poke ripple ── */
+  @keyframes ripple-out { 0%{width:0;height:0;opacity:.8;margin:0;}100%{width:120px;height:120px;opacity:0;margin:-60px;} }
   .poke-ripple { position: fixed; border-radius: 50%; border: 2px dashed; pointer-events: none; z-index: 141; animation: poke-out 0.6s ease-out forwards; }
-  @keyframes poke-out { 0% { width: 0; height: 0; opacity: 1; margin: 0; } 100% { width: 60px; height: 60px; opacity: 0; margin: -30px; } }
+  @keyframes poke-out { 0%{width:0;height:0;opacity:1;margin:0;}100%{width:60px;height:60px;opacity:0;margin:-30px;} }
 
-  /* ── follow mode ── */
   #follow-banner { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 11px; background: #111; color: #fff; padding: 3px 10px; z-index: 800; display: none; pointer-events: none; }
   .cursor.being-followed .cursor-name { background: #555; }
 
-  /* ── floating balls ── */
-  .ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: 120; transition: left 0.12s linear, top 0.12s linear; }
+  .ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: 120; }
 
-  /* ── draggable boxes ── */
   .dbox { position: fixed; z-index: 300; border: 1.5px solid #000; background: #fff; font-family: monospace; font-size: 11px; padding: 4px 8px; cursor: grab; user-select: none; white-space: nowrap; }
   .dbox:active { cursor: grabbing; }
   .dbox.grabbed { border-style: dashed; opacity: 0.85; }
+  .dbox.admin-block { border: 2px solid #e74c3c !important; background: #fff8f8 !important; }
 
-  /* ── notes ── */
   .note-pin { position: fixed; z-index: 400; pointer-events: all; cursor: default; }
   .note-pin-head { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.3); }
   .note-stem { width: 1px; height: 10px; background: #999; margin: 0 auto; }
@@ -139,26 +99,18 @@
   #note-composer-row button:hover { background: #000; color: #fff; border-color: #000; }
   #note-hint { position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 11px; color: #bbb; pointer-events: none; opacity: 1; transition: opacity 1s; }
 
-  /* ── crowd warmth ── */
   #warmth-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.18; }
 
-  /* ── applause ── */
   .clap-float { position: fixed; pointer-events: none; z-index: 600; font-size: 18px; animation: clap-rise 1.2s ease-out forwards; }
-  @keyframes clap-rise { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-60px) scale(1.4); } }
+  @keyframes clap-rise { 0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.4);} }
   .clap-burst { position: fixed; pointer-events: none; z-index: 601; font-size: 28px; animation: clap-burst-anim 0.9s ease-out forwards; }
-  @keyframes clap-burst-anim { 0% { opacity: 1; transform: translate(-50%,-50%) scale(0.5); } 60% { opacity: 1; transform: translate(-50%,-50%) scale(1.6); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(2); } }
+  @keyframes clap-burst-anim { 0%{opacity:1;transform:translate(-50%,-50%) scale(.5);}60%{opacity:1;transform:translate(-50%,-50%) scale(1.6);}100%{opacity:0;transform:translate(-50%,-50%) scale(2);} }
 
-  /* ── arrival tooltip ── */
-  .cursor-arrival { position: absolute; top: 32px; left: 10px; font-family: monospace; font-size: 10px; color: #aaa; background: #fff; border: 1px solid #eee; padding: 1px 5px; white-space: nowrap; display: none; pointer-events: none; z-index: 10; }
-  .cursor-hit-zone:hover .cursor-arrival { display: block; }
-
-  /* ── last words ghost ── */
   .ghost-cursor { position: fixed; pointer-events: none; z-index: 149; animation: ghost-fade 30s ease-out forwards; }
-  @keyframes ghost-fade { 0% { opacity: 0.55; } 70% { opacity: 0.3; } 100% { opacity: 0; } }
+  @keyframes ghost-fade { 0%{opacity:.55;}70%{opacity:.3;}100%{opacity:0;} }
   .ghost-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; font-style: italic; background: #f9f9f9; border: 1px dashed #ccc; padding: 2px 6px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; color: #888; }
   .ghost-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; background: #888; color: #fff; padding: 1px 4px; white-space: nowrap; }
 
-  /* ── pixel canvas ── */
   #pixel-panel { position: fixed; bottom: 16px; right: 16px; z-index: 600; background: #fff; border: 1px solid #000; font-family: monospace; font-size: 11px; display: none; flex-direction: column; gap: 6px; padding: 8px; cursor: default !important; }
   #pixel-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   #pixel-panel-header span { font-size: 11px; color: #666; }
@@ -169,20 +121,63 @@
   body.in-game #pixel-toggle { cursor: pointer !important; }
   body.in-game #pixel-canvas-el { cursor: crosshair !important; }
   body.in-game #pixel-close { cursor: pointer !important; }
+
+  /* ── admin ── */
+  #admin-btn { position: fixed; top: 30px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #e74c3c; color: #e74c3c; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 601; display: none; }
+  #admin-btn:hover { background: #e74c3c; color: #fff; }
+  body.in-game #admin-btn { cursor: pointer !important; }
+  #admin-panel { position: fixed; top: 54px; right: 8px; background: #fff; border: 1px solid #e74c3c; padding: 10px 12px; z-index: 700; display: none; flex-direction: column; gap: 7px; font-family: monospace; font-size: 11px; min-width: 190px; }
+  #admin-panel .ap-title { font-size: 12px; color: #e74c3c; border-bottom: 1px solid #fdd; padding-bottom: 5px; margin-bottom: 2px; letter-spacing: .05em; }
+  #admin-panel button { font-family: monospace; font-size: 11px; border: 1px solid #e74c3c; color: #e74c3c; background: #fff; padding: 4px 8px; cursor: pointer !important; text-align: left; }
+  #admin-panel button:hover { background: #e74c3c; color: #fff; }
+  #admin-panel button.active { background: #e74c3c; color: #fff; }
+
+  /* ── kick-all countdown banner ── */
+  #kick-all-banner { position: fixed; top: 0; left: 0; right: 0; background: #e74c3c; color: #fff; font-family: monospace; font-size: 13px; text-align: center; padding: 10px 0; z-index: 9999; display: none; pointer-events: none; letter-spacing: .03em; }
 </style>
 </head>
 <body>
 
 <canvas id="warmth-canvas"></canvas>
 
+<!-- ══ OVERLAY ══ -->
 <div id="overlay">
+  <!-- Name row -->
   <div style="font-family:monospace;font-size:13px;">what's your name?</div>
   <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="name..." />
   <div id="name-error"></div>
+
+  <!-- Color row -->
   <div id="color-row"><span>color:</span></div>
-  <button id="joinBtn">join</button>
+
+  <!-- Hex row (logged-in only) -->
+  <div id="hex-input-row">
+    <label>hex:</label>
+    <input id="hexColorInput" type="text" maxlength="7" placeholder="#3498db" />
+    <div id="hexPreview"></div>
+  </div>
+
+  <button id="joinBtn" class="main-btn">join</button>
+
+  <div class="or-row">account</div>
+
+  <!-- Auth: login form -->
+  <div id="login-form" style="display:flex;flex-direction:column;gap:6px;align-items:center;width:210px;">
+    <input id="authEmail"    type="email"    placeholder="email..."    autocomplete="email" />
+    <input id="authPassword" type="password" placeholder="password..."  autocomplete="current-password" />
+    <button id="loginBtn"  class="main-btn">log in</button>
+    <button id="signupBtn" class="sec-btn">create account</button>
+    <div id="auth-error"></div>
+  </div>
+
+  <!-- Auth: logged-in state -->
+  <div id="loggedin-area" style="display:none;flex-direction:column;align-items:center;gap:5px;width:210px;">
+    <div id="loggedin-msg" style="font-family:monospace;font-size:11px;color:#2ecc71;text-align:center;"></div>
+    <button id="logoutBtn" class="sec-btn">log out</button>
+  </div>
 </div>
 
+<!-- ══ IN-GAME ══ -->
 <div id="pixel-toggle" style="display:none;">pixel art</div>
 <div id="pixel-panel">
   <div id="pixel-panel-header">
@@ -205,8 +200,10 @@
 <div id="note-hint" style="display:none;">right-click to leave a note · double-click to clap</div>
 
 <div id="count">0 online</div>
+<div id="acct-badge"></div>
 <div id="follow-banner">following <span id="follow-name"></span> · esc to stop</div>
 <div id="kick-warning">you've been idle — disconnecting in <span id="kick-countdown">30</span>s</div>
+<div id="kick-all-banner"></div>
 <div id="chat-hint" style="display:none;">press / to chat · click to ripple</div>
 
 <div id="chatbar">
@@ -223,12 +220,29 @@
 <div id="color-picker-panel">
   <div style="color:#666;">cursor color</div>
   <div id="ig-swatches"></div>
+  <div id="ig-hex-row">
+    <span style="color:#888;font-size:10px;">hex:</span>
+    <input id="ig-hex-input" type="text" maxlength="7" placeholder="#rrggbb" />
+    <div id="ig-hex-preview"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div id="admin-btn">admin</div>
+<div id="admin-panel">
+  <div class="ap-title">admin panel</div>
+  <button id="ap-kick-all">kick all  (10s warning)</button>
+  <button id="ap-rainbow">rainbow cursor</button>
+  <button id="ap-spawn-block">spawn block at cursor</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
-
+/* ══════════════════════════════════════════════
+   FIREBASE INIT
+══════════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyDFniinqSfTtpJaq9uM3ayXz-z8njAHTMg",
   authDomain: "cursor-wars-96326.firebaseapp.com",
@@ -238,9 +252,17 @@ const firebaseConfig = {
   messagingSenderId: "182917855465",
   appId: "1:182917855465:web:b7881211afc05549999878"
 };
-
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db   = firebase.database();
+const auth = firebase.auth();
+
+/* ══════════════════════════════════════════════
+   CONSTANTS / HELPERS
+══════════════════════════════════════════════ */
+const ADMIN_EMAIL = 'am1onionyt@gmail.com';
+
+function vw() { return document.documentElement.clientWidth; }
+function vh() { return document.documentElement.clientHeight; }
 
 const BAD = ['fuck','shit','ass','bitch','cunt','dick','cock','pussy','bastard','damn','crap',
   'piss','whore','slut','fag','nigger','nigga','retard','twat','wank','bollocks','arse'];
@@ -249,18 +271,97 @@ function hasProfanity(s) {
   return BAD.some(w => low.includes(w));
 }
 
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function isValidHex(h) { return /^#[0-9a-fA-F]{6}$/.test(h); }
+
+function friendlyAuthError(code) {
+  const map = {
+    'auth/user-not-found':       'no account with that email.',
+    'auth/wrong-password':       'wrong password.',
+    'auth/invalid-credential':   'wrong email or password.',
+    'auth/email-already-in-use': 'email already in use.',
+    'auth/invalid-email':        'invalid email address.',
+    'auth/too-many-requests':    'too many attempts — try later.',
+    'auth/weak-password':        'password must be 6+ characters.'
+  };
+  return map[code] || ('error: ' + code);
+}
+
 const COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#ffffff','#111111'];
 let myColor = COLORS[5];
-
 function strokeFor(c) { return c === '#ffffff' ? '#999' : '#fff'; }
-
-const cursorSVG = (color) =>
+const cursorSVG = c =>
   `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;">
-    <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${color}" stroke="${strokeFor(color)}" stroke-width="1"/>
+    <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/>
   </svg>`;
 
-/* ── overlay swatches ── */
-const colorRow = document.getElementById('color-row');
+/* ══════════════════════════════════════════════
+   AUTH STATE
+══════════════════════════════════════════════ */
+let loggedInEmail = null;
+let isAdmin       = false;
+
+const loginFormEl    = document.getElementById('login-form');
+const loggedinAreaEl = document.getElementById('loggedin-area');
+const loggedinMsgEl  = document.getElementById('loggedin-msg');
+const authErrorEl    = document.getElementById('auth-error');
+const hexInputRow    = document.getElementById('hex-input-row');
+const hexColorInput  = document.getElementById('hexColorInput');
+const hexPreview     = document.getElementById('hexPreview');
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loggedInEmail = user.email;
+    isAdmin = (user.email === ADMIN_EMAIL);
+    loginFormEl.style.display    = 'none';
+    loggedinAreaEl.style.display = 'flex';
+    loggedinMsgEl.textContent = (isAdmin ? '⚡ admin · ' : '✓ ') + user.email;
+    hexInputRow.style.display = 'flex';
+    hexColorInput.value = myColor;
+    hexPreview.style.background = myColor;
+  } else {
+    loggedInEmail = null; isAdmin = false;
+    loginFormEl.style.display    = 'flex';
+    loggedinAreaEl.style.display = 'none';
+    hexInputRow.style.display    = 'none';
+  }
+});
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPassword').value;
+  if (!email || !pass) { authErrorEl.textContent = 'enter email + password.'; return; }
+  try { await auth.signInWithEmailAndPassword(email, pass); authErrorEl.textContent = ''; }
+  catch(e) { authErrorEl.textContent = friendlyAuthError(e.code); }
+});
+
+document.getElementById('signupBtn').addEventListener('click', async () => {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPassword').value;
+  if (!email || !pass) { authErrorEl.textContent = 'enter email + password.'; return; }
+  try { await auth.createUserWithEmailAndPassword(email, pass); authErrorEl.textContent = ''; }
+  catch(e) { authErrorEl.textContent = friendlyAuthError(e.code); }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+/* hex picker on overlay */
+hexColorInput.addEventListener('input', () => {
+  const v = hexColorInput.value.trim();
+  if (isValidHex(v)) {
+    myColor = v;
+    hexPreview.style.background = v;
+    hexPreview.style.outline = v === '#ffffff' ? '1px solid #ccc' : 'none';
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  }
+});
+
+/* overlay swatches */
+const colorRowEl = document.getElementById('color-row');
 COLORS.forEach(c => {
   const sw = document.createElement('div');
   sw.className = 'color-swatch' + (c === myColor ? ' selected' : '');
@@ -268,23 +369,30 @@ COLORS.forEach(c => {
   if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
   sw.addEventListener('click', () => {
     myColor = c;
+    hexColorInput.value = c;
+    hexPreview.style.background = c;
+    hexPreview.style.outline = c === '#ffffff' ? '1px solid #ccc' : 'none';
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
     sw.classList.add('selected');
   });
-  colorRow.appendChild(sw);
+  colorRowEl.appendChild(sw);
 });
 
-/* ── state ── */
+/* ══════════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════════ */
 let myId = null, myRef = null, myName = '', myCursorEl = null;
-let myX = 0, myY = 0;
+let myX = 0, myY = 0, prevMouseX = 0, prevMouseY = 0;
 let chatOpen = false, chatTimeout = null, lastChatSent = 0;
 const CHAT_COOLDOWN = 5000;
 const others = {};
 const THROTTLE = 40;
 let lastSent = 0;
 const chatMessages = [];
-let followingId = null;
-let followInterval = null;
+let followingId = null, followInterval = null;
+
+/* rainbow */
+let rainbowOn = false, rainbowHue = 0, rainbowInterval = null;
 
 const overlay      = document.getElementById('overlay');
 const nameInput    = document.getElementById('nameInput');
@@ -294,45 +402,176 @@ const chatInput    = document.getElementById('chatInput');
 const countEl      = document.getElementById('count');
 const chatHistEl   = document.getElementById('chat-history');
 const chatCooldownEl = document.getElementById('chat-cooldown');
-const chatHint     = document.getElementById('chat-hint');
+const chatHintEl   = document.getElementById('chat-hint');
 const cpBtn        = document.getElementById('color-picker-btn');
 const cpPanel      = document.getElementById('color-picker-panel');
 const cpbDot       = document.getElementById('cpb-dot');
-const igSwatches   = document.getElementById('ig-swatches');
+const igSwatchesEl = document.getElementById('ig-swatches');
+const igHexRow     = document.getElementById('ig-hex-row');
+const igHexInput   = document.getElementById('ig-hex-input');
+const igHexPreview = document.getElementById('ig-hex-preview');
+const acctBadge    = document.getElementById('acct-badge');
+const kickAllBannerEl = document.getElementById('kick-all-banner');
 
-/* ── in-game swatches ── */
+/* ══════════════════════════════════════════════
+   IN-GAME COLOR PICKER
+══════════════════════════════════════════════ */
 function buildIgSwatches() {
-  igSwatches.innerHTML = '';
+  igSwatchesEl.innerHTML = '';
   COLORS.forEach(c => {
     const sw = document.createElement('div');
     sw.className = 'ig-swatch' + (c === myColor ? ' selected' : '');
     sw.style.background = c;
     if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
     sw.addEventListener('click', () => {
-      myColor = c;
-      if (myCursorEl) {
-        const path = myCursorEl.querySelector('svg path');
-        path.setAttribute('fill', myColor);
-        path.setAttribute('stroke', strokeFor(myColor));
-      }
-      if (myRef) myRef.update({ color: myColor });
-      cpbDot.style.background = myColor;
-      igSwatches.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
+      applyMyColor(c);
+      igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
       sw.classList.add('selected');
+      igHexInput.value = c;
+      igHexPreview.style.background = c;
       cpPanel.style.display = 'none';
     });
-    igSwatches.appendChild(sw);
+    igSwatchesEl.appendChild(sw);
   });
+
+  if (loggedInEmail) {
+    igHexRow.style.display = 'flex';
+    igHexInput.value = myColor;
+    igHexPreview.style.background = myColor;
+    igHexInput.oninput = () => {
+      const v = igHexInput.value.trim();
+      if (!isValidHex(v)) return;
+      igHexPreview.style.background = v;
+      igHexPreview.style.outline = v === '#ffffff' ? '1px solid #ccc' : 'none';
+      igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
+      applyMyColor(v);
+    };
+  } else {
+    igHexRow.style.display = 'none';
+  }
+}
+
+function applyMyColor(c) {
+  myColor = c;
+  cpbDot.style.background = c;
+  if (!rainbowOn && myCursorEl) {
+    const path = myCursorEl.querySelector('svg path');
+    path.setAttribute('fill', c);
+    path.setAttribute('stroke', strokeFor(c));
+  }
+  if (myRef) myRef.update({ color: c });
 }
 
 cpBtn.addEventListener('click', e => {
   e.stopPropagation();
-  cpPanel.style.display = cpPanel.style.display === 'flex' ? 'none' : 'flex';
+  const open = cpPanel.style.display === 'flex';
+  cpPanel.style.display = open ? 'none' : 'flex';
+  if (!open) buildIgSwatches();
 });
 document.addEventListener('click', () => { cpPanel.style.display = 'none'; });
 cpPanel.addEventListener('click', e => e.stopPropagation());
 
-/* ── join ── */
+/* ══════════════════════════════════════════════
+   RAINBOW CURSOR  (admin-only, local visual only)
+══════════════════════════════════════════════ */
+function startRainbow() {
+  rainbowOn = true;
+  document.getElementById('ap-rainbow').classList.add('active');
+  rainbowInterval = setInterval(() => {
+    rainbowHue = (rainbowHue + 4) % 360;
+    const c = `hsl(${rainbowHue},100%,55%)`;
+    if (myCursorEl) {
+      const path = myCursorEl.querySelector('svg path');
+      path.setAttribute('fill', c);
+      path.setAttribute('stroke', '#fff');
+    }
+    cpbDot.style.background = c;
+  }, 30);
+}
+function stopRainbow() {
+  rainbowOn = false;
+  clearInterval(rainbowInterval); rainbowInterval = null;
+  document.getElementById('ap-rainbow').classList.remove('active');
+  applyMyColor(myColor);
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════════════ */
+const adminBtn   = document.getElementById('admin-btn');
+const adminPanel = document.getElementById('admin-panel');
+
+function setupAdminUI() {
+  adminBtn.style.display = 'block';
+  adminBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    adminPanel.style.display = adminPanel.style.display === 'flex' ? 'none' : 'flex';
+  });
+  document.addEventListener('click', () => { adminPanel.style.display = 'none'; });
+  adminPanel.addEventListener('click', e => e.stopPropagation());
+
+  /* kick all */
+  document.getElementById('ap-kick-all').addEventListener('click', () => {
+    adminPanel.style.display = 'none';
+    db.ref('admin_kick').set({ ts: Date.now(), by: myId });
+  });
+
+  /* rainbow toggle */
+  document.getElementById('ap-rainbow').addEventListener('click', () => {
+    adminPanel.style.display = 'none';
+    rainbowOn ? stopRainbow() : startRainbow();
+  });
+
+  /* spawn block */
+  document.getElementById('ap-spawn-block').addEventListener('click', () => {
+    adminPanel.style.display = 'none';
+    db.ref('boxes/ablock_' + Date.now()).set({
+      label: '🐟',
+      x: myX / vw(),
+      y: myY / vh(),
+      bg: '#fff8f8',
+      grabbedBy: null,
+      adminBlock: true
+    });
+    showToast('block spawned!');
+  });
+}
+
+/* everyone listens for kick-all signal */
+function listenKickAll() {
+  db.ref('admin_kick').on('value', snap => {
+    if (!snap.exists()) return;
+    const d = snap.val();
+    if (!d || !d.ts) return;
+    if (Date.now() - d.ts > 40000) return;  // stale
+    if (isAdmin && d.by === myId) return;    // don't kick the admin who sent it
+    startKickAllCountdown();
+  });
+}
+
+let kickAllCountdown = null;
+function startKickAllCountdown() {
+  if (kickAllCountdown) return;
+  let s = 10;
+  kickAllBannerEl.style.display = 'block';
+  kickAllBannerEl.textContent = `admin is kicking everyone in ${s}s`;
+  kickAllCountdown = setInterval(() => {
+    s--;
+    if (s <= 0) {
+      clearInterval(kickAllCountdown); kickAllCountdown = null;
+      kickAllBannerEl.style.display = 'none';
+      if (myRef) myRef.remove();
+      document.body.classList.remove('in-game');
+      document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked by admin.<br><br><a href="" style="color:#000">rejoin</a></div>';
+    } else {
+      kickAllBannerEl.textContent = `admin is kicking everyone in ${s}s`;
+    }
+  }, 1000);
+}
+
+/* ══════════════════════════════════════════════
+   JOIN
+══════════════════════════════════════════════ */
 async function join() {
   const raw = nameInput.value.trim();
   if (!raw) { nameInput.focus(); return; }
@@ -343,10 +582,16 @@ async function join() {
   const taken = snap.exists() && Object.values(snap.val()).some(v => v.name && v.name.toLowerCase() === safe.toLowerCase());
   if (taken) { nameError.textContent = 'name already taken.'; return; }
 
+  // apply hex if logged in + valid
+  if (loggedInEmail) {
+    const hv = hexColorInput.value.trim();
+    if (isValidHex(hv)) myColor = hv;
+  }
+
   nameError.textContent = '';
   myName = safe;
-  myId = db.ref().push().key;
-  myRef = db.ref('cursors/' + myId);
+  myId   = db.ref().push().key;
+  myRef  = db.ref('cursors/' + myId);
   myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor, joinedAt: Date.now() });
   myRef.onDisconnect().remove();
 
@@ -358,14 +603,19 @@ async function join() {
 
   cpBtn.style.display = 'flex';
   cpbDot.style.background = myColor;
-  buildIgSwatches();
 
-  chatHint.style.display = 'block';
+  if (isAdmin) setupAdminUI();
+
+  if (loggedInEmail) {
+    acctBadge.style.display = 'block';
+    acctBadge.innerHTML = isAdmin
+      ? `<span style="color:#e74c3c;">admin</span>`
+      : `<span style="color:#888;">● logged in</span>`;
+  }
+
+  chatHintEl.style.display = 'block';
   document.getElementById('note-hint').style.display = 'block';
-  setTimeout(() => {
-    chatHint.style.opacity = '0';
-    document.getElementById('note-hint').style.opacity = '0';
-  }, 8000);
+  setTimeout(() => { chatHintEl.style.opacity='0'; document.getElementById('note-hint').style.opacity='0'; }, 8000);
 
   listenCursors();
   listenChat();
@@ -375,6 +625,7 @@ async function join() {
   listenNotes();
   listenApplause();
   listenPixelCanvas();
+  listenKickAll();
   trackMouse();
   setupChat();
   setupClick();
@@ -387,76 +638,37 @@ async function join() {
 
   db.ref('cursors').on('value', s => {
     if (!s.exists()) { countEl.textContent = '0 online'; return; }
-    const n = Object.values(s.val()).filter(v => v && v.name).length;
-    countEl.textContent = n + ' online';
+    countEl.textContent = Object.values(s.val()).filter(v => v && v.name).length + ' online';
   });
 }
 
-/*
-  makeCursorEl — the key fix:
-
-  Structure:
-    .cursor                        (pointer-events: none — NEVER blocks)
-      .cursor-hit-zone             (pointer-events: all  — tiny zone over arrow + name only)
-        svg                        (pointer-events: none — SVG itself doesn't catch; hit-zone parent does)
-        .cursor-name               (label inside hit-zone)
-        .cursor-arrival            (tooltip, shown on hit-zone hover)
-      .cursor-bubble               (pointer-events: none — speech bubble floats freely, never blocks)
-
-  Because .cursor is pointer-events:none, anything underneath it
-  (notes, boxes, the canvas) receives clicks/hovers normally UNLESS
-  the cursor-hit-zone is directly on top of them — which is only a
-  small ~80×36px area, and even then only while hovered.
-*/
+/* ══════════════════════════════════════════════
+   CURSOR ELEMENTS
+══════════════════════════════════════════════ */
 function makeCursorEl(uid, name, color, joinedAt) {
   const el = document.createElement('div');
-  el.className = 'cursor';
-  el.id = 'c-' + uid;
-
-  const arrivalText = joinedAt ? formatArrival(joinedAt) : '';
-
-  // hit-zone: covers the arrow + name tag area only
+  el.className = 'cursor'; el.id = 'c-' + uid;
   const hitZone = document.createElement('div');
   hitZone.className = 'cursor-hit-zone';
-  hitZone.innerHTML =
-    cursorSVG(color) +
+  hitZone.innerHTML = cursorSVG(color) +
     `<div class="cursor-name">${esc(name)}</div>` +
-    `<div class="cursor-arrival">${arrivalText}</div>`;
-
-  // bubble sits outside hit-zone so it never blocks
+    `<div class="cursor-arrival">${joinedAt ? formatArrival(joinedAt) : ''}</div>`;
   const bubble = document.createElement('div');
   bubble.className = 'cursor-bubble';
-
-  el.appendChild(hitZone);
-  el.appendChild(bubble);
-
-  // name tag click → follow
-  hitZone.querySelector('.cursor-name').addEventListener('click', e => {
-    e.stopPropagation();
-    startFollow(uid, name);
-  });
-
-  // hit-zone click on the SVG area → poke (but not on name tag)
-  hitZone.addEventListener('click', e => {
-    if (e.target.classList.contains('cursor-name')) return;
-    e.stopPropagation();
-    sendPoke(uid);
-  });
-
-  el.style.pointerEvents = 'none'; // redundant safety
+  el.appendChild(hitZone); el.appendChild(bubble);
+  hitZone.querySelector('.cursor-name').addEventListener('click', e => { e.stopPropagation(); startFollow(uid, name); });
+  hitZone.addEventListener('click', e => { if (e.target.classList.contains('cursor-name')) return; e.stopPropagation(); sendPoke(uid); });
+  el.style.pointerEvents = 'none';
   return el;
 }
 
 function formatArrival(ts) {
-  const mins = Math.floor((Date.now() - ts) / 60000);
+  const mins = Math.floor((Date.now()-ts)/60000);
   if (mins < 1) return 'just arrived';
   if (mins < 60) return `here ${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  const rem = mins % 60;
-  return `here ${hrs}h ${rem}m`;
+  return `here ${Math.floor(mins/60)}h ${mins%60}m`;
 }
 
-/* tick arrival labels every 60s */
 function tickArrivalLabels() {
   setInterval(() => {
     Object.entries(others).forEach(([uid, o]) => {
@@ -472,38 +684,32 @@ function listenCursors() {
   db.ref('cursors').on('child_added', s => {
     if (s.key === myId) return;
     const d = s.val();
-    const el = makeCursorEl(s.key, d.name, d.color || '#3498db', d.joinedAt);
+    const el = makeCursorEl(s.key, d.name, d.color||'#3498db', d.joinedAt);
     document.body.appendChild(el);
-    others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5, joinedAt: d.joinedAt || Date.now() };
+    others[s.key] = { el, bt: null, x: d.x||0.5, y: d.y||0.5, joinedAt: d.joinedAt||Date.now() };
     move(el, d.x, d.y);
     if (d.msg) showBubble(s.key, d.msg);
-    scheduleIdle(s.key, d.lastMove || d.ts);
+    scheduleIdle(s.key, d.lastMove||d.ts);
   });
   db.ref('cursors').on('child_changed', s => {
     if (s.key === myId) return;
     const d = s.val();
     if (!others[s.key]) {
-      const el = makeCursorEl(s.key, d.name, d.color || '#3498db', d.joinedAt);
+      const el = makeCursorEl(s.key, d.name, d.color||'#3498db', d.joinedAt);
       document.body.appendChild(el);
-      others[s.key] = { el, bt: null, x: d.x || 0.5, y: d.y || 0.5, joinedAt: d.joinedAt || Date.now() };
+      others[s.key] = { el, bt: null, x: d.x||0.5, y: d.y||0.5, joinedAt: d.joinedAt||Date.now() };
     }
-    others[s.key].x = d.x || 0.5;
-    others[s.key].y = d.y || 0.5;
+    others[s.key].x = d.x||0.5; others[s.key].y = d.y||0.5;
     const path = others[s.key].el.querySelector('svg path');
-    const c = d.color || '#3498db';
-    path.setAttribute('fill', c);
-    path.setAttribute('stroke', strokeFor(c));
+    const c = d.color||'#3498db';
+    path.setAttribute('fill', c); path.setAttribute('stroke', strokeFor(c));
     move(others[s.key].el, d.x, d.y);
     others[s.key].el.classList.remove('idle');
     if (d.msg !== undefined) updateBubbleProximity(s.key, d.msg);
-    scheduleIdle(s.key, d.lastMove || d.ts);
+    scheduleIdle(s.key, d.lastMove||d.ts);
   });
   db.ref('cursors').on('child_removed', s => {
-    if (others[s.key]) {
-      spawnGhost(others[s.key]);
-      others[s.key].el.remove();
-      delete others[s.key];
-    }
+    if (others[s.key]) { spawnGhost(others[s.key]); others[s.key].el.remove(); delete others[s.key]; }
     if (idleTimers[s.key]) { clearTimeout(idleTimers[s.key]); delete idleTimers[s.key]; }
     if (followingId === s.key) stopFollow();
   });
@@ -512,866 +718,584 @@ function listenCursors() {
 
 function scheduleIdle(uid, lastMove) {
   if (idleTimers[uid]) clearTimeout(idleTimers[uid]);
-  const elapsed = Date.now() - lastMove;
-  const remaining = Math.max(0, 30000 - elapsed);
-  idleTimers[uid] = setTimeout(() => {
-    if (others[uid]) others[uid].el.classList.add('idle');
-  }, remaining);
+  const rem = Math.max(0, 30000 - (Date.now()-lastMove));
+  idleTimers[uid] = setTimeout(() => { if (others[uid]) others[uid].el.classList.add('idle'); }, rem);
 }
 
 function move(el, nx, ny) {
-  el.style.left = (nx * window.innerWidth) + 'px';
-  el.style.top = (ny * window.innerHeight) + 'px';
+  el.style.left = (nx * vw()) + 'px';
+  el.style.top  = (ny * vh()) + 'px';
 }
 
 /* ── proximity bubble ── */
 const BUBBLE_MAX_DIST = 200;
-
-function dist(uid) {
-  const o = others[uid];
-  if (!o) return Infinity;
-  const ox = o.x * window.innerWidth;
-  const oy = o.y * window.innerHeight;
-  return Math.hypot(ox - myX, oy - myY);
+function distTo(uid) {
+  const o = others[uid]; if (!o) return Infinity;
+  return Math.hypot(o.x*vw()-myX, o.y*vh()-myY);
 }
-
 function updateBubbleProximity(uid, msg) {
-  const entry = others[uid];
-  if (!entry) return;
+  const entry = others[uid]; if (!entry) return;
   const bubble = entry.el.querySelector('.cursor-bubble');
   if (!msg) { bubble.classList.remove('show'); return; }
-  const d = dist(uid);
-  const visible = d < BUBBLE_MAX_DIST;
+  const d = distTo(uid), visible = d < BUBBLE_MAX_DIST;
   bubble.textContent = msg;
-  bubble.style.opacity = visible ? Math.max(0.2, 1 - d / BUBBLE_MAX_DIST).toFixed(2) : '0';
+  bubble.style.opacity = visible ? Math.max(0.2, 1-d/BUBBLE_MAX_DIST).toFixed(2) : '0';
   if (visible) {
     bubble.classList.add('show');
     if (entry.bt) clearTimeout(entry.bt);
     entry.bt = setTimeout(() => bubble.classList.remove('show'), 6000);
-  } else {
-    bubble.classList.remove('show');
-  }
+  } else bubble.classList.remove('show');
 }
-
 function refreshAllBubbles() {
   Object.keys(others).forEach(uid => {
-    const entry = others[uid];
-    if (!entry) return;
+    const entry = others[uid]; if (!entry) return;
     const bubble = entry.el.querySelector('.cursor-bubble');
     if (!bubble.textContent) return;
     updateBubbleProximity(uid, bubble.textContent);
   });
 }
-
-function showBubble(uid, msg) {
-  updateBubbleProximity(uid, msg);
-}
+function showBubble(uid, msg) { updateBubbleProximity(uid, msg); }
 
 /* ── idle kick ── */
 const IDLE_WARN = 2.5 * 60 * 1000;
-let kickWarnTimer = null, kickTimer = null, kickCountdownInterval = null;
-const kickWarningEl = document.getElementById('kick-warning');
+let kickWarnTimer=null, kickTimer=null, kickCountdownInt=null;
+const kickWarningEl   = document.getElementById('kick-warning');
 const kickCountdownEl = document.getElementById('kick-countdown');
-
 function resetIdleKick() {
   kickWarningEl.style.display = 'none';
-  if (kickWarnTimer) { clearTimeout(kickWarnTimer); kickWarnTimer = null; }
-  if (kickTimer) { clearTimeout(kickTimer); kickTimer = null; }
-  if (kickCountdownInterval) { clearInterval(kickCountdownInterval); kickCountdownInterval = null; }
+  if (kickWarnTimer)    { clearTimeout(kickWarnTimer);   kickWarnTimer=null; }
+  if (kickTimer)        { clearTimeout(kickTimer);       kickTimer=null; }
+  if (kickCountdownInt) { clearInterval(kickCountdownInt); kickCountdownInt=null; }
   scheduleIdleKick();
 }
-
 function scheduleIdleKick() {
   kickWarnTimer = setTimeout(() => {
     kickWarningEl.style.display = 'block';
-    let secs = 30;
-    kickCountdownEl.textContent = secs;
-    kickCountdownInterval = setInterval(() => {
-      secs--;
-      kickCountdownEl.textContent = secs;
-      if (secs <= 0) clearInterval(kickCountdownInterval);
-    }, 1000);
-    kickTimer = setTimeout(() => kickPlayer(), 30000);
+    let s=30; kickCountdownEl.textContent=s;
+    kickCountdownInt = setInterval(() => { s--; kickCountdownEl.textContent=s; if(s<=0) clearInterval(kickCountdownInt); }, 1000);
+    kickTimer = setTimeout(kickPlayer, 30000);
   }, IDLE_WARN);
 }
-
 function kickPlayer() {
   if (myRef) myRef.remove();
   document.body.classList.remove('in-game');
   document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';
 }
 
+/* ── mouse + ball collision ── */
+const BALL_HIT_RADIUS = 55, BALL_HIT_FORCE = 0.018;
 function trackMouse() {
   document.addEventListener('mousemove', e => {
     resetIdleKick();
-    myX = e.clientX;
-    myY = e.clientY;
-    if (myCursorEl) {
-      myCursorEl.style.left = e.clientX + 'px';
-      myCursorEl.style.top = e.clientY + 'px';
-    }
+    prevMouseX=myX; prevMouseY=myY;
+    myX=e.clientX; myY=e.clientY;
+    if (myCursorEl) { myCursorEl.style.left=e.clientX+'px'; myCursorEl.style.top=e.clientY+'px'; }
     refreshAllBubbles();
-    const now = Date.now();
-    if (now - lastSent < THROTTLE) return;
-    lastSent = now;
-    myRef.update({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight, lastMove: now });
+    if (amBallMaster) {
+      const dvx=(myX-prevMouseX)/vw(), dvy=(myY-prevMouseY)/vh();
+      const cs=Math.hypot(dvx,dvy);
+      for (let i=0;i<BALL_COUNT;i++) {
+        const b=ballPhysics[i]; if(!b) continue;
+        const bx=b.x*vw(), by=b.y*vh(), sz=BALL_SIZES[i];
+        const d=Math.hypot(bx-myX,by-myY);
+        if (d<BALL_HIT_RADIUS+sz/2 && d>0) {
+          const nx=(bx-myX)/d, ny=(by-myY)/d;
+          const f=BALL_HIT_FORCE+cs*1.2;
+          b.vx+=nx*f; b.vy+=ny*f;
+          const spd=Math.hypot(b.vx,b.vy);
+          if(spd>0.025){b.vx=(b.vx/spd)*0.025;b.vy=(b.vy/spd)*0.025;}
+        }
+      }
+    }
+    const now=Date.now();
+    if(now-lastSent<THROTTLE) return;
+    lastSent=now;
+    myRef.update({x:e.clientX/vw(), y:e.clientY/vh(), lastMove:now});
   });
 }
 
-/* ── RIPPLE feature ── */
+/* ── ripple ── */
 function setupClick() {
   document.addEventListener('click', e => {
-    if (!myId) return;
-    if (chatOpen) return;
-    if (followingId) return;
+    if (!myId||chatOpen||followingId) return;
     if (e.target.classList.contains('cursor-name')) return;
     if (e.target.closest('.cursor-hit-zone')) return;
     spawnRipple(e.clientX, e.clientY, myColor);
-    db.ref('ripples').push({
-      x: e.clientX / window.innerWidth,
-      y: e.clientY / window.innerHeight,
-      color: myColor,
-      ts: Date.now()
-    });
-    db.ref('ripples').orderByChild('ts').endAt(Date.now() - 5000).limitToFirst(50).get().then(snap => {
-      if (snap.exists()) snap.forEach(c => c.ref.remove());
+    db.ref('ripples').push({x:e.clientX/vw(), y:e.clientY/vh(), color:myColor, ts:Date.now()});
+    db.ref('ripples').orderByChild('ts').endAt(Date.now()-5000).limitToFirst(50).get().then(snap=>{
+      if(snap.exists()) snap.forEach(c=>c.ref.remove());
     });
   });
 }
-
-function spawnRipple(cx, cy, color) {
-  const el = document.createElement('div');
-  el.className = 'ripple';
-  el.style.left = cx + 'px';
-  el.style.top = cy + 'px';
-  el.style.borderColor = color === '#ffffff' ? '#ccc' : color;
-  document.body.appendChild(el);
-  el.addEventListener('animationend', () => el.remove());
+function spawnRipple(cx,cy,color) {
+  const el=document.createElement('div');
+  el.className='ripple'; el.style.left=cx+'px'; el.style.top=cy+'px';
+  el.style.borderColor=color==='#ffffff'?'#ccc':color;
+  document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
 }
-
 function listenRipples() {
-  db.ref('ripples').on('child_added', s => {
-    const d = s.val();
-    if (Date.now() - d.ts > 2000) return;
-    spawnRipple(d.x * window.innerWidth, d.y * window.innerHeight, d.color);
+  db.ref('ripples').on('child_added', s=>{
+    const d=s.val();
+    if(Date.now()-d.ts>2000) return;
+    spawnRipple(d.x*vw(), d.y*vh(), d.color);
   });
 }
 
-/* ── FLOATING BALLS feature ── */
-const BALL_COUNT = 5;
-const BALL_COLORS = ['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6'];
-const BALL_SIZES  = [28, 20, 24, 18, 22];
-const ballEls = {};
-let amBallMaster = false;
-let ballPhysics = {};
+/* ══════════════════════════════════════════════
+   BALLS
+══════════════════════════════════════════════ */
+const BALL_COUNT=5, BALL_COLORS=['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6'], BALL_SIZES=[28,20,24,18,22];
+const BALL_FRICTION=0.985;
+const ballEls={}; let amBallMaster=false, ballPhysics={};
 
 function initBalls() {
-  db.ref('balls').get().then(snap => {
-    if (!snap.exists()) {
-      amBallMaster = true;
-      const init = {};
-      for (let i = 0; i < BALL_COUNT; i++) {
-        init[i] = {
-          x: 0.1 + Math.random() * 0.8,
-          y: 0.1 + Math.random() * 0.8,
-          vx: (Math.random() - 0.5) * 0.003,
-          vy: (Math.random() - 0.5) * 0.003
-        };
-        ballPhysics[i] = { ...init[i] };
+  db.ref('balls').get().then(snap=>{
+    if(!snap.exists()){
+      const init={};
+      for(let i=0;i<BALL_COUNT;i++){
+        init[i]={x:.1+Math.random()*.8, y:.1+Math.random()*.8, vx:(Math.random()-.5)*.003, vy:(Math.random()-.5)*.003};
+        ballPhysics[i]={...init[i]};
       }
       db.ref('balls').set(init);
     }
   });
-
-  for (let i = 0; i < BALL_COUNT; i++) {
-    const el = document.createElement('div');
-    el.className = 'ball';
-    const sz = BALL_SIZES[i];
-    el.style.width = sz + 'px';
-    el.style.height = sz + 'px';
-    el.style.background = BALL_COLORS[i];
-    el.style.opacity = '0.55';
-    el.style.left = '50%';
-    el.style.top = '50%';
-    document.body.appendChild(el);
-    ballEls[i] = el;
+  for(let i=0;i<BALL_COUNT;i++){
+    const el=document.createElement('div'); el.className='ball';
+    const sz=BALL_SIZES[i];
+    el.style.cssText=`width:${sz}px;height:${sz}px;background:${BALL_COLORS[i]};opacity:.55;left:50%;top:50%;`;
+    document.body.appendChild(el); ballEls[i]=el;
   }
-
-  db.ref('balls').on('child_changed', s => {
-    const i = s.key;
-    const d = s.val();
-    const el = ballEls[i];
-    if (!el) return;
-    const sz = BALL_SIZES[i];
-    el.style.left = (d.x * window.innerWidth - sz/2) + 'px';
-    el.style.top  = (d.y * window.innerHeight - sz/2) + 'px';
-    if (amBallMaster) ballPhysics[i] = { ...d };
+  const syncBall=(s)=>{
+    const d=s.val(), el=ballEls[s.key]; if(!el) return;
+    const sz=BALL_SIZES[s.key];
+    el.style.left=(d.x*vw()-sz/2)+'px'; el.style.top=(d.y*vh()-sz/2)+'px';
+    if(amBallMaster) ballPhysics[s.key]={...d};
+  };
+  db.ref('balls').on('child_changed', syncBall);
+  db.ref('balls').on('child_added', s=>{
+    syncBall(s); ballPhysics[s.key]={...s.val()};
   });
-
-  db.ref('balls').on('child_added', s => {
-    const i = s.key;
-    const d = s.val();
-    const el = ballEls[i];
-    if (!el) return;
-    const sz = BALL_SIZES[i];
-    el.style.left = (d.x * window.innerWidth - sz/2) + 'px';
-    el.style.top  = (d.y * window.innerHeight - sz/2) + 'px';
-    ballPhysics[i] = { ...d };
-  });
-
-  db.ref('.info/connected').on('value', snap => {
-    if (!snap.val()) return;
-    db.ref('ballmaster').transaction(cur => {
-      if (!cur) { amBallMaster = true; return myId; }
-      return undefined;
-    }, (err, committed) => {
-      if (committed) {
-        amBallMaster = true;
-        db.ref('ballmaster').onDisconnect().remove();
-        runBallPhysics();
-      }
+  db.ref('.info/connected').on('value', snap=>{
+    if(!snap.val()) return;
+    db.ref('ballmaster').transaction(cur=>{
+      if(!cur){amBallMaster=true;return myId;} return undefined;
+    },(err,committed)=>{
+      if(committed){amBallMaster=true;db.ref('ballmaster').onDisconnect().remove();runBallPhysics();}
     });
   });
 }
-
-function runBallPhysics() {
-  if (!amBallMaster) return;
-  setInterval(() => {
-    const W = window.innerWidth, H = window.innerHeight;
-    const updates = {};
-    for (let i = 0; i < BALL_COUNT; i++) {
-      const b = ballPhysics[i];
-      if (!b) continue;
-      b.x += b.vx;
-      b.y += b.vy;
-      if (b.x < 0.03 || b.x > 0.97) b.vx *= -1;
-      if (b.y < 0.03 || b.y > 0.97) b.vy *= -1;
-      b.x = Math.max(0.03, Math.min(0.97, b.x));
-      b.y = Math.max(0.03, Math.min(0.97, b.y));
-      updates[i] = { x: b.x, y: b.y, vx: b.vx, vy: b.vy };
-      const sz = BALL_SIZES[i];
-      ballEls[i].style.left = (b.x * W - sz/2) + 'px';
-      ballEls[i].style.top  = (b.y * H - sz/2) + 'px';
+function runBallPhysics(){
+  if(!amBallMaster) return;
+  setInterval(()=>{
+    const W=vw(),H=vh(),updates={};
+    for(let i=0;i<BALL_COUNT;i++){
+      const b=ballPhysics[i]; if(!b) continue;
+      b.vx*=BALL_FRICTION; b.vy*=BALL_FRICTION;
+      const spd=Math.hypot(b.vx,b.vy);
+      if(spd<.0008){const a=Math.random()*Math.PI*2;b.vx+=Math.cos(a)*.001;b.vy+=Math.sin(a)*.001;}
+      b.x+=b.vx; b.y+=b.vy;
+      if(b.x<.03){b.x=.03;b.vx=Math.abs(b.vx);}
+      if(b.x>.97){b.x=.97;b.vx=-Math.abs(b.vx);}
+      if(b.y<.03){b.y=.03;b.vy=Math.abs(b.vy);}
+      if(b.y>.97){b.y=.97;b.vy=-Math.abs(b.vy);}
+      updates[i]={x:b.x,y:b.y,vx:b.vx,vy:b.vy};
+      ballEls[i].style.left=(b.x*W-BALL_SIZES[i]/2)+'px';
+      ballEls[i].style.top=(b.y*H-BALL_SIZES[i]/2)+'px';
     }
     db.ref('balls').update(updates);
-  }, 80);
+  },80);
 }
 
-/* ── DRAGGABLE BOXES feature ── */
-const BOX_LABELS = ['','','','','','','','','',''];
-const BOX_COLORS = ['#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec','#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec'];
-let dragState = null;
+/* ══════════════════════════════════════════════
+   BOXES
+══════════════════════════════════════════════ */
+const BOX_LABELS=['','','','','','','','','',''];
+const BOX_BGS=['#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec','#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec'];
+let dragState=null;
 
-function setupBoxes() {
-  db.ref('boxes').get().then(snap => {
-    if (!snap.exists()) {
-      const init = {};
-      BOX_LABELS.forEach((lbl, i) => {
-        init[i] = {
-          label: lbl,
-          x: 0.1 + (i * 0.18),
-          y: 0.15 + (i % 2) * 0.08,
-          bg: BOX_COLORS[i],
-          grabbedBy: null
-        };
+function setupBoxes(){
+  db.ref('boxes').get().then(snap=>{
+    if(!snap.exists()){
+      const init={};
+      BOX_LABELS.forEach((lbl,i)=>{
+        init[i]={label:lbl,x:.1+(i*.18),y:.15+(i%2)*.08,bg:BOX_BGS[i],grabbedBy:null};
       });
       db.ref('boxes').set(init);
     }
   });
 }
-
-function listenBoxes() {
-  db.ref('boxes').on('child_added', s => renderBox(s.key, s.val()));
-  db.ref('boxes').on('child_changed', s => renderBox(s.key, s.val()));
+function listenBoxes(){
+  db.ref('boxes').on('child_added',   s=>renderBox(s.key,s.val()));
+  db.ref('boxes').on('child_changed', s=>renderBox(s.key,s.val()));
+  db.ref('boxes').on('child_removed', s=>{ const el=document.getElementById('box-'+s.key); if(el) el.remove(); });
 }
-
-function renderBox(key, d) {
-  let el = document.getElementById('box-' + key);
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'dbox';
-    el.id = 'box-' + key;
-    el.addEventListener('mousedown', e => startDrag(e, key));
+function renderBox(key,d){
+  let el=document.getElementById('box-'+key);
+  if(!el){
+    el=document.createElement('div'); el.className='dbox'; el.id='box-'+key;
+    el.addEventListener('mousedown',e=>startDrag(e,key));
     document.body.appendChild(el);
   }
-  el.textContent = d.label;
-  el.style.background = d.bg || '#fff';
-  el.style.left = (d.x * window.innerWidth) + 'px';
-  el.style.top  = (d.y * window.innerHeight) + 'px';
-  if (d.grabbedBy && d.grabbedBy !== myId) {
-    el.classList.add('grabbed');
-    el.style.cursor = 'not-allowed';
-  } else if (!d.grabbedBy) {
-    el.classList.remove('grabbed');
-    el.style.cursor = 'grab';
+  el.textContent=d.label; el.style.background=d.bg||'#fff';
+  el.style.left=(d.x*vw())+'px'; el.style.top=(d.y*vh())+'px';
+  if(d.adminBlock){
+    el.classList.add('admin-block'); el.style.cursor='default';
+  } else if(d.grabbedBy && d.grabbedBy!==myId){
+    el.classList.add('grabbed'); el.style.cursor='not-allowed';
+  } else if(!d.grabbedBy){
+    el.classList.remove('grabbed','admin-block'); el.style.cursor='grab';
   }
 }
-
-function startDrag(e, key) {
-  if (dragState) return;
+function startDrag(e,key){
+  if(dragState) return;
   e.stopPropagation();
-  const el = document.getElementById('box-' + key);
-  const rect = el.getBoundingClientRect();
-  const offX = e.clientX - rect.left;
-  const offY = e.clientY - rect.top;
-  db.ref('boxes/' + key).transaction(d => {
-    if (d && d.grabbedBy && d.grabbedBy !== myId) return;
-    if (d) d.grabbedBy = myId;
-    return d;
-  }, (err, committed) => {
-    if (!committed) return;
-    dragState = { key, offX, offY };
-    el.style.cursor = 'grabbing';
-    db.ref('boxes/' + key + '/grabbedBy').onDisconnect().set(null);
+  const el=document.getElementById('box-'+key);
+  if(!el) return;
+  if(el.classList.contains('admin-block') && !isAdmin) return;
+  const rect=el.getBoundingClientRect();
+  const offX=e.clientX-rect.left, offY=e.clientY-rect.top;
+  db.ref('boxes/'+key).transaction(d=>{
+    if(!d) return d;
+    if(d.adminBlock && !isAdmin) return;
+    if(d.grabbedBy && d.grabbedBy!==myId) return;
+    d.grabbedBy=myId; return d;
+  },(err,committed)=>{
+    if(!committed) return;
+    dragState={key,offX,offY}; el.style.cursor='grabbing';
+    db.ref('boxes/'+key+'/grabbedBy').onDisconnect().set(null);
   });
 }
-
-document.addEventListener('mousemove', e => {
-  if (!dragState) return;
-  const { key, offX, offY } = dragState;
-  const nx = (e.clientX - offX) / window.innerWidth;
-  const ny = (e.clientY - offY) / window.innerHeight;
-  db.ref('boxes/' + key).update({ x: Math.max(0, Math.min(0.95, nx)), y: Math.max(0, Math.min(0.92, ny)) });
+document.addEventListener('mousemove',e=>{
+  if(!dragState) return;
+  const {key,offX,offY}=dragState;
+  db.ref('boxes/'+key).update({
+    x:Math.max(0,Math.min(.95,(e.clientX-offX)/vw())),
+    y:Math.max(0,Math.min(.92,(e.clientY-offY)/vh()))
+  });
+});
+document.addEventListener('mouseup',()=>{
+  if(!dragState) return;
+  const key=dragState.key; dragState=null;
+  db.ref('boxes/'+key).update({grabbedBy:null});
+  const el=document.getElementById('box-'+key);
+  if(el&&!el.classList.contains('admin-block')){el.classList.remove('grabbed');el.style.cursor='grab';}
 });
 
-document.addEventListener('mouseup', () => {
-  if (!dragState) return;
-  const key = dragState.key;
-  dragState = null;
-  db.ref('boxes/' + key).update({ grabbedBy: null });
-  const el = document.getElementById('box-' + key);
-  if (el) { el.classList.remove('grabbed'); el.style.cursor = 'grab'; }
-});
-
-/* ── POKE feature ── */
-function sendPoke(targetId) {
-  if (!myId || targetId === myId) return;
-  db.ref('pokes').push({ to: targetId, from: myId, fromName: myName, color: myColor, ts: Date.now() });
+/* ── poke ── */
+function sendPoke(targetId){
+  if(!myId||targetId===myId) return;
+  db.ref('pokes').push({to:targetId,from:myId,fromName:myName,color:myColor,ts:Date.now()});
 }
-
-function listenPokes() {
-  db.ref('pokes').on('child_added', s => {
-    const d = s.val();
-    if (Date.now() - d.ts > 3000) return;
-    if (d.to !== myId) return;
-    spawnPokeRipple(myX, myY, d.color);
-    showToast(`${esc(d.fromName)} poked you`);
+function listenPokes(){
+  db.ref('pokes').on('child_added',s=>{
+    const d=s.val();
+    if(Date.now()-d.ts>3000||d.to!==myId) return;
+    spawnPokeRipple(myX,myY,d.color);
+    showToast(esc(d.fromName)+' poked you');
   });
 }
-
-function spawnPokeRipple(cx, cy, color) {
-  for (let i = 0; i < 3; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'poke-ripple';
-      el.style.left = cx + 'px';
-      el.style.top = cy + 'px';
-      el.style.borderColor = color === '#ffffff' ? '#ccc' : color;
-      document.body.appendChild(el);
-      el.addEventListener('animationend', () => el.remove());
-    }, i * 120);
-  }
+function spawnPokeRipple(cx,cy,color){
+  for(let i=0;i<3;i++) setTimeout(()=>{
+    const el=document.createElement('div'); el.className='poke-ripple';
+    el.style.left=cx+'px'; el.style.top=cy+'px';
+    el.style.borderColor=color==='#ffffff'?'#ccc':color;
+    document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
+  },i*120);
 }
 
-/* ── FOLLOW MODE ── */
-const followBanner = document.getElementById('follow-banner');
-const followNameEl = document.getElementById('follow-name');
-
-function startFollow(uid, name) {
-  if (followingId === uid) { stopFollow(); return; }
-  stopFollow();
-  followingId = uid;
-  followNameEl.textContent = name;
-  followBanner.style.display = 'block';
-  const el = document.getElementById('c-' + uid);
-  if (el) el.classList.add('being-followed');
-  followInterval = setInterval(() => {
-    const o = others[followingId];
-    if (!o) { stopFollow(); return; }
-    const tx = o.x * window.innerWidth;
-    const ty = o.y * window.innerHeight;
-    myX += (tx - myX) * 0.12;
-    myY += (ty - myY) * 0.12;
-    if (myCursorEl) { myCursorEl.style.left = myX + 'px'; myCursorEl.style.top = myY + 'px'; }
+/* ── follow ── */
+const followBanner=document.getElementById('follow-banner'), followNameEl=document.getElementById('follow-name');
+function startFollow(uid,name){
+  if(followingId===uid){stopFollow();return;}
+  stopFollow(); followingId=uid; followNameEl.textContent=name;
+  followBanner.style.display='block';
+  const el=document.getElementById('c-'+uid); if(el) el.classList.add('being-followed');
+  followInterval=setInterval(()=>{
+    const o=others[followingId]; if(!o){stopFollow();return;}
+    myX+=(o.x*vw()-myX)*.12; myY+=(o.y*vh()-myY)*.12;
+    if(myCursorEl){myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';}
     refreshAllBubbles();
-    const now = Date.now();
-    if (now - lastSent > THROTTLE) {
-      lastSent = now;
-      myRef.update({ x: myX / window.innerWidth, y: myY / window.innerHeight, lastMove: now });
-    }
-  }, 30);
+    const now=Date.now();
+    if(now-lastSent>THROTTLE){lastSent=now;myRef.update({x:myX/vw(),y:myY/vh(),lastMove:now});}
+  },30);
+}
+function stopFollow(){
+  if(followingId){const el=document.getElementById('c-'+followingId);if(el)el.classList.remove('being-followed');}
+  followingId=null; followBanner.style.display='none';
+  if(followInterval){clearInterval(followInterval);followInterval=null;}
 }
 
-function stopFollow() {
-  if (followingId) {
-    const el = document.getElementById('c-' + followingId);
-    if (el) el.classList.remove('being-followed');
-  }
-  followingId = null;
-  followBanner.style.display = 'none';
-  if (followInterval) { clearInterval(followInterval); followInterval = null; }
-}
-
-/* ── TOAST ── */
-function showToast(msg) {
-  const el = document.createElement('div');
-  el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:12px;background:#111;color:#fff;padding:4px 12px;z-index:900;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }, 2500);
+/* ── toast ── */
+function showToast(msg){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:12px;background:#111;color:#fff;padding:4px 12px;z-index:900;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';
+  el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),500);},2500);
 }
 
 /* ── chat ── */
-function listenChat() {
-  db.ref('chat').limitToLast(20).on('child_added', s => {
-    const d = s.val();
-    chatMessages.push(d);
-    if (chatMessages.length > 20) chatMessages.shift();
+function listenChat(){
+  db.ref('chat').limitToLast(20).on('child_added',s=>{
+    const d=s.val(); chatMessages.push(d);
+    if(chatMessages.length>20) chatMessages.shift();
     renderChatHistory();
   });
 }
-
-function renderChatHistory() {
-  chatHistEl.innerHTML = '';
-  chatMessages.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'chat-hist-msg';
-    const t = new Date(m.ts);
-    const timeStr = t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0');
-    const nameColor = (m.color === '#ffffff' || m.color === '#f1c40f') ? '#888' : esc(m.color);
-    div.innerHTML = `<span class="chat-who" style="color:${nameColor}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;
+function renderChatHistory(){
+  chatHistEl.innerHTML='';
+  chatMessages.forEach(m=>{
+    const div=document.createElement('div'); div.className='chat-hist-msg';
+    const t=new Date(m.ts);
+    const timeStr=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+    const nameColor=(m.color==='#ffffff'||m.color==='#f1c40f')?'#888':esc(m.color);
+    div.innerHTML=`<span class="chat-who" style="color:${nameColor}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;
     chatHistEl.appendChild(div);
   });
-  chatHistEl.scrollTop = chatHistEl.scrollHeight;
+  chatHistEl.scrollTop=chatHistEl.scrollHeight;
 }
-
-function setupChat() {
-  document.addEventListener('keydown', e => {
-    if (overlay.style.display !== 'none') return;
-    if (e.key === 'Escape') {
-      if (followingId) { stopFollow(); return; }
-      if (chatOpen) closeChat();
-    }
-    if (e.key === '/' && !chatOpen) { e.preventDefault(); openChat(); }
+function setupChat(){
+  document.addEventListener('keydown',e=>{
+    if(overlay.style.display!=='none') return;
+    if(e.key==='Escape'){if(followingId){stopFollow();return;}if(chatOpen)closeChat();}
+    if(e.key==='/'&&!chatOpen){e.preventDefault();openChat();}
   });
-  chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendChat();
-    if (e.key === 'Escape') closeChat();
+  chatInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter') sendChat();
+    if(e.key==='Escape') closeChat();
     e.stopPropagation();
   });
 }
-
-function openChat() {
-  chatOpen = true;
-  chatbar.style.display = 'flex';
-  renderChatHistory();
-  chatHistEl.scrollTop = chatHistEl.scrollHeight;
-  setTimeout(() => chatInput.focus(), 20);
-  chatHint.style.display = 'none';
+function openChat(){
+  chatOpen=true; chatbar.style.display='flex';
+  renderChatHistory(); chatHistEl.scrollTop=chatHistEl.scrollHeight;
+  setTimeout(()=>chatInput.focus(),20);
+  chatHintEl.style.display='none';
 }
-
-function closeChat() {
-  chatOpen = false;
-  chatbar.style.display = 'none';
-  chatInput.value = '';
-  chatInput.blur();
+function closeChat(){
+  chatOpen=false; chatbar.style.display='none';
+  chatInput.value=''; chatInput.blur();
 }
-
-function sendChat() {
-  const msg = chatInput.value.trim();
-  if (!msg) { closeChat(); return; }
-
-  if (hasProfanity(msg)) {
-    chatInput.value = '';
-    chatInput.placeholder = 'keep it clean!';
-    setTimeout(() => chatInput.placeholder = 'say something...', 2000);
-    return;
+function sendChat(){
+  const msg=chatInput.value.trim();
+  if(!msg){closeChat();return;}
+  if(hasProfanity(msg)){
+    chatInput.value=''; chatInput.placeholder='keep it clean!';
+    setTimeout(()=>chatInput.placeholder='say something...',2000); return;
   }
-
-  const now = Date.now();
-  if (now - lastChatSent < CHAT_COOLDOWN) {
-    const wait = Math.ceil((CHAT_COOLDOWN - (now - lastChatSent)) / 1000);
-    chatCooldownEl.textContent = `wait ${wait}s`;
-    setTimeout(() => chatCooldownEl.textContent = '', 1200);
-    return;
+  const now=Date.now();
+  if(now-lastChatSent<CHAT_COOLDOWN){
+    const wait=Math.ceil((CHAT_COOLDOWN-(now-lastChatSent))/1000);
+    chatCooldownEl.textContent=`wait ${wait}s`;
+    setTimeout(()=>chatCooldownEl.textContent='',1200); return;
   }
-  lastChatSent = now;
-  resetIdleKick();
-
-  const bubble = myCursorEl.querySelector('.cursor-bubble');
-  bubble.textContent = msg;
-  bubble.classList.add('show');
-  if (chatTimeout) clearTimeout(chatTimeout);
-  chatTimeout = setTimeout(() => { bubble.classList.remove('show'); myRef.update({ msg: '' }); }, 6000);
-  myRef.update({ msg, ts: now });
-  db.ref('chat').push({ name: myName, text: msg, ts: now, color: myColor });
-
+  lastChatSent=now; resetIdleKick();
+  const bubble=myCursorEl.querySelector('.cursor-bubble');
+  bubble.textContent=msg; bubble.classList.add('show');
+  if(chatTimeout) clearTimeout(chatTimeout);
+  chatTimeout=setTimeout(()=>{bubble.classList.remove('show');myRef.update({msg:''});},6000);
+  myRef.update({msg,ts:now});
+  db.ref('chat').push({name:myName,text:msg,ts:now,color:myColor});
   closeChat();
 }
 
-/* ══════════════════════════════════
-   LEAVE A NOTE
-══════════════════════════════════ */
-const noteComposer  = document.getElementById('note-composer');
-const noteTextarea  = document.getElementById('note-text');
-let notePendingX = 0, notePendingY = 0;
-const NOTE_TTL = 10 * 60 * 1000;
-
-function setupNotes() {
-  document.addEventListener('contextmenu', e => {
-    if (!myId) return;
-    if (e.target.closest('.dbox, .note-pin, #chatbar, #overlay, #color-picker-panel')) return;
+/* ── notes ── */
+const noteComposer=document.getElementById('note-composer'), noteTextarea=document.getElementById('note-text');
+let notePendingX=0, notePendingY=0;
+const NOTE_TTL=10*60*1000;
+function setupNotes(){
+  document.addEventListener('contextmenu',e=>{
+    if(!myId) return;
+    if(e.target.closest('.dbox,.note-pin,#chatbar,#overlay,#color-picker-panel,#admin-panel')) return;
     e.preventDefault();
-    notePendingX = e.clientX / window.innerWidth;
-    notePendingY = e.clientY / window.innerHeight;
-    noteComposer.style.left = Math.min(e.clientX, window.innerWidth - 220) + 'px';
-    noteComposer.style.top  = Math.min(e.clientY, window.innerHeight - 120) + 'px';
-    noteComposer.style.display = 'flex';
-    setTimeout(() => noteTextarea.focus(), 20);
+    notePendingX=e.clientX/vw(); notePendingY=e.clientY/vh();
+    noteComposer.style.left=Math.min(e.clientX,vw()-220)+'px';
+    noteComposer.style.top=Math.min(e.clientY,vh()-120)+'px';
+    noteComposer.style.display='flex';
+    setTimeout(()=>noteTextarea.focus(),20);
   });
-
-  document.getElementById('note-cancel').addEventListener('click', () => {
-    noteComposer.style.display = 'none';
-    noteTextarea.value = '';
-  });
-
-  document.getElementById('note-post').addEventListener('click', postNote);
-
-  noteTextarea.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); postNote(); }
-    if (e.key === 'Escape') { noteComposer.style.display = 'none'; noteTextarea.value = ''; }
+  document.getElementById('note-cancel').addEventListener('click',()=>{noteComposer.style.display='none';noteTextarea.value='';});
+  document.getElementById('note-post').addEventListener('click',postNote);
+  noteTextarea.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();postNote();}
+    if(e.key==='Escape'){noteComposer.style.display='none';noteTextarea.value='';}
     e.stopPropagation();
   });
-
-  setInterval(() => {
-    db.ref('notes').orderByChild('ts').endAt(Date.now() - NOTE_TTL).get().then(snap => {
-      if (snap.exists()) snap.forEach(c => c.ref.remove());
+  setInterval(()=>{
+    db.ref('notes').orderByChild('ts').endAt(Date.now()-NOTE_TTL).get().then(snap=>{
+      if(snap.exists()) snap.forEach(c=>c.ref.remove());
     });
-  }, 60000);
+  },60000);
 }
-
-function postNote() {
-  const txt = noteTextarea.value.trim();
-  if (!txt || hasProfanity(txt)) {
-    if (hasProfanity(txt)) noteTextarea.placeholder = 'keep it clean!';
-    noteTextarea.value = '';
-    setTimeout(() => noteTextarea.placeholder = 'write something...', 1500);
-    return;
+function postNote(){
+  const txt=noteTextarea.value.trim();
+  if(!txt||hasProfanity(txt)){
+    if(hasProfanity(txt)) noteTextarea.placeholder='keep it clean!';
+    noteTextarea.value=''; setTimeout(()=>noteTextarea.placeholder='write something...',1500); return;
   }
-  db.ref('notes').push({
-    x: notePendingX,
-    y: notePendingY,
-    text: txt,
-    author: myName,
-    color: myColor,
-    ts: Date.now()
-  });
-  noteComposer.style.display = 'none';
-  noteTextarea.value = '';
+  db.ref('notes').push({x:notePendingX,y:notePendingY,text:txt,author:myName,color:myColor,ts:Date.now()});
+  noteComposer.style.display='none'; noteTextarea.value='';
 }
-
-function listenNotes() {
-  db.ref('notes').get().then(snap => {
-    if (!snap.exists()) return;
-    snap.forEach(s => renderNote(s.key, s.val()));
-  });
-  db.ref('notes').on('child_added', s => renderNote(s.key, s.val()));
-  db.ref('notes').on('child_removed', s => {
-    const el = document.getElementById('note-' + s.key);
-    if (el) el.remove();
-  });
+function listenNotes(){
+  db.ref('notes').get().then(snap=>{if(!snap.exists()) return;snap.forEach(s=>renderNote(s.key,s.val()));});
+  db.ref('notes').on('child_added',s=>renderNote(s.key,s.val()));
+  db.ref('notes').on('child_removed',s=>{const el=document.getElementById('note-'+s.key);if(el)el.remove();});
 }
-
-function renderNote(key, d) {
-  if (document.getElementById('note-' + key)) return;
-  if (Date.now() - d.ts > NOTE_TTL) return;
-  const el = document.createElement('div');
-  el.className = 'note-pin';
-  el.id = 'note-' + key;
-  el.style.left = (d.x * window.innerWidth) + 'px';
-  el.style.top  = (d.y * window.innerHeight) + 'px';
-
-  const headColor = d.color === '#ffffff' ? '#ccc' : (d.color || '#e74c3c');
-  el.innerHTML = `
-    <div class="note-card">${esc(d.text)}<span class="note-author">— ${esc(d.author)}</span></div>
-    <div class="note-pin-head" style="background:${headColor}"></div>
-    <div class="note-stem"></div>`;
+function renderNote(key,d){
+  if(document.getElementById('note-'+key)) return;
+  if(Date.now()-d.ts>NOTE_TTL) return;
+  const el=document.createElement('div'); el.className='note-pin'; el.id='note-'+key;
+  el.style.left=(d.x*vw())+'px'; el.style.top=(d.y*vh())+'px';
+  const hc=d.color==='#ffffff'?'#ccc':(d.color||'#e74c3c');
+  el.innerHTML=`<div class="note-card">${esc(d.text)}<span class="note-author">— ${esc(d.author)}</span></div><div class="note-pin-head" style="background:${hc}"></div><div class="note-stem"></div>`;
   document.body.appendChild(el);
-
-  const remaining = NOTE_TTL - (Date.now() - d.ts);
-  setTimeout(() => {
-    el.style.transition = 'opacity 1s';
-    el.style.opacity = '0';
-    setTimeout(() => el.remove(), 1000);
-  }, Math.max(0, remaining));
+  const rem=NOTE_TTL-(Date.now()-d.ts);
+  setTimeout(()=>{el.style.transition='opacity 1s';el.style.opacity='0';setTimeout(()=>el.remove(),1000);},Math.max(0,rem));
 }
 
-/* ══════════════════════════════════
-   CROWD WARMTH
-══════════════════════════════════ */
-function initWarmth() {
-  const canvas = document.getElementById('warmth-canvas');
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
-  window.addEventListener('resize', () => {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
-  setInterval(drawWarmth, 200);
+/* ── warmth ── */
+function initWarmth(){
+  const canvas=document.getElementById('warmth-canvas');
+  canvas.width=vw(); canvas.height=vh();
+  window.addEventListener('resize',()=>{canvas.width=vw();canvas.height=vh();});
+  setInterval(drawWarmth,200);
 }
-
-function drawWarmth() {
-  const canvas = document.getElementById('warmth-canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const positions = [{ x: myX, y: myY }];
-  Object.values(others).forEach(o => {
-    positions.push({ x: o.x * canvas.width, y: o.y * canvas.height });
-  });
-
-  if (positions.length < 2) return;
-
-  positions.forEach(p => {
-    const nearby = positions.filter(q => q !== p && Math.hypot(q.x - p.x, q.y - p.y) < 160);
-    if (nearby.length === 0) return;
-    const intensity = Math.min(1, nearby.length / 3);
-    const r = 100 + intensity * 60;
-    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-    grad.addColorStop(0, `rgba(255,160,60,${0.5 * intensity})`);
-    grad.addColorStop(1, 'rgba(255,160,60,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-    ctx.fill();
+function drawWarmth(){
+  const canvas=document.getElementById('warmth-canvas'), ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const pos=[{x:myX,y:myY}];
+  Object.values(others).forEach(o=>pos.push({x:o.x*canvas.width,y:o.y*canvas.height}));
+  if(pos.length<2) return;
+  pos.forEach(p=>{
+    const nearby=pos.filter(q=>q!==p&&Math.hypot(q.x-p.x,q.y-p.y)<160);
+    if(!nearby.length) return;
+    const intensity=Math.min(1,nearby.length/3), r=100+intensity*60;
+    const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
+    grad.addColorStop(0,`rgba(255,160,60,${.5*intensity})`);
+    grad.addColorStop(1,'rgba(255,160,60,0)');
+    ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
   });
 }
 
-/* ══════════════════════════════════
-   APPLAUSE
-══════════════════════════════════ */
-let lastClap = 0;
-const CLAP_COOLDOWN = 1500;
-
-function listenApplause() {
-  db.ref('applause').on('child_added', s => {
-    const d = s.val();
-    if (Date.now() - d.ts > 3000) return;
-    spawnClapFloat(d.x * window.innerWidth, d.y * window.innerHeight);
+/* ── applause ── */
+let lastClap=0; const CLAP_COOLDOWN=1500;
+function listenApplause(){
+  db.ref('applause').on('child_added',s=>{
+    const d=s.val();
+    if(Date.now()-d.ts>3000) return;
+    spawnClapFloat(d.x*vw(),d.y*vh());
   });
-
-  db.ref('applause').orderByChild('ts').on('value', snap => {
-    if (!snap.exists()) return;
-    const now = Date.now();
-    const recent = [];
-    snap.forEach(c => { if (now - c.val().ts < 2000) recent.push(c.val()); });
-    if (recent.length >= 3) triggerBurst();
+  db.ref('applause').orderByChild('ts').on('value',snap=>{
+    if(!snap.exists()) return;
+    const now=Date.now(), recent=[];
+    snap.forEach(c=>{if(now-c.val().ts<2000)recent.push(c.val());});
+    if(recent.length>=3) triggerBurst();
   });
 }
-
-function sendClap() {
-  const now = Date.now();
-  if (now - lastClap < CLAP_COOLDOWN) return;
-  lastClap = now;
-  spawnClapFloat(myX, myY);
-  db.ref('applause').push({ x: myX / window.innerWidth, y: myY / window.innerHeight, by: myId, ts: now });
-  db.ref('applause').orderByChild('ts').endAt(now - 10000).get().then(snap => {
-    if (snap.exists()) snap.forEach(c => c.ref.remove());
-  });
+function sendClap(){
+  const now=Date.now(); if(now-lastClap<CLAP_COOLDOWN) return; lastClap=now;
+  spawnClapFloat(myX,myY);
+  db.ref('applause').push({x:myX/vw(),y:myY/vh(),by:myId,ts:now});
+  db.ref('applause').orderByChild('ts').endAt(now-10000).get().then(snap=>{if(snap.exists())snap.forEach(c=>c.ref.remove());});
 }
-
-function spawnClapFloat(cx, cy) {
-  const el = document.createElement('div');
-  el.className = 'clap-float';
-  el.textContent = '👏';
-  el.style.left = (cx - 10) + 'px';
-  el.style.top  = (cy - 10) + 'px';
-  document.body.appendChild(el);
-  el.addEventListener('animationend', () => el.remove());
+function spawnClapFloat(cx,cy){
+  const el=document.createElement('div'); el.className='clap-float'; el.textContent='👏';
+  el.style.left=(cx-10)+'px'; el.style.top=(cy-10)+'px';
+  document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
 }
-
-let burstCooldown = false;
-function triggerBurst() {
-  if (burstCooldown) return;
-  burstCooldown = true;
-  setTimeout(() => burstCooldown = false, 3000);
-  for (let i = 0; i < 8; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'clap-burst';
-      el.textContent = '👏';
-      el.style.left = (10 + Math.random() * 80) + 'vw';
-      el.style.top  = (10 + Math.random() * 80) + 'vh';
-      document.body.appendChild(el);
-      el.addEventListener('animationend', () => el.remove());
-    }, i * 80);
-  }
+let burstCooldown=false;
+function triggerBurst(){
+  if(burstCooldown) return; burstCooldown=true; setTimeout(()=>burstCooldown=false,3000);
+  for(let i=0;i<8;i++) setTimeout(()=>{
+    const el=document.createElement('div'); el.className='clap-burst'; el.textContent='👏';
+    el.style.left=(10+Math.random()*80)+'vw'; el.style.top=(10+Math.random()*80)+'vh';
+    document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
+  },i*80);
 }
-
-document.addEventListener('dblclick', e => {
-  if (!myId) return;
-  if (e.target.closest('.dbox, .note-pin, #chatbar, #overlay, .cursor-name')) return;
+document.addEventListener('dblclick',e=>{
+  if(!myId) return;
+  if(e.target.closest('.dbox,.note-pin,#chatbar,#overlay,.cursor-name')) return;
   sendClap();
 });
 
-/* ══════════════════════════════════
-   LAST WORDS GHOST
-══════════════════════════════════ */
-function spawnGhost(entry) {
-  const bubble = entry.el.querySelector('.cursor-bubble');
-  const lastMsg = bubble ? bubble.textContent : '';
-  const nameEl  = entry.el.querySelector('.cursor-name');
-  const svgEl   = entry.el.querySelector('svg');
-  if (!svgEl) return;
-
-  const ghost = document.createElement('div');
-  ghost.className = 'ghost-cursor';
-  ghost.style.left = entry.el.style.left;
-  ghost.style.top  = entry.el.style.top;
-
-  const nameColor = svgEl.querySelector('path').getAttribute('fill') || '#888';
-  ghost.innerHTML = svgEl.outerHTML +
-    `<div class="ghost-name" style="background:${nameColor === '#ffffff' ? '#ccc' : nameColor}">${nameEl.textContent} ✦</div>` +
-    (lastMsg ? `<div class="ghost-bubble">${esc(lastMsg)}</div>` : '');
-
-  document.body.appendChild(ghost);
-  ghost.addEventListener('animationend', () => ghost.remove());
+/* ── ghost ── */
+function spawnGhost(entry){
+  const bubble=entry.el.querySelector('.cursor-bubble');
+  const lastMsg=bubble?bubble.textContent:'';
+  const nameEl=entry.el.querySelector('.cursor-name'), svgEl=entry.el.querySelector('svg');
+  if(!svgEl) return;
+  const ghost=document.createElement('div'); ghost.className='ghost-cursor';
+  ghost.style.left=entry.el.style.left; ghost.style.top=entry.el.style.top;
+  const nc=svgEl.querySelector('path').getAttribute('fill')||'#888';
+  ghost.innerHTML=svgEl.outerHTML+
+    `<div class="ghost-name" style="background:${nc==='#ffffff'?'#ccc':nc}">${nameEl.textContent} ✦</div>`+
+    (lastMsg?`<div class="ghost-bubble">${esc(lastMsg)}</div>`:'');
+  document.body.appendChild(ghost); ghost.addEventListener('animationend',()=>ghost.remove());
 }
 
-/* ══════════════════════════════════
-   PIXEL CANVAS
-══════════════════════════════════ */
-const GRID_W = 64, GRID_H = 64;
-const CELL_PX = 10;
-const PIXEL_COOLDOWN_MS = 60 * 60 * 1000;
-
-let pixelCanvasEl, pixelCtx;
-let pixelGrid = {};
-let myFingerprint = '';
-let canPlacePixel = true;
-let pixelCooldownTimer = null;
-
-function makeFingerprint() {
-  const raw = [
-    navigator.userAgent,
-    screen.width, screen.height, screen.colorDepth,
-    Intl.DateTimeFormat().resolvedOptions().timeZone,
-    navigator.language,
-    navigator.hardwareConcurrency || 0
-  ].join('|');
-  let h = 5381;
-  for (let i = 0; i < raw.length; i++) h = ((h << 5) + h) ^ raw.charCodeAt(i);
-  return 'fp_' + (h >>> 0).toString(36);
+/* ── pixel canvas ── */
+const GRID_W=64,GRID_H=64,CELL_PX=10,PIXEL_COOLDOWN_MS=3600000;
+let pixelCanvasEl,pixelCtx,pixelGrid={},myFingerprint='',canPlacePixel=true,pixelCooldownTimer=null;
+function makeFingerprint(){
+  const raw=[navigator.userAgent,screen.width,screen.height,screen.colorDepth,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,navigator.language,navigator.hardwareConcurrency||0].join('|');
+  let h=5381;
+  for(let i=0;i<raw.length;i++) h=((h<<5)+h)^raw.charCodeAt(i);
+  return 'fp_'+(h>>>0).toString(36);
 }
-
-function setupPixelCanvas() {
-  pixelCanvasEl = document.getElementById('pixel-canvas-el');
-  pixelCanvasEl.width  = GRID_W * CELL_PX;
-  pixelCanvasEl.height = GRID_H * CELL_PX;
-  pixelCtx = pixelCanvasEl.getContext('2d');
-
-  myFingerprint = makeFingerprint();
-
-  const toggle = document.getElementById('pixel-toggle');
-  const panel  = document.getElementById('pixel-panel');
-  toggle.style.display = 'block';
-  toggle.addEventListener('click', () => {
-    panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
-    toggle.style.display = 'none';
-  });
-  document.getElementById('pixel-close').addEventListener('click', () => {
-    panel.style.display = 'none';
-    toggle.style.display = 'block';
-  });
-
-  db.ref('pixel_cooldowns/' + myFingerprint).get().then(snap => {
-    if (snap.exists()) {
-      const lastPlace = snap.val();
-      const elapsed = Date.now() - lastPlace;
-      if (elapsed < PIXEL_COOLDOWN_MS) {
-        canPlacePixel = false;
-        startCooldownUI(PIXEL_COOLDOWN_MS - elapsed);
-      }
+function setupPixelCanvas(){
+  pixelCanvasEl=document.getElementById('pixel-canvas-el');
+  pixelCanvasEl.width=GRID_W*CELL_PX; pixelCanvasEl.height=GRID_H*CELL_PX;
+  pixelCtx=pixelCanvasEl.getContext('2d');
+  myFingerprint=makeFingerprint();
+  const toggle=document.getElementById('pixel-toggle'), panel=document.getElementById('pixel-panel');
+  toggle.style.display='block';
+  toggle.addEventListener('click',()=>{panel.style.display=panel.style.display==='flex'?'none':'flex';toggle.style.display='none';});
+  document.getElementById('pixel-close').addEventListener('click',()=>{panel.style.display='none';toggle.style.display='block';});
+  db.ref('pixel_cooldowns/'+myFingerprint).get().then(snap=>{
+    if(snap.exists()){
+      const elapsed=Date.now()-snap.val();
+      if(elapsed<PIXEL_COOLDOWN_MS){canPlacePixel=false;startCooldownUI(PIXEL_COOLDOWN_MS-elapsed);}
     }
   });
-
-  pixelCanvasEl.addEventListener('click', e => {
-    if (!canPlacePixel) return;
-    const rect = pixelCanvasEl.getBoundingClientRect();
-    const scaleX = GRID_W / rect.width;
-    const scaleY = GRID_H / rect.height;
-    const gx = Math.floor((e.clientX - rect.left) * scaleX);
-    const gy = Math.floor((e.clientY - rect.top)  * scaleY);
-    if (gx < 0 || gx >= GRID_W || gy < 0 || gy >= GRID_H) return;
-
-    const color = myColor === '#ffffff' ? '#eeeeee' : myColor;
-    db.ref('pixels/' + gx + '_' + gy).set({ color, by: myName, ts: Date.now() });
-    db.ref('pixel_cooldowns/' + myFingerprint).set(Date.now());
-    canPlacePixel = false;
-    startCooldownUI(PIXEL_COOLDOWN_MS);
+  pixelCanvasEl.addEventListener('click',e=>{
+    if(!canPlacePixel) return;
+    const rect=pixelCanvasEl.getBoundingClientRect();
+    const gx=Math.floor((e.clientX-rect.left)*GRID_W/rect.width);
+    const gy=Math.floor((e.clientY-rect.top)*GRID_H/rect.height);
+    if(gx<0||gx>=GRID_W||gy<0||gy>=GRID_H) return;
+    const color=myColor==='#ffffff'?'#eeeeee':myColor;
+    db.ref('pixels/'+gx+'_'+gy).set({color,by:myName,ts:Date.now()});
+    db.ref('pixel_cooldowns/'+myFingerprint).set(Date.now());
+    canPlacePixel=false; startCooldownUI(PIXEL_COOLDOWN_MS);
     showToast('pixel placed! come back in 1 hour');
   });
 }
-
-function startCooldownUI(remaining) {
-  const msgEl = document.getElementById('pixel-cooldown-msg');
-  const startedAt = Date.now();
-  function tick() {
-    const left = Math.max(0, remaining - (Date.now() - startedAt));
-    if (left <= 0) {
-      canPlacePixel = true;
-      msgEl.textContent = 'your turn!';
-      return;
-    }
-    const m = Math.floor(left / 60000);
-    const s = Math.floor((left % 60000) / 1000);
-    msgEl.textContent = `next pixel in ${m}m ${s}s`;
-    pixelCooldownTimer = setTimeout(tick, 1000);
+function startCooldownUI(remaining){
+  const msgEl=document.getElementById('pixel-cooldown-msg'), startedAt=Date.now();
+  function tick(){
+    const left=Math.max(0,remaining-(Date.now()-startedAt));
+    if(left<=0){canPlacePixel=true;msgEl.textContent='your turn!';return;}
+    msgEl.textContent=`next pixel in ${Math.floor(left/60000)}m ${Math.floor((left%60000)/1000)}s`;
+    pixelCooldownTimer=setTimeout(tick,1000);
   }
   tick();
 }
-
-function listenPixelCanvas() {
-  db.ref('pixels').get().then(snap => {
-    if (!snap.exists()) return;
-    snap.forEach(s => {
-      const d = s.val();
-      const [gx, gy] = s.key.split('_').map(Number);
-      pixelGrid[s.key] = d.color;
-      drawCell(gx, gy, d.color);
-    });
+function listenPixelCanvas(){
+  db.ref('pixels').get().then(snap=>{
+    if(!snap.exists()) return;
+    snap.forEach(s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});
   });
-
-  db.ref('pixels').on('child_added', s => {
-    if (pixelGrid[s.key]) return;
-    const d = s.val();
-    const [gx, gy] = s.key.split('_').map(Number);
-    pixelGrid[s.key] = d.color;
-    drawCell(gx, gy, d.color);
-  });
-
-  db.ref('pixels').on('child_changed', s => {
-    const d = s.val();
-    const [gx, gy] = s.key.split('_').map(Number);
-    pixelGrid[s.key] = d.color;
-    drawCell(gx, gy, d.color);
-  });
+  db.ref('pixels').on('child_added',s=>{if(pixelGrid[s.key]) return;const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});
+  db.ref('pixels').on('child_changed',s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});
+}
+function drawCell(gx,gy,color){
+  if(!pixelCtx) return;
+  pixelCtx.fillStyle=color; pixelCtx.fillRect(gx*CELL_PX,gy*CELL_PX,CELL_PX,CELL_PX);
+  pixelCtx.strokeStyle='rgba(0,0,0,0.06)'; pixelCtx.lineWidth=.5;
+  pixelCtx.strokeRect(gx*CELL_PX,gy*CELL_PX,CELL_PX,CELL_PX);
 }
 
-function drawCell(gx, gy, color) {
-  if (!pixelCtx) return;
-  pixelCtx.fillStyle = color;
-  pixelCtx.fillRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
-  pixelCtx.strokeStyle = 'rgba(0,0,0,0.06)';
-  pixelCtx.lineWidth = 0.5;
-  pixelCtx.strokeRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
-}
-
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+/* ── boot ── */
 document.getElementById('joinBtn').addEventListener('click', join);
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
 setTimeout(() => nameInput.focus(), 50);
