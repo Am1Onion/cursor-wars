@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Cursor Wars</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <style>
@@ -134,6 +135,119 @@
 
   /* ── kick-all countdown banner ── */
   #kick-all-banner { position: fixed; top: 0; left: 0; right: 0; background: #e74c3c; color: #fff; font-family: monospace; font-size: 13px; text-align: center; padding: 10px 0; z-index: 9999; display: none; pointer-events: none; letter-spacing: .03em; }
+
+  /* ══════════════════════════════════════════
+     MOBILE CONTROLS  (landscape-only, bottom bar)
+  ══════════════════════════════════════════ */
+  #mobile-controls {
+    display: none;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 72px;
+    z-index: 500;
+    pointer-events: none;
+    /* subtle frosted bar */
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* Left side — joystick */
+  #joystick-zone {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+  }
+  #joystick-base {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.06);
+    border: 1.5px solid rgba(0,0,0,0.12);
+    position: relative;
+    touch-action: none;
+    flex-shrink: 0;
+  }
+  #joystick-knob {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.20);
+    border: 1.5px solid rgba(0,0,0,0.28);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    transition: background 0.1s;
+    pointer-events: none;
+  }
+  #joystick-base.active #joystick-knob {
+    background: rgba(0,0,0,0.35);
+  }
+
+  /* Right side — buttons */
+  #mobile-btn-zone {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: all;
+  }
+
+  .mob-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.14);
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: all;
+    transition: background 0.1s, transform 0.08s;
+    cursor: pointer !important;
+    line-height: 1;
+  }
+  .mob-btn:active, .mob-btn.pressed {
+    background: rgba(0,0,0,0.10);
+    transform: scale(0.90);
+  }
+  .mob-btn .mob-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+  .mob-btn .mob-label {
+    font-size: 7px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: monospace;
+  }
+
+  /* Colour dot on the click button */
+  #mob-click-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-top: 1px;
+  }
+
+  /* Show mobile controls only in landscape on touch devices */
+  @media (orientation: landscape) and (pointer: coarse) {
+    #mobile-controls { display: block; }
+    #pixel-toggle { display: none !important; }
+    #pixel-panel  { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -142,15 +256,12 @@
 
 <!-- ══ OVERLAY ══ -->
 <div id="overlay">
-  <!-- Name row -->
   <div style="font-family:monospace;font-size:13px;">what's your name?</div>
   <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="name..." />
   <div id="name-error"></div>
 
-  <!-- Color row -->
   <div id="color-row"><span>color:</span></div>
 
-  <!-- Hex row (logged-in only) -->
   <div id="hex-input-row">
     <label>hex:</label>
     <input id="hexColorInput" type="text" maxlength="7" placeholder="#3498db" />
@@ -161,7 +272,6 @@
 
   <div class="or-row">account</div>
 
-  <!-- Auth: login form -->
   <div id="login-form" style="display:flex;flex-direction:column;gap:6px;align-items:center;width:210px;">
     <input id="authEmail"    type="email"    placeholder="email..."    autocomplete="email" />
     <input id="authPassword" type="password" placeholder="password..."  autocomplete="current-password" />
@@ -170,7 +280,6 @@
     <div id="auth-error"></div>
   </div>
 
-  <!-- Auth: logged-in state -->
   <div id="loggedin-area" style="display:none;flex-direction:column;align-items:center;gap:5px;width:210px;">
     <div id="loggedin-msg" style="font-family:monospace;font-size:11px;color:#2ecc71;text-align:center;"></div>
     <button id="logoutBtn" class="sec-btn">log out</button>
@@ -234,6 +343,36 @@
   <button id="ap-kick-all">kick all  (10s warning)</button>
   <button id="ap-rainbow">rainbow cursor</button>
   <button id="ap-spawn-block">spawn block at cursor</button>
+</div>
+
+<!-- ══ MOBILE CONTROLS ══ -->
+<div id="mobile-controls">
+  <!-- LEFT: joystick -->
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-knob"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: action buttons -->
+  <div id="mobile-btn-zone">
+    <!-- Click / ripple -->
+    <div class="mob-btn" id="mob-click-btn" title="click / ripple">
+      <span class="mob-icon">◎</span>
+      <div id="mob-click-dot"></div>
+      <span class="mob-label">click</span>
+    </div>
+    <!-- Clap -->
+    <div class="mob-btn" id="mob-clap-btn" title="clap">
+      <span class="mob-icon"></span>
+      <span class="mob-label">clap</span>
+    </div>
+    <!-- Chat -->
+    <div class="mob-btn" id="mob-chat-btn" id="mob-chat-btn" title="chat">
+      <span class="mob-icon"></span>
+      <span class="mob-label">chat</span>
+    </div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -349,7 +488,6 @@ document.getElementById('signupBtn').addEventListener('click', async () => {
 
 document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
-/* hex picker on overlay */
 hexColorInput.addEventListener('input', () => {
   const v = hexColorInput.value.trim();
   if (isValidHex(v)) {
@@ -360,7 +498,6 @@ hexColorInput.addEventListener('input', () => {
   }
 });
 
-/* overlay swatches */
 const colorRowEl = document.getElementById('color-row');
 COLORS.forEach(c => {
   const sw = document.createElement('div');
@@ -391,7 +528,6 @@ let lastSent = 0;
 const chatMessages = [];
 let followingId = null, followInterval = null;
 
-/* rainbow */
 let rainbowOn = false, rainbowHue = 0, rainbowInterval = null;
 
 const overlay      = document.getElementById('overlay');
@@ -454,6 +590,7 @@ function buildIgSwatches() {
 function applyMyColor(c) {
   myColor = c;
   cpbDot.style.background = c;
+  document.getElementById('mob-click-dot').style.background = c;
   if (!rainbowOn && myCursorEl) {
     const path = myCursorEl.querySelector('svg path');
     path.setAttribute('fill', c);
@@ -472,7 +609,7 @@ document.addEventListener('click', () => { cpPanel.style.display = 'none'; });
 cpPanel.addEventListener('click', e => e.stopPropagation());
 
 /* ══════════════════════════════════════════════
-   RAINBOW CURSOR  (admin-only, local visual only)
+   RAINBOW CURSOR
 ══════════════════════════════════════════════ */
 function startRainbow() {
   rainbowOn = true;
@@ -510,19 +647,16 @@ function setupAdminUI() {
   document.addEventListener('click', () => { adminPanel.style.display = 'none'; });
   adminPanel.addEventListener('click', e => e.stopPropagation());
 
-  /* kick all */
   document.getElementById('ap-kick-all').addEventListener('click', () => {
     adminPanel.style.display = 'none';
     db.ref('admin_kick').set({ ts: Date.now(), by: myId });
   });
 
-  /* rainbow toggle */
   document.getElementById('ap-rainbow').addEventListener('click', () => {
     adminPanel.style.display = 'none';
     rainbowOn ? stopRainbow() : startRainbow();
   });
 
-  /* spawn block */
   document.getElementById('ap-spawn-block').addEventListener('click', () => {
     adminPanel.style.display = 'none';
     db.ref('boxes/ablock_' + Date.now()).set({
@@ -537,14 +671,13 @@ function setupAdminUI() {
   });
 }
 
-/* everyone listens for kick-all signal */
 function listenKickAll() {
   db.ref('admin_kick').on('value', snap => {
     if (!snap.exists()) return;
     const d = snap.val();
     if (!d || !d.ts) return;
-    if (Date.now() - d.ts > 40000) return;  // stale
-    if (isAdmin && d.by === myId) return;    // don't kick the admin who sent it
+    if (Date.now() - d.ts > 40000) return;
+    if (isAdmin && d.by === myId) return;
     startKickAllCountdown();
   });
 }
@@ -582,7 +715,6 @@ async function join() {
   const taken = snap.exists() && Object.values(snap.val()).some(v => v.name && v.name.toLowerCase() === safe.toLowerCase());
   if (taken) { nameError.textContent = 'name already taken.'; return; }
 
-  // apply hex if logged in + valid
   if (loggedInEmail) {
     const hv = hexColorInput.value.trim();
     if (isValidHex(hv)) myColor = hv;
@@ -592,6 +724,10 @@ async function join() {
   myName = safe;
   myId   = db.ref().push().key;
   myRef  = db.ref('cursors/' + myId);
+
+  // Start cursor near center
+  myX = vw() * 0.5; myY = vh() * 0.5;
+
   myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor, joinedAt: Date.now() });
   myRef.onDisconnect().remove();
 
@@ -599,10 +735,13 @@ async function join() {
   document.body.classList.add('in-game');
 
   myCursorEl = makeCursorEl(myId, myName, myColor);
+  myCursorEl.style.left = myX + 'px';
+  myCursorEl.style.top  = myY + 'px';
   document.body.appendChild(myCursorEl);
 
   cpBtn.style.display = 'flex';
   cpbDot.style.background = myColor;
+  document.getElementById('mob-click-dot').style.background = myColor;
 
   if (isAdmin) setupAdminUI();
 
@@ -635,6 +774,7 @@ async function join() {
   scheduleIdleKick();
   initBalls();
   initWarmth();
+  setupMobileControls();
 
   db.ref('cursors').on('value', s => {
     if (!s.exists()) { countEl.textContent = '0 online'; return; }
@@ -791,27 +931,30 @@ function trackMouse() {
     myX=e.clientX; myY=e.clientY;
     if (myCursorEl) { myCursorEl.style.left=e.clientX+'px'; myCursorEl.style.top=e.clientY+'px'; }
     refreshAllBubbles();
-    if (amBallMaster) {
-      const dvx=(myX-prevMouseX)/vw(), dvy=(myY-prevMouseY)/vh();
-      const cs=Math.hypot(dvx,dvy);
-      for (let i=0;i<BALL_COUNT;i++) {
-        const b=ballPhysics[i]; if(!b) continue;
-        const bx=b.x*vw(), by=b.y*vh(), sz=BALL_SIZES[i];
-        const d=Math.hypot(bx-myX,by-myY);
-        if (d<BALL_HIT_RADIUS+sz/2 && d>0) {
-          const nx=(bx-myX)/d, ny=(by-myY)/d;
-          const f=BALL_HIT_FORCE+cs*1.2;
-          b.vx+=nx*f; b.vy+=ny*f;
-          const spd=Math.hypot(b.vx,b.vy);
-          if(spd>0.025){b.vx=(b.vx/spd)*0.025;b.vy=(b.vy/spd)*0.025;}
-        }
-      }
-    }
+    applyBallCollision();
     const now=Date.now();
     if(now-lastSent<THROTTLE) return;
     lastSent=now;
     myRef.update({x:e.clientX/vw(), y:e.clientY/vh(), lastMove:now});
   });
+}
+
+function applyBallCollision() {
+  if (!amBallMaster) return;
+  const dvx=(myX-prevMouseX)/vw(), dvy=(myY-prevMouseY)/vh();
+  const cs=Math.hypot(dvx,dvy);
+  for (let i=0;i<BALL_COUNT;i++) {
+    const b=ballPhysics[i]; if(!b) continue;
+    const bx=b.x*vw(), by=b.y*vh(), sz=BALL_SIZES[i];
+    const d=Math.hypot(bx-myX,by-myY);
+    if (d<BALL_HIT_RADIUS+sz/2 && d>0) {
+      const nx=(bx-myX)/d, ny=(by-myY)/d;
+      const f=BALL_HIT_FORCE+cs*1.2;
+      b.vx+=nx*f; b.vy+=ny*f;
+      const spd=Math.hypot(b.vx,b.vy);
+      if(spd>0.025){b.vx=(b.vx/spd)*0.025;b.vy=(b.vy/spd)*0.025;}
+    }
+  }
 }
 
 /* ── ripple ── */
@@ -820,6 +963,7 @@ function setupClick() {
     if (!myId||chatOpen||followingId) return;
     if (e.target.classList.contains('cursor-name')) return;
     if (e.target.closest('.cursor-hit-zone')) return;
+    if (e.target.closest('#mobile-controls')) return; // handled separately
     spawnRipple(e.clientX, e.clientY, myColor);
     db.ref('ripples').push({x:e.clientX/vw(), y:e.clientY/vh(), color:myColor, ts:Date.now()});
     db.ref('ripples').orderByChild('ts').endAt(Date.now()-5000).limitToFirst(50).get().then(snap=>{
@@ -839,6 +983,139 @@ function listenRipples() {
     if(Date.now()-d.ts>2000) return;
     spawnRipple(d.x*vw(), d.y*vh(), d.color);
   });
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE CONTROLS
+══════════════════════════════════════════════ */
+function setupMobileControls() {
+  const joystickBase = document.getElementById('joystick-base');
+  const joystickKnob = document.getElementById('joystick-knob');
+  const mobControls  = document.getElementById('mobile-controls');
+  const mobClickBtn  = document.getElementById('mob-click-btn');
+  const mobClapBtn   = document.getElementById('mob-clap-btn');
+  const mobChatBtn   = document.getElementById('mob-chat-btn');
+
+  const JOYSTICK_RADIUS = 29;  // base radius (half of 58px)
+  const KNOB_RADIUS     = 11;  // knob half-width (half of 22px)
+  const MAX_OFFSET      = JOYSTICK_RADIUS - KNOB_RADIUS;
+  const SPEED           = 0.004; // fraction of screen per frame at full deflection
+
+  let joyActive = false;
+  let joyId = null;
+  let joyDx = 0, joyDy = 0;  // normalised -1..1
+  let joyRaf = null;
+
+  function getBaseCenter() {
+    const r = joystickBase.getBoundingClientRect();
+    return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+  }
+
+  function updateKnob(dx, dy) {
+    joystickKnob.style.left = (50 + dx * MAX_OFFSET / JOYSTICK_RADIUS * 50) + '%';
+    joystickKnob.style.top  = (50 + dy * MAX_OFFSET / JOYSTICK_RADIUS * 50) + '%';
+    joystickKnob.style.transform = 'translate(-50%,-50%)';
+  }
+
+  function joyTick() {
+    if (!joyActive || !myRef) { joyRaf = null; return; }
+    if (Math.abs(joyDx) > 0.05 || Math.abs(joyDy) > 0.05) {
+      resetIdleKick();
+      prevMouseX = myX; prevMouseY = myY;
+      myX = Math.max(0, Math.min(vw(), myX + joyDx * SPEED * vw()));
+      myY = Math.max(0, Math.min(vh(), myY + joyDy * SPEED * vh()));
+      if (myCursorEl) { myCursorEl.style.left = myX + 'px'; myCursorEl.style.top = myY + 'px'; }
+      refreshAllBubbles();
+      applyBallCollision();
+      const now = Date.now();
+      if (now - lastSent >= THROTTLE) {
+        lastSent = now;
+        myRef.update({ x: myX / vw(), y: myY / vh(), lastMove: now });
+      }
+    }
+    joyRaf = requestAnimationFrame(joyTick);
+  }
+
+  joystickBase.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (joyActive) return;
+    const t = e.changedTouches[0];
+    joyId = t.identifier; joyActive = true;
+    joystickBase.classList.add('active');
+    const { cx, cy } = getBaseCenter();
+    const rx = t.clientX - cx, ry = t.clientY - cy;
+    const dist = Math.min(Math.hypot(rx, ry), MAX_OFFSET);
+    const angle = Math.atan2(ry, rx);
+    joyDx = Math.cos(angle) * dist / MAX_OFFSET;
+    joyDy = Math.sin(angle) * dist / MAX_OFFSET;
+    updateKnob(joyDx * MAX_OFFSET / (MAX_OFFSET / JOYSTICK_RADIUS), joyDy * MAX_OFFSET / (MAX_OFFSET / JOYSTICK_RADIUS));
+    if (!joyRaf) joyRaf = requestAnimationFrame(joyTick);
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!joyActive) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== joyId) continue;
+      e.preventDefault();
+      const { cx, cy } = getBaseCenter();
+      const rx = t.clientX - cx, ry = t.clientY - cy;
+      const dist = Math.hypot(rx, ry);
+      if (dist === 0) { joyDx = 0; joyDy = 0; updateKnob(0, 0); return; }
+      const clamped = Math.min(dist, MAX_OFFSET);
+      const angle = Math.atan2(ry, rx);
+      joyDx = Math.cos(angle) * clamped / MAX_OFFSET;
+      joyDy = Math.sin(angle) * clamped / MAX_OFFSET;
+      const kx = Math.cos(angle) * clamped;
+      const ky = Math.sin(angle) * clamped;
+      updateKnob(kx, ky);
+    }
+  }, { passive: false });
+
+  function endJoy(e) {
+    for (const t of e.changedTouches) {
+      if (t.identifier === joyId) {
+        joyActive = false; joyId = null; joyDx = 0; joyDy = 0;
+        joystickBase.classList.remove('active');
+        joystickKnob.style.left = '50%'; joystickKnob.style.top = '50%';
+        joystickKnob.style.transform = 'translate(-50%,-50%)';
+      }
+    }
+  }
+  document.addEventListener('touchend',    endJoy, { passive: true });
+  document.addEventListener('touchcancel', endJoy, { passive: true });
+
+  /* — Click button — */
+  mobClickBtn.addEventListener('touchstart', e => {
+    e.preventDefault(); e.stopPropagation();
+    mobClickBtn.classList.add('pressed');
+    spawnRipple(myX, myY, myColor);
+    db.ref('ripples').push({ x: myX/vw(), y: myY/vh(), color: myColor, ts: Date.now() });
+    resetIdleKick();
+  }, { passive: false });
+  mobClickBtn.addEventListener('touchend', e => {
+    e.preventDefault(); mobClickBtn.classList.remove('pressed');
+  }, { passive: false });
+
+  /* — Clap button — */
+  mobClapBtn.addEventListener('touchstart', e => {
+    e.preventDefault(); e.stopPropagation();
+    mobClapBtn.classList.add('pressed');
+    sendClap();
+    resetIdleKick();
+  }, { passive: false });
+  mobClapBtn.addEventListener('touchend', e => {
+    e.preventDefault(); mobClapBtn.classList.remove('pressed');
+  }, { passive: false });
+
+  /* — Chat button — */
+  mobChatBtn.addEventListener('touchstart', e => {
+    e.preventDefault(); e.stopPropagation();
+    mobChatBtn.classList.add('pressed');
+  }, { passive: false });
+  mobChatBtn.addEventListener('touchend', e => {
+    e.preventDefault(); mobChatBtn.classList.remove('pressed');
+    if (chatOpen) closeChat(); else openChat();
+  }, { passive: false });
 }
 
 /* ══════════════════════════════════════════════
