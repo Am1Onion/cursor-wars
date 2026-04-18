@@ -34,10 +34,59 @@
   #chatbar input { font-family: monospace; font-size: 13px; border: none; outline: none; flex: 1; }
   #chat-cooldown { font-size: 10px; color: #aaa; }
 
-  .cursor { position: fixed; pointer-events: none; z-index: 500; transition: opacity 0.5s; }
+  /* ── cursor elements ──
+     The outer .cursor div is ALWAYS pointer-events:none.
+     Only .cursor-hit-zone (wraps svg + name) gets pointer-events:all.
+     This means cursors NEVER block clicks on notes, boxes, or canvas beneath them.
+     z-index 150 keeps cursors visible but below notes(400), boxes(300), pixel panel(600). */
+  .cursor {
+    position: fixed;
+    pointer-events: none;   /* never block anything underneath */
+    z-index: 150;
+    transition: opacity 0.5s;
+  }
   .cursor.idle { opacity: 0.3; }
-  .cursor-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; background: #000; color: #fff; padding: 1px 4px; }
-  .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; transition: opacity 0.4s; }
+
+  /* tiny interactive zone around just the arrow tip + name tag */
+  .cursor-hit-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80px;      /* covers arrow(16px) + name tag */
+    height: 36px;     /* covers arrow(20px) + name tag */
+    pointer-events: all;
+    cursor: pointer;
+  }
+
+  .cursor-name {
+    position: absolute;
+    top: 18px;
+    left: 10px;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    background: #000;
+    color: #fff;
+    padding: 1px 4px;
+    /* pointer-events inherited from hit-zone parent */
+  }
+  .cursor-bubble {
+    position: absolute;
+    bottom: 24px;
+    left: 10px;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 2px 6px;
+    display: none;
+    transition: opacity 0.4s;
+    pointer-events: none;   /* bubble never blocks */
+  }
   .cursor-bubble.show { display: block; }
 
   #kick-warning { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 12px; color: #c0392b; border: 1px solid #c0392b; background: #fff; padding: 4px 12px; z-index: 800; display: none; pointer-events: none; }
@@ -55,22 +104,19 @@
   .ig-swatch.selected { border-color: #000; }
 
   /* ── ripple ── */
-  .ripple { position: fixed; border-radius: 50%; border: 2px solid; pointer-events: none; z-index: 490; animation: ripple-out 0.8s ease-out forwards; }
+  .ripple { position: fixed; border-radius: 50%; border: 2px solid; pointer-events: none; z-index: 140; animation: ripple-out 0.8s ease-out forwards; }
   @keyframes ripple-out { 0% { width: 0; height: 0; opacity: 0.8; margin: 0; } 100% { width: 120px; height: 120px; opacity: 0; margin: -60px; } }
 
   /* ── poke ripple ── */
-  .poke-ripple { position: fixed; border-radius: 50%; border: 2px dashed; pointer-events: none; z-index: 491; animation: poke-out 0.6s ease-out forwards; }
+  .poke-ripple { position: fixed; border-radius: 50%; border: 2px dashed; pointer-events: none; z-index: 141; animation: poke-out 0.6s ease-out forwards; }
   @keyframes poke-out { 0% { width: 0; height: 0; opacity: 1; margin: 0; } 100% { width: 60px; height: 60px; opacity: 0; margin: -30px; } }
 
   /* ── follow mode ── */
   #follow-banner { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); font-family: monospace; font-size: 11px; background: #111; color: #fff; padding: 3px 10px; z-index: 800; display: none; pointer-events: none; }
-  .cursor.followable .cursor-name { cursor: pointer; outline: 1px dashed transparent; transition: outline 0.15s; }
-  .cursor.followable .cursor-name:hover { outline: 1px dashed #000; }
-  .cursor.being-followed svg path { filter: none; }
   .cursor.being-followed .cursor-name { background: #555; }
 
   /* ── floating balls ── */
-  .ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: 200; transition: left 0.12s linear, top 0.12s linear; }
+  .ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: 120; transition: left 0.12s linear, top 0.12s linear; }
 
   /* ── draggable boxes ── */
   .dbox { position: fixed; z-index: 300; border: 1.5px solid #000; background: #fff; font-family: monospace; font-size: 11px; padding: 4px 8px; cursor: grab; user-select: none; white-space: nowrap; }
@@ -102,11 +148,10 @@
 
   /* ── arrival tooltip ── */
   .cursor-arrival { position: absolute; top: 32px; left: 10px; font-family: monospace; font-size: 10px; color: #aaa; background: #fff; border: 1px solid #eee; padding: 1px 5px; white-space: nowrap; display: none; pointer-events: none; z-index: 10; }
-  .cursor:hover .cursor-arrival { display: block; }
-  .cursor-name-wrap { pointer-events: all; position: relative; display: inline-block; }
+  .cursor-hit-zone:hover .cursor-arrival { display: block; }
 
   /* ── last words ghost ── */
-  .ghost-cursor { position: fixed; pointer-events: none; z-index: 499; animation: ghost-fade 30s ease-out forwards; }
+  .ghost-cursor { position: fixed; pointer-events: none; z-index: 149; animation: ghost-fade 30s ease-out forwards; }
   @keyframes ghost-fade { 0% { opacity: 0.55; } 70% { opacity: 0.3; } 100% { opacity: 0; } }
   .ghost-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; font-style: italic; background: #f9f9f9; border: 1px dashed #ccc; padding: 2px 6px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; color: #888; }
   .ghost-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; background: #888; color: #fff; padding: 1px 4px; white-space: nowrap; }
@@ -119,10 +164,6 @@
   #pixel-cooldown-msg { font-size: 10px; color: #aaa; min-height: 13px; text-align: center; }
   #pixel-toggle { position: fixed; bottom: 16px; right: 16px; font-family: monospace; font-size: 11px; border: 1px solid #ccc; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 600; display: none; }
   #pixel-toggle:hover { border-color: #000; }
-  /* restore real cursor over all interactive UI while in-game */
-  body.in-game #pixel-toggle,
-  body.in-game #pixel-panel,
-  body.in-game #pixel-panel * { cursor: inherit; }
   body.in-game #pixel-toggle { cursor: pointer !important; }
   body.in-game #pixel-canvas-el { cursor: crosshair !important; }
   body.in-game #pixel-close { cursor: pointer !important; }
@@ -212,7 +253,7 @@ let myColor = COLORS[5];
 function strokeFor(c) { return c === '#ffffff' ? '#999' : '#fff'; }
 
 const cursorSVG = (color) =>
-  `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg">
+  `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;">
     <path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${color}" stroke="${strokeFor(color)}" stroke-width="1"/>
   </svg>`;
 
@@ -349,31 +390,58 @@ async function join() {
   });
 }
 
+/*
+  makeCursorEl — the key fix:
+
+  Structure:
+    .cursor                        (pointer-events: none — NEVER blocks)
+      .cursor-hit-zone             (pointer-events: all  — tiny zone over arrow + name only)
+        svg                        (pointer-events: none — SVG itself doesn't catch; hit-zone parent does)
+        .cursor-name               (label inside hit-zone)
+        .cursor-arrival            (tooltip, shown on hit-zone hover)
+      .cursor-bubble               (pointer-events: none — speech bubble floats freely, never blocks)
+
+  Because .cursor is pointer-events:none, anything underneath it
+  (notes, boxes, the canvas) receives clicks/hovers normally UNLESS
+  the cursor-hit-zone is directly on top of them — which is only a
+  small ~80×36px area, and even then only while hovered.
+*/
 function makeCursorEl(uid, name, color, joinedAt) {
   const el = document.createElement('div');
-  el.className = 'cursor followable';
+  el.className = 'cursor';
   el.id = 'c-' + uid;
-  const arrivalText = joinedAt ? formatArrival(joinedAt) : '';
-  el.innerHTML = cursorSVG(color) +
-    `<div class="cursor-name" data-uid="${uid}">${esc(name)}</div>` +
-    `<div class="cursor-arrival">${arrivalText}</div>` +
-    `<div class="cursor-bubble"></div>`;
 
-  /* name tag click = follow */
-  el.querySelector('.cursor-name').addEventListener('click', e => {
+  const arrivalText = joinedAt ? formatArrival(joinedAt) : '';
+
+  // hit-zone: covers the arrow + name tag area only
+  const hitZone = document.createElement('div');
+  hitZone.className = 'cursor-hit-zone';
+  hitZone.innerHTML =
+    cursorSVG(color) +
+    `<div class="cursor-name">${esc(name)}</div>` +
+    `<div class="cursor-arrival">${arrivalText}</div>`;
+
+  // bubble sits outside hit-zone so it never blocks
+  const bubble = document.createElement('div');
+  bubble.className = 'cursor-bubble';
+
+  el.appendChild(hitZone);
+  el.appendChild(bubble);
+
+  // name tag click → follow
+  hitZone.querySelector('.cursor-name').addEventListener('click', e => {
     e.stopPropagation();
     startFollow(uid, name);
   });
 
-  /* svg click = poke */
-  el.querySelector('svg').style.pointerEvents = 'all';
-  el.querySelector('svg').addEventListener('click', e => {
+  // hit-zone click on the SVG area → poke (but not on name tag)
+  hitZone.addEventListener('click', e => {
+    if (e.target.classList.contains('cursor-name')) return;
     e.stopPropagation();
     sendPoke(uid);
   });
 
-  el.style.pointerEvents = 'none';
-  el.querySelector('.cursor-name').style.pointerEvents = 'all';
+  el.style.pointerEvents = 'none'; // redundant safety
   return el;
 }
 
@@ -483,7 +551,6 @@ function updateBubbleProximity(uid, msg) {
   }
 }
 
-/* recalculate all bubble visibilities when I move */
 function refreshAllBubbles() {
   Object.keys(others).forEach(uid => {
     const entry = others[uid];
@@ -556,7 +623,7 @@ function setupClick() {
     if (chatOpen) return;
     if (followingId) return;
     if (e.target.classList.contains('cursor-name')) return;
-    if (e.target.closest('svg') && e.target.closest('.cursor')) return;
+    if (e.target.closest('.cursor-hit-zone')) return;
     spawnRipple(e.clientX, e.clientY, myColor);
     db.ref('ripples').push({
       x: e.clientX / window.innerWidth,
@@ -785,9 +852,7 @@ function listenPokes() {
     const d = s.val();
     if (Date.now() - d.ts > 3000) return;
     if (d.to !== myId) return;
-    /* show a small dashed ripple on my cursor */
     spawnPokeRipple(myX, myY, d.color);
-    /* and a toast */
     showToast(`${esc(d.fromName)} poked you`);
   });
 }
@@ -816,7 +881,6 @@ function startFollow(uid, name) {
   followingId = uid;
   followNameEl.textContent = name;
   followBanner.style.display = 'block';
-  /* mark target */
   const el = document.getElementById('c-' + uid);
   if (el) el.classList.add('being-followed');
   followInterval = setInterval(() => {
@@ -824,7 +888,6 @@ function startFollow(uid, name) {
     if (!o) { stopFollow(); return; }
     const tx = o.x * window.innerWidth;
     const ty = o.y * window.innerHeight;
-    /* smoothly lerp my cursor toward target */
     myX += (tx - myX) * 0.12;
     myY += (ty - myY) * 0.12;
     if (myCursorEl) { myCursorEl.style.left = myX + 'px'; myCursorEl.style.top = myY + 'px'; }
@@ -950,12 +1013,11 @@ function sendChat() {
 const noteComposer  = document.getElementById('note-composer');
 const noteTextarea  = document.getElementById('note-text');
 let notePendingX = 0, notePendingY = 0;
-const NOTE_TTL = 10 * 60 * 1000; /* 10 minutes */
+const NOTE_TTL = 10 * 60 * 1000;
 
 function setupNotes() {
   document.addEventListener('contextmenu', e => {
     if (!myId) return;
-    /* don't hijack right-click on interactive elements */
     if (e.target.closest('.dbox, .note-pin, #chatbar, #overlay, #color-picker-panel')) return;
     e.preventDefault();
     notePendingX = e.clientX / window.innerWidth;
@@ -979,7 +1041,6 @@ function setupNotes() {
     e.stopPropagation();
   });
 
-  /* clean up expired notes every 60s */
   setInterval(() => {
     db.ref('notes').orderByChild('ts').endAt(Date.now() - NOTE_TTL).get().then(snap => {
       if (snap.exists()) snap.forEach(c => c.ref.remove());
@@ -1008,7 +1069,6 @@ function postNote() {
 }
 
 function listenNotes() {
-  /* render existing notes on join */
   db.ref('notes').get().then(snap => {
     if (!snap.exists()) return;
     snap.forEach(s => renderNote(s.key, s.val()));
@@ -1036,7 +1096,6 @@ function renderNote(key, d) {
     <div class="note-stem"></div>`;
   document.body.appendChild(el);
 
-  /* auto-remove when TTL expires */
   const remaining = NOTE_TTL - (Date.now() - d.ts);
   setTimeout(() => {
     el.style.transition = 'opacity 1s';
@@ -1064,7 +1123,6 @@ function drawWarmth() {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  /* collect all cursor positions including mine */
   const positions = [{ x: myX, y: myY }];
   Object.values(others).forEach(o => {
     positions.push({ x: o.x * canvas.width, y: o.y * canvas.height });
@@ -1072,7 +1130,6 @@ function drawWarmth() {
 
   if (positions.length < 2) return;
 
-  /* for each position, if another cursor is within 160px, draw a warm glow */
   positions.forEach(p => {
     const nearby = positions.filter(q => q !== p && Math.hypot(q.x - p.x, q.y - p.y) < 160);
     if (nearby.length === 0) return;
@@ -1098,11 +1155,9 @@ function listenApplause() {
   db.ref('applause').on('child_added', s => {
     const d = s.val();
     if (Date.now() - d.ts > 3000) return;
-    /* show float at the clapper's position, not mine */
     spawnClapFloat(d.x * window.innerWidth, d.y * window.innerHeight);
   });
 
-  /* watch for burst: 3+ claps within 2 seconds */
   db.ref('applause').orderByChild('ts').on('value', snap => {
     if (!snap.exists()) return;
     const now = Date.now();
@@ -1116,10 +1171,8 @@ function sendClap() {
   const now = Date.now();
   if (now - lastClap < CLAP_COOLDOWN) return;
   lastClap = now;
-  /* local float immediately */
   spawnClapFloat(myX, myY);
   db.ref('applause').push({ x: myX / window.innerWidth, y: myY / window.innerHeight, by: myId, ts: now });
-  /* clean old claps */
   db.ref('applause').orderByChild('ts').endAt(now - 10000).get().then(snap => {
     if (snap.exists()) snap.forEach(c => c.ref.remove());
   });
@@ -1140,7 +1193,6 @@ function triggerBurst() {
   if (burstCooldown) return;
   burstCooldown = true;
   setTimeout(() => burstCooldown = false, 3000);
-  /* scatter several big claps across screen */
   for (let i = 0; i < 8; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
@@ -1154,7 +1206,6 @@ function triggerBurst() {
   }
 }
 
-/* hook double-click for applause — but not on interactive elements */
 document.addEventListener('dblclick', e => {
   if (!myId) return;
   if (e.target.closest('.dbox, .note-pin, #chatbar, #overlay, .cursor-name')) return;
@@ -1165,7 +1216,8 @@ document.addEventListener('dblclick', e => {
    LAST WORDS GHOST
 ══════════════════════════════════ */
 function spawnGhost(entry) {
-  const lastMsg = entry.el.querySelector('.cursor-bubble').textContent;
+  const bubble = entry.el.querySelector('.cursor-bubble');
+  const lastMsg = bubble ? bubble.textContent : '';
   const nameEl  = entry.el.querySelector('.cursor-name');
   const svgEl   = entry.el.querySelector('svg');
   if (!svgEl) return;
@@ -1185,17 +1237,14 @@ function spawnGhost(entry) {
 }
 
 /* ══════════════════════════════════
-   PIXEL CANVAS  (64×64 grid)
-   Cooldown stored in Firebase keyed
-   by device fingerprint — persists
-   across refreshes.
+   PIXEL CANVAS
 ══════════════════════════════════ */
 const GRID_W = 64, GRID_H = 64;
-const CELL_PX = 10; /* display size per cell */
-const PIXEL_COOLDOWN_MS = 60 * 60 * 1000; /* 1 hour */
+const CELL_PX = 10;
+const PIXEL_COOLDOWN_MS = 60 * 60 * 1000;
 
 let pixelCanvasEl, pixelCtx;
-let pixelGrid = {}; /* "x,y" -> color */
+let pixelGrid = {};
 let myFingerprint = '';
 let canPlacePixel = true;
 let pixelCooldownTimer = null;
@@ -1208,7 +1257,6 @@ function makeFingerprint() {
     navigator.language,
     navigator.hardwareConcurrency || 0
   ].join('|');
-  /* simple djb2 hash */
   let h = 5381;
   for (let i = 0; i < raw.length; i++) h = ((h << 5) + h) ^ raw.charCodeAt(i);
   return 'fp_' + (h >>> 0).toString(36);
@@ -1222,7 +1270,6 @@ function setupPixelCanvas() {
 
   myFingerprint = makeFingerprint();
 
-  /* show/hide panel */
   const toggle = document.getElementById('pixel-toggle');
   const panel  = document.getElementById('pixel-panel');
   toggle.style.display = 'block';
@@ -1235,7 +1282,6 @@ function setupPixelCanvas() {
     toggle.style.display = 'block';
   });
 
-  /* check cooldown in Firebase */
   db.ref('pixel_cooldowns/' + myFingerprint).get().then(snap => {
     if (snap.exists()) {
       const lastPlace = snap.val();
@@ -1247,7 +1293,6 @@ function setupPixelCanvas() {
     }
   });
 
-  /* place pixel on click */
   pixelCanvasEl.addEventListener('click', e => {
     if (!canPlacePixel) return;
     const rect = pixelCanvasEl.getBoundingClientRect();
@@ -1262,12 +1307,13 @@ function setupPixelCanvas() {
     db.ref('pixel_cooldowns/' + myFingerprint).set(Date.now());
     canPlacePixel = false;
     startCooldownUI(PIXEL_COOLDOWN_MS);
-    showToast('pixel placed! come back in 1 hour 🎨');
+    showToast('pixel placed! come back in 1 hour');
   });
 }
 
 function startCooldownUI(remaining) {
   const msgEl = document.getElementById('pixel-cooldown-msg');
+  const startedAt = Date.now();
   function tick() {
     const left = Math.max(0, remaining - (Date.now() - startedAt));
     if (left <= 0) {
@@ -1280,12 +1326,10 @@ function startCooldownUI(remaining) {
     msgEl.textContent = `next pixel in ${m}m ${s}s`;
     pixelCooldownTimer = setTimeout(tick, 1000);
   }
-  const startedAt = Date.now();
   tick();
 }
 
 function listenPixelCanvas() {
-  /* load all existing pixels */
   db.ref('pixels').get().then(snap => {
     if (!snap.exists()) return;
     snap.forEach(s => {
@@ -1296,9 +1340,8 @@ function listenPixelCanvas() {
     });
   });
 
-  /* listen for new placements */
   db.ref('pixels').on('child_added', s => {
-    if (pixelGrid[s.key]) return; /* already loaded */
+    if (pixelGrid[s.key]) return;
     const d = s.val();
     const [gx, gy] = s.key.split('_').map(Number);
     pixelGrid[s.key] = d.color;
@@ -1317,7 +1360,6 @@ function drawCell(gx, gy, color) {
   if (!pixelCtx) return;
   pixelCtx.fillStyle = color;
   pixelCtx.fillRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
-  /* subtle grid line */
   pixelCtx.strokeStyle = 'rgba(0,0,0,0.06)';
   pixelCtx.lineWidth = 0.5;
   pixelCtx.strokeRect(gx * CELL_PX, gy * CELL_PX, CELL_PX, CELL_PX);
