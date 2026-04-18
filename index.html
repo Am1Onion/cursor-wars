@@ -849,10 +849,11 @@ function makeCursorEl(uid, name, color, joinedAt, badgeStyle, shape, verified) {
 
   const svgStr = cursorSVG(color, shape || 'arrow');
   const checkHtml = verified ? `<span class="verified-check">✓</span>` : '';
+  const isMe = (uid === myId);
   hitZone.innerHTML = svgStr +
     `<div class="cursor-name">${checkHtml}<span class="cn-text">${esc(name)}</span></div>` +
     `<div class="cursor-arrival">${joinedAt ? formatArrival(joinedAt) : ''}</div>` +
-    `<div class="profile-card" id="pc-${uid}"><div class="pc-name">${esc(name)}</div><div class="pc-row" id="pc-visits-${uid}">loading...</div><div class="pc-row" id="pc-since-${uid}"></div></div>`;
+    (!isMe ? `<div class="profile-card" id="pc-${uid}"><div class="pc-name">${esc(name)}</div><div class="pc-row" id="pc-visits-${uid}">loading...</div><div class="pc-row" id="pc-since-${uid}"></div></div>` : '');
 
   const nameEl = hitZone.querySelector('.cursor-name');
   applyBadgeStyle(nameEl, badgeStyle || 'normal', color);
@@ -1209,7 +1210,8 @@ function updateCampfireVeil() {
     if (Math.hypot(myX - cfX, myY - cfY) < CAMPFIRE_RADIUS) { inside = true; break; }
   }
   myCampfireRadius = inside ? CAMPFIRE_RADIUS : 0;
-  veilEl.style.background = inside ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0)';
+  // darken the outside — when inside a campfire the world beyond feels dimmer
+  veilEl.style.background = inside ? 'rgba(0,0,0,0)' : (Object.keys(campfireEls).length > 0 ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0)');
 }
 
 /* ══════════════════════════════════════════════
