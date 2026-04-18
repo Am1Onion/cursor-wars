@@ -382,23 +382,25 @@
 /* ══════════════════════════════════════════════
    FIREBASE INIT
 ══════════════════════════════════════════════ */
-const firebaseConfig = {
-  apiKey: "AIzaSyDFniinqSfTtpJaq9uM3ayXz-z8njAHTMg",
-  authDomain: "cursor-wars-96326.firebaseapp.com",
-  databaseURL: "https://cursor-wars-96326-default-rtdb.firebaseio.com",
-  projectId: "cursor-wars-96326",
-  storageBucket: "cursor-wars-96326.firebasestorage.app",
-  messagingSenderId: "182917855465",
-  appId: "1:182917855465:web:b7881211afc05549999878"
-};
-firebase.initializeApp(firebaseConfig);
-const db   = firebase.database();
-const auth = firebase.auth();
+let db, auth;
+
+async function initFirebase() {
+  const res = await fetch('firebase-config.json');
+  const firebaseConfig = await res.json();
+  firebase.initializeApp(firebaseConfig);
+  db   = firebase.database();
+  auth = firebase.auth();
+  setupAuth();
+}
+
+initFirebase().catch(() => {
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;">could not load firebase-config.json</div>';
+});
 
 /* ══════════════════════════════════════════════
    CONSTANTS / HELPERS
 ══════════════════════════════════════════════ */
-const ADMIN_EMAIL = 'am1onionyt@gmail.com';
+const ADMIN_EMAIL = 'am1onionyt@gmail.com'; // if you see this, please don't spam it. <3
 
 function vw() { return document.documentElement.clientWidth; }
 function vh() { return document.documentElement.clientHeight; }
@@ -444,6 +446,8 @@ const cursorSVG = c =>
 let loggedInEmail = null;
 let isAdmin       = false;
 
+function setupAuth() {
+
 const loginFormEl    = document.getElementById('login-form');
 const loggedinAreaEl = document.getElementById('loggedin-area');
 const loggedinMsgEl  = document.getElementById('loggedin-msg');
@@ -487,6 +491,7 @@ document.getElementById('signupBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+} // end setupAuth
 
 hexColorInput.addEventListener('input', () => {
   const v = hexColorInput.value.trim();
@@ -494,7 +499,7 @@ hexColorInput.addEventListener('input', () => {
     myColor = v;
     hexPreview.style.background = v;
     hexPreview.style.outline = v === '#ffffff' ? '1px solid #ccc' : 'none';
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected')); // still have no idea what ts does, this is why ai writes the comments.
   }
 });
 
