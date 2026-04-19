@@ -70,14 +70,12 @@
   #hexColorInput { font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 2px 5px; outline: none; width: 80px; }
   #hexPreview { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ccc; flex-shrink: 0; }
 
-  /* ── badge style picker (account-only, overlay) ── */
   #badge-style-row { display: none; align-items: center; gap: 6px; width: 210px; flex-wrap: wrap; }
   #badge-style-row span { font-family: monospace; font-size: 12px; color: #666; }
   .badge-opt { font-family: monospace; font-size: 11px; border: 1px solid #ccc; padding: 2px 7px; cursor: pointer; background: #fff; }
   .badge-opt:hover { border-color: #000; }
   .badge-opt.selected { background: #000; color: #fff; border-color: #000; }
 
-  /* ── cursor shape picker (account-only, overlay) ── */
   #shape-row { display: none; align-items: center; gap: 6px; width: 210px; flex-wrap: wrap; }
   #shape-row span { font-family: monospace; font-size: 12px; color: #666; }
   .shape-opt { font-family: monospace; font-size: 11px; border: 1px solid #ccc; padding: 2px 7px; cursor: pointer; background: #fff; }
@@ -97,24 +95,22 @@
   #chatbar input { font-family: monospace; font-size: 13px; border: none; outline: none; flex: 1; }
   #chat-cooldown { font-size: 10px; color: #aaa; }
 
-  /* ── cursor name badge variants ── */
   .cursor { position: fixed; pointer-events: none; z-index: 150; transition: opacity 0.5s; }
   .cursor.idle { opacity: 0.3; }
+  /* frozen cursor visual */
+  .cursor.frozen-cursor { filter: hue-rotate(180deg) brightness(0.7); }
   .cursor-hit-zone { position: absolute; top: 0; left: 0; width: 110px; height: 36px; pointer-events: all; cursor: pointer; }
   .cursor-name { position: absolute; top: 18px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; background: #000; color: #fff; padding: 1px 4px; display: flex; align-items: center; gap: 3px; }
-  /* badge style variants */
   .cursor-name.badge-bold { font-weight: bold; }
   .cursor-name.badge-italic { font-style: italic; }
   .cursor-name.badge-outline { background: transparent; border: 1.5px solid #000; color: #000; }
-  .cursor-name.badge-colorful { /* color set inline */ }
-  /* verified checkmark */
+  .cursor-name.badge-colorful { }
   .verified-check { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; background: #2ecc71; color: #fff; font-size: 8px; font-style: normal; font-weight: bold; flex-shrink: 0; line-height: 1; }
   .cursor-bubble { position: absolute; bottom: 24px; left: 10px; font-family: monospace; font-size: 11px; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; background: #fff; border: 1px solid #000; padding: 2px 6px; display: none; transition: opacity 0.4s; pointer-events: none; }
   .cursor-bubble.show { display: block; }
   .cursor-arrival { position: absolute; top: 32px; left: 10px; font-family: monospace; font-size: 10px; color: #aaa; background: #fff; border: 1px solid #eee; padding: 1px 5px; white-space: nowrap; display: none; pointer-events: none; z-index: 10; }
   .cursor-hit-zone:hover .cursor-arrival { display: block; }
 
-  /* ── profile card ── */
   .profile-card { position: absolute; top: 38px; left: 10px; background: #fff; border: 1px solid #000; font-family: monospace; font-size: 10px; padding: 6px 8px; white-space: nowrap; z-index: 200; pointer-events: none; display: none; min-width: 130px; line-height: 1.6; }
   .profile-card .pc-name { font-size: 11px; font-weight: bold; margin-bottom: 3px; }
   .profile-card .pc-row { color: #666; }
@@ -188,102 +184,187 @@
   body.in-game #pixel-canvas-el { cursor: crosshair !important; }
   body.in-game #pixel-close { cursor: pointer !important; }
 
-  /* ── campfire ── */
   .campfire-el { position: fixed; pointer-events: none; z-index: 130; transform: translate(-50%, -50%); }
   .campfire-el img { width: 36px; height: 36px; image-rendering: pixelated; }
   .campfire-ring { position: fixed; border-radius: 50%; pointer-events: none; z-index: 128; transform: translate(-50%, -50%); border: 2px solid; opacity: 0.35; }
   .campfire-veil { position: fixed; inset: 0; pointer-events: none; z-index: 127; transition: opacity 0.6s; opacity: 0; }
   #campfire-timer { position: fixed; bottom: 36px; right: 16px; font-family: monospace; font-size: 11px; color: #888; z-index: 600; pointer-events: none; display: none; }
 
-  /* ── admin ── */
+  /* ══ ADMIN ══ */
   #admin-btn { position: fixed; top: 30px; right: 8px; font-family: monospace; font-size: 11px; border: 1px solid #e74c3c; color: #e74c3c; background: #fff; padding: 3px 8px; cursor: pointer !important; z-index: 601; display: none; }
   #admin-btn:hover { background: #e74c3c; color: #fff; }
   body.in-game #admin-btn { cursor: pointer !important; }
-  #admin-panel { position: fixed; top: 54px; right: 8px; background: #fff; border: 1px solid #e74c3c; padding: 10px 12px; z-index: 700; display: none; flex-direction: column; gap: 7px; font-family: monospace; font-size: 11px; min-width: 190px; }
-  #admin-panel .ap-title { font-size: 12px; color: #e74c3c; border-bottom: 1px solid #fdd; padding-bottom: 5px; margin-bottom: 2px; letter-spacing: .05em; }
-  #admin-panel button { font-family: monospace; font-size: 11px; border: 1px solid #e74c3c; color: #e74c3c; background: #fff; padding: 4px 8px; cursor: pointer !important; text-align: left; }
+
+  #admin-panel {
+    position: fixed; top: 54px; right: 8px; background: #fff;
+    border: 1px solid #e74c3c; padding: 0; z-index: 700; display: none;
+    flex-direction: column; font-family: monospace; font-size: 11px;
+    min-width: 210px; max-height: 80vh; overflow-y: auto;
+  }
+  #admin-panel .ap-title {
+    font-size: 12px; color: #e74c3c; padding: 8px 12px 6px;
+    border-bottom: 1px solid #fdd; letter-spacing: .05em;
+    position: sticky; top: 0; background: #fff; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #admin-panel .ap-section {
+    padding: 6px 12px 4px; border-bottom: 1px solid #fafafa;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  #admin-panel .ap-section-label {
+    font-size: 9px; color: #ccc; text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 2px;
+  }
+  #admin-panel button {
+    font-family: monospace; font-size: 11px; border: 1px solid #e74c3c;
+    color: #e74c3c; background: #fff; padding: 4px 8px;
+    cursor: pointer !important; text-align: left; display: flex;
+    align-items: center; gap: 5px; transition: background 0.1s;
+  }
   #admin-panel button:hover { background: #e74c3c; color: #fff; }
   #admin-panel button.active { background: #e74c3c; color: #fff; }
+  #admin-panel button.active:hover { background: #c0392b; }
+  /* toggle style: green when on */
+  #admin-panel button.toggle-on { background: #27ae60; color: #fff; border-color: #27ae60; }
+  #admin-panel button.toggle-on:hover { background: #1e8449; }
+  .ap-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
   #kick-all-banner { position: fixed; top: 0; left: 0; right: 0; background: #e74c3c; color: #fff; font-family: monospace; font-size: 13px; text-align: center; padding: 10px 0; z-index: 9999; display: none; pointer-events: none; letter-spacing: .03em; }
 
-  /* ══════════════════════════════════════════
-     MOBILE CONTROLS  (landscape-only, bottom bar)
-  ══════════════════════════════════════════ */
-  #mobile-controls {
+  /* ── admin power cursor ring ── */
+  #admin-power-ring {
+    position: fixed; pointer-events: none; z-index: 9000;
+    border-radius: 50%; border: 2px solid transparent;
+    width: 32px; height: 32px; margin: -16px 0 0 -16px;
+    transition: border-color 0.2s;
     display: none;
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    height: 72px;
-    z-index: 500;
-    pointer-events: none;
-    background: rgba(255,255,255,0.72);
-    backdrop-filter: blur(6px);
+  }
+  #admin-power-ring.kick-mode  { border-color: #e74c3c; box-shadow: 0 0 8px rgba(231,76,60,0.5); animation: ring-pulse 0.8s ease-in-out infinite; }
+  #admin-power-ring.ban-mode   { border-color: #8e44ad; box-shadow: 0 0 8px rgba(142,68,173,0.5); animation: ring-pulse 0.8s ease-in-out infinite; }
+  #admin-power-ring.mute-mode  { border-color: #e67e22; box-shadow: 0 0 8px rgba(230,126,34,0.5); animation: ring-pulse 0.8s ease-in-out infinite; }
+  #admin-power-ring.freeze-mode { border-color: #3498db; box-shadow: 0 0 8px rgba(52,152,219,0.5); animation: ring-pulse 0.8s ease-in-out infinite; }
+  @keyframes ring-pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.25);opacity:0.7;} }
+
+  #admin-power-label {
+    position: fixed; z-index: 9001; pointer-events: none;
+    font-family: monospace; font-size: 10px; color: #fff;
+    background: rgba(0,0,0,0.75); padding: 2px 6px;
+    transform: translateX(-50%); white-space: nowrap; display: none;
+  }
+
+  /* cursor highlight when a power is active */
+  body.admin-power-active .cursor-hit-zone { cursor: crosshair !important; }
+  body.admin-power-active.in-game .cursor-hit-zone { cursor: crosshair !important; }
+
+  /* muted indicator on cursor badge */
+  .cursor-name .muted-icon { font-size: 9px; opacity: 0.7; }
+
+  /* ── user list panel ── */
+  #user-list-panel {
+    position: fixed; top: 54px; left: 8px; background: #fff;
+    border: 1px solid #000; font-family: monospace; font-size: 11px;
+    z-index: 700; display: none; flex-direction: column;
+    min-width: 260px; max-height: 70vh;
+  }
+  #user-list-panel .ulp-title {
+    font-size: 11px; font-weight: bold; padding: 7px 10px 5px;
+    border-bottom: 1px solid #eee; background: #fafafa;
+    position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center;
+  }
+  #user-list-scroll { overflow-y: auto; flex: 1; }
+  .ulp-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-bottom: 1px solid #f5f5f5;
+    font-size: 11px;
+  }
+  .ulp-row:hover { background: #fafafa; }
+  .ulp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ulp-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ulp-meta { font-size: 10px; color: #aaa; flex-shrink: 0; }
+  .ulp-actions { display: flex; gap: 3px; flex-shrink: 0; }
+  .ulp-btn {
+    font-family: monospace; font-size: 10px; border: 1px solid #ddd;
+    background: #fff; padding: 1px 5px; cursor: pointer !important; color: #666;
+    transition: all 0.1s;
+  }
+  .ulp-btn:hover { border-color: #000; color: #000; }
+  .ulp-btn.active { background: #000; color: #fff; border-color: #000; }
+  .ulp-btn.kick-btn:hover { border-color: #e74c3c; color: #e74c3c; }
+  .ulp-btn.ban-btn:hover  { border-color: #8e44ad; color: #8e44ad; }
+  .ulp-btn.mute-btn.active { background: #e67e22; border-color: #e67e22; }
+  .ulp-btn.freeze-btn.active { background: #3498db; border-color: #3498db; }
+  body.in-game .ulp-btn { cursor: pointer !important; }
+
+  /* ── audit log panel ── */
+  #audit-panel {
+    position: fixed; bottom: 54px; left: 8px; background: #fff;
+    border: 1px solid #000; font-family: monospace; font-size: 10px;
+    z-index: 700; display: none; flex-direction: column;
+    width: 280px; max-height: 200px;
+  }
+  #audit-panel .aud-title {
+    font-size: 11px; padding: 5px 8px; border-bottom: 1px solid #eee;
+    background: #fafafa; display: flex; justify-content: space-between;
+    position: sticky; top: 0;
+  }
+  #audit-log-list { overflow-y: auto; flex: 1; padding: 4px 0; }
+  .aud-entry {
+    padding: 2px 8px; border-bottom: 1px solid #f8f8f8;
+    display: flex; gap: 5px; align-items: baseline; font-size: 10px;
+  }
+  .aud-time { color: #bbb; flex-shrink: 0; }
+  .aud-icon { flex-shrink: 0; }
+  .aud-text { color: #555; flex: 1; }
+  .aud-text strong { color: #222; }
+
+  /* ── frozen overlay ── */
+  #freeze-overlay {
+    position: fixed; inset: 0; z-index: 9999; pointer-events: all;
+    background: rgba(52,152,219,0.08);
+    display: none;
+    border: 3px solid rgba(52,152,219,0.4);
+  }
+  #freeze-msg {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-family: monospace; font-size: 16px; color: #3498db;
+    background: rgba(255,255,255,0.95); border: 2px solid #3498db;
+    padding: 12px 24px; z-index: 10000; display: none; pointer-events: none;
+    text-align: center; letter-spacing: .04em;
+  }
+
+  /* ── slow mode indicator ── */
+  #slow-mode-banner {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    font-family: monospace; font-size: 10px; background: #e67e22; color: #fff;
+    padding: 2px 10px; z-index: 800; display: none; pointer-events: none;
+  }
+
+  /* ── pixel locked indicator ── */
+  #pixel-locked-msg {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-family: monospace; font-size: 13px; background: #111; color: #fff;
+    padding: 8px 16px; z-index: 800; display: none; pointer-events: none;
+    animation: fadein-out 2.5s ease-out forwards;
+  }
+  @keyframes fadein-out { 0%{opacity:0;}10%{opacity:1;}80%{opacity:1;}100%{opacity:0;} }
+
+  /* mobile */
+  #mobile-controls {
+    display: none; position: fixed; left: 0; right: 0; bottom: 0;
+    height: 72px; z-index: 500; pointer-events: none;
+    background: rgba(255,255,255,0.72); backdrop-filter: blur(6px);
     border-top: 1px solid rgba(0,0,0,0.08);
   }
-  #joystick-zone {
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: all;
-  }
-  #joystick-base {
-    width: 58px; height: 58px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.06);
-    border: 1.5px solid rgba(0,0,0,0.12);
-    position: relative;
-    touch-action: none;
-    flex-shrink: 0;
-  }
-  #joystick-knob {
-    position: absolute;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.20);
-    border: 1.5px solid rgba(0,0,0,0.28);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    transition: background 0.1s;
-    pointer-events: none;
-  }
+  #joystick-zone { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; display: flex; align-items: center; justify-content: center; pointer-events: all; }
+  #joystick-base { width: 58px; height: 58px; border-radius: 50%; background: rgba(0,0,0,0.06); border: 1.5px solid rgba(0,0,0,0.12); position: relative; touch-action: none; flex-shrink: 0; }
+  #joystick-knob { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.20); border: 1.5px solid rgba(0,0,0,0.28); top: 50%; left: 50%; transform: translate(-50%, -50%); transition: background 0.1s; pointer-events: none; }
   #joystick-base.active #joystick-knob { background: rgba(0,0,0,0.35); }
-  #mobile-btn-zone {
-    position: absolute;
-    right: 0; top: 0; bottom: 0;
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    pointer-events: all;
-  }
-  .mob-btn {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(0,0,0,0.14);
-    background: rgba(255,255,255,0.9);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: all;
-    transition: background 0.1s, transform 0.08s;
-    cursor: pointer !important;
-    line-height: 1;
-  }
+  #mobile-btn-zone { position: absolute; right: 0; top: 0; bottom: 0; width: 50%; display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: all; }
+  .mob-btn { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.14); background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; touch-action: none; user-select: none; -webkit-user-select: none; pointer-events: all; transition: background 0.1s, transform 0.08s; cursor: pointer !important; line-height: 1; }
   .mob-btn:active, .mob-btn.pressed { background: rgba(0,0,0,0.10); transform: scale(0.90); }
   .mob-btn .mob-icon { font-size: 14px; line-height: 1; }
   .mob-btn .mob-label { font-size: 7px; color: #999; text-transform: uppercase; letter-spacing: 0.04em; font-family: monospace; }
   #mob-click-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 1px; }
-
   @media (orientation: landscape) and (pointer: coarse) {
     #mobile-controls { display: block; }
     #pixel-toggle { display: none !important; }
@@ -295,25 +376,27 @@
 
 <canvas id="warmth-canvas"></canvas>
 <div class="campfire-veil" id="campfire-veil"></div>
+<div id="freeze-overlay"></div>
+<div id="freeze-msg">❄️ you have been frozen<br><span style="font-size:11px;color:#888;">an admin has frozen your cursor</span></div>
+<div id="slow-mode-banner">🐢 slow mode: 30s cooldown</div>
+
+<!-- ══ ADMIN POWER RING (follows cursor) ══ -->
+<div id="admin-power-ring"></div>
+<div id="admin-power-label"></div>
 
 <!-- ══ OVERLAY ══ -->
 <div id="overlay">
   <div id="overlay-logo"><span class="logo-dot"></span>cursor wars</div>
   <div id="overlay-sub">a little multiplayer experiment :D</div>
-
   <div id="overlay-card">
     <input id="nameInput" type="text" maxlength="20" autocomplete="off" placeholder="your name..." />
     <div id="name-error"></div>
-
     <div id="color-row"><span>color:</span></div>
-
     <div id="hex-input-row">
       <label>hex:</label>
       <input id="hexColorInput" type="text" maxlength="7" placeholder="#3498db" />
       <div id="hexPreview"></div>
     </div>
-
-    <!-- account-only: badge style -->
     <div id="badge-style-row">
       <span>badge:</span>
       <div class="badge-opt selected" data-style="normal">normal</div>
@@ -322,8 +405,6 @@
       <div class="badge-opt" data-style="outline">outline</div>
       <div class="badge-opt" data-style="colorful">color</div>
     </div>
-
-    <!-- account-only: cursor shape -->
     <div id="shape-row">
       <span>cursor:</span>
       <div class="shape-opt selected" data-shape="arrow">arrow</div>
@@ -331,11 +412,8 @@
       <div class="shape-opt" data-shape="star">star</div>
       <div class="shape-opt" data-shape="crosshair">+hair</div>
     </div>
-
     <button id="joinBtn" class="main-btn">→ join</button>
-
     <div class="or-row">account</div>
-
     <div id="login-form" style="display:flex;flex-direction:column;gap:7px;align-items:center;width:210px;">
       <input id="authEmail"    type="email"    placeholder="email..."    autocomplete="email" />
       <input id="authPassword" type="password" placeholder="password..."  autocomplete="current-password" />
@@ -343,7 +421,6 @@
       <button id="signupBtn" class="sec-btn">create account</button>
       <div id="auth-error"></div>
     </div>
-
     <div id="loggedin-area" style="display:none;flex-direction:column;align-items:center;gap:5px;width:210px;">
       <div id="loggedin-msg" style="font-family:monospace;font-size:11px;color:#2ecc71;text-align:center;"></div>
       <button id="logoutBtn" class="sec-btn">log out</button>
@@ -403,20 +480,87 @@
 </div>
 
 <!-- ══ ADMIN ══ -->
-<div id="admin-btn">admin</div>
+<div id="admin-btn">⚡ admin</div>
 <div id="admin-panel">
-  <div class="ap-title">admin panel</div>
-  <button id="ap-kick-all">kick all  (10s warning)</button>
-  <button id="ap-rainbow">rainbow cursor</button>
-  <button id="ap-spawn-block">spawn block at cursor</button>
+  <div class="ap-title">
+    <span>⚡ admin panel</span>
+    <span style="font-size:9px;color:#faa;letter-spacing:.03em;" id="ap-active-power-label"></span>
+  </div>
+
+  <!-- CURSOR POWERS (click-to-target) -->
+  <div class="ap-section">
+    <div class="ap-section-label">cursor powers (click a cursor)</div>
+    <button id="ap-kick-cursor">
+      <div class="ap-status-dot" style="background:#e74c3c;"></div> kick cursor
+    </button>
+    <button id="ap-ban-cursor">
+      <div class="ap-status-dot" style="background:#8e44ad;"></div> ban cursor
+    </button>
+    <button id="ap-mute-cursor">
+      <div class="ap-status-dot" style="background:#e67e22;"></div> mute cursor (toggle)
+    </button>
+    <button id="ap-freeze-cursor">
+      <div class="ap-status-dot" style="background:#3498db;"></div> freeze cursor (toggle)
+    </button>
+  </div>
+
+  <!-- GLOBAL TOGGLES -->
+  <div class="ap-section">
+    <div class="ap-section-label">global toggles</div>
+    <button id="ap-slow-mode">🐢 slow mode</button>
+    <button id="ap-lock-canvas">🔒 lock pixel canvas</button>
+    <button id="ap-clear-notes">🗑 clear all notes</button>
+    <button id="ap-kick-all">💥 kick all (10s warning)</button>
+  </div>
+
+  <!-- COOLDOWN RESET -->
+  <div class="ap-section">
+    <div class="ap-section-label">cooldown reset (click a cursor)</div>
+    <button id="ap-reset-pixel-cd">
+      <div class="ap-status-dot" style="background:#2ecc71;"></div> reset pixel cooldown
+    </button>
+    <button id="ap-reset-campfire-cd">
+      <div class="ap-status-dot" style="background:#f39c12;"></div> reset campfire cooldown
+    </button>
+  </div>
+
+  <!-- FUN -->
+  <div class="ap-section">
+    <div class="ap-section-label">fun</div>
+    <button id="ap-rainbow">🌈 rainbow cursor</button>
+    <button id="ap-spawn-block">🐟 spawn block at cursor</button>
+  </div>
+
+  <!-- PANELS -->
+  <div class="ap-section">
+    <div class="ap-section-label">panels</div>
+    <button id="ap-user-list">👥 user list</button>
+    <button id="ap-audit-log">📋 audit log</button>
+  </div>
+</div>
+
+<!-- ══ USER LIST PANEL ══ -->
+<div id="user-list-panel">
+  <div class="ulp-title">
+    <span>👥 online users</span>
+    <span style="color:#aaa;font-size:10px;cursor:pointer;" id="ulp-close">✕</span>
+  </div>
+  <div id="user-list-scroll"></div>
+</div>
+
+<!-- ══ AUDIT LOG PANEL ══ -->
+<div id="audit-panel">
+  <div class="aud-title">
+    <span>📋 audit log</span>
+    <span style="color:#aaa;cursor:pointer;" id="audit-close">✕</span>
+  </div>
+  <div id="audit-log-list"></div>
 </div>
 
 <!-- ══ MOBILE CONTROLS ══ -->
 <div id="mobile-controls">
   <div id="joystick-zone">
-    <div id="joystick-base">
-      <div id="joystick-knob"></div>
-    </div>
+    <div id="joystick-base"><div id="joystick-knob"></div></div>
   </div>
   <div id="mobile-btn-zone">
     <div class="mob-btn" id="mob-click-btn" title="click / ripple">
@@ -443,7 +587,6 @@
    FIREBASE INIT
 ══════════════════════════════════════════════ */
 let db, auth;
-
 async function initFirebase() {
   const res = await fetch('firebase-config.json');
   const firebaseConfig = await res.json();
@@ -452,7 +595,6 @@ async function initFirebase() {
   auth = firebase.auth();
   setupAuth();
 }
-
 initFirebase().catch(() => {
   document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;">could not load firebase-config.json</div>';
 });
@@ -460,871 +602,886 @@ initFirebase().catch(() => {
 /* ══════════════════════════════════════════════
    CONSTANTS / HELPERS
 ══════════════════════════════════════════════ */
-const ADMIN_EMAIL = 'am1onionyt@gmail.com'; // if you see this, please don't spam it. <3
+const ADMIN_EMAIL = 'am1onionyt@gmail.com';
 
 function vw() { return document.documentElement.clientWidth; }
 function vh() { return document.documentElement.clientHeight; }
 
 const BAD = ['fuck','shit','ass','bitch','cunt','dick','cock','pussy','bastard','damn','crap',
   'piss','whore','slut','fag','nigger','nigga','retard','twat','wank','bollocks','arse'];
-function hasProfanity(s) {
-  const low = s.toLowerCase().replace(/[^a-z]/g,'');
-  return BAD.some(w => low.includes(w));
-}
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function hasProfanity(s) { const low=s.toLowerCase().replace(/[^a-z]/g,''); return BAD.some(w=>low.includes(w)); }
+function esc(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function isValidHex(h) { return /^#[0-9a-fA-F]{6}$/.test(h); }
 function friendlyAuthError(code) {
-  const map = {
-    'auth/user-not-found':'no account with that email.','auth/wrong-password':'wrong password.',
-    'auth/invalid-credential':'wrong email or password.','auth/email-already-in-use':'email already in use.',
-    'auth/invalid-email':'invalid email address.','auth/too-many-requests':'too many attempts — try later.',
-    'auth/weak-password':'password must be 6+ characters.'
-  };
-  return map[code] || ('error: ' + code);
+  const map={'auth/user-not-found':'no account with that email.','auth/wrong-password':'wrong password.','auth/invalid-credential':'wrong email or password.','auth/email-already-in-use':'email already in use.','auth/invalid-email':'invalid email address.','auth/too-many-requests':'too many attempts — try later.','auth/weak-password':'password must be 6+ characters.'};
+  return map[code]||('error: '+code);
+}
+const COLORS=['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#ffffff','#111111'];
+let myColor=COLORS[5];
+function strokeFor(c){return c==='#ffffff'?'#999':'#fff';}
+
+let myShape='arrow';
+const CURSOR_SHAPES={
+  arrow: c=>`<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
+  hand:  c=>`<svg width="18" height="20" viewBox="0 0 18 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><rect x="3" y="8" width="3" height="9" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="6" y="5" width="3" height="12" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="9" y="6" width="3" height="11" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="12" y="8" width="3" height="9" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="3" y="14" width="12" height="5" rx="1" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
+  star:  c=>`<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><polygon points="10,1 12.9,7 19.5,7.6 14.5,12 16.2,18.5 10,15 3.8,18.5 5.5,12 0.5,7.6 7.1,7" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
+  crosshair: c=>`<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><line x1="10" y1="0" x2="10" y2="20" stroke="${c}" stroke-width="2"/><line x1="0" y1="10" x2="20" y2="10" stroke="${c}" stroke-width="2"/><circle cx="10" cy="10" r="3" fill="none" stroke="${c}" stroke-width="1.5"/></svg>`
+};
+function cursorSVG(c,shape){return(CURSOR_SHAPES[shape]||CURSOR_SHAPES.arrow)(c);}
+
+let myBadgeStyle='normal';
+
+/* ══════════════════════════════════════════════
+   AUDIT LOG
+══════════════════════════════════════════════ */
+const MAX_AUDIT = 80;
+const auditEntries = []; // {ts, icon, text}
+
+function auditLog(icon, html) {
+  const ts = new Date();
+  const timeStr = ts.getHours().toString().padStart(2,'0')+':'+ts.getMinutes().toString().padStart(2,'0')+':'+ts.getSeconds().toString().padStart(2,'0');
+  auditEntries.unshift({ts: timeStr, icon, text: html});
+  if (auditEntries.length > MAX_AUDIT) auditEntries.pop();
+  renderAuditLog();
+  // also write to Firebase so admin sees real-time from DB
+  if (db && isAdmin) {
+    db.ref('audit').push({ts: Date.now(), icon, text: html}).then(ref=>{
+      // prune old entries (keep last 100)
+      db.ref('audit').orderByChild('ts').endAt(Date.now()-300000).get().then(snap=>{if(snap.exists())snap.forEach(c=>c.ref.remove());});
+    });
+  }
 }
 
-const COLORS = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c','#3498db','#9b59b6','#e91e63','#ffffff','#111111'];
-let myColor = COLORS[5];
-function strokeFor(c) { return c === '#ffffff' ? '#999' : '#fff'; }
+function renderAuditLog() {
+  const el = document.getElementById('audit-log-list');
+  if (!el) return;
+  el.innerHTML = '';
+  auditEntries.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'aud-entry';
+    div.innerHTML = `<span class="aud-time">${e.ts}</span><span class="aud-icon">${e.icon}</span><span class="aud-text">${e.text}</span>`;
+    el.appendChild(div);
+  });
+}
 
-/* ── cursor shapes ── */
-let myShape = 'arrow';
-const CURSOR_SHAPES = {
-  arrow: c => `<svg width="16" height="20" viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><path d="M0 0 L0 16 L4 12 L7 19 L9 18 L6 11 L11 11 Z" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
-  hand:  c => `<svg width="18" height="20" viewBox="0 0 18 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><rect x="3" y="8" width="3" height="9" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="6" y="5" width="3" height="12" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="9" y="6" width="3" height="11" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="12" y="8" width="3" height="9" rx="1.5" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/><rect x="3" y="14" width="12" height="5" rx="1" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
-  star:  c => `<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><polygon points="10,1 12.9,7 19.5,7.6 14.5,12 16.2,18.5 10,15 3.8,18.5 5.5,12 0.5,7.6 7.1,7" fill="${c}" stroke="${strokeFor(c)}" stroke-width="1"/></svg>`,
-  crosshair: c => `<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;display:block;"><line x1="10" y1="0" x2="10" y2="20" stroke="${c}" stroke-width="2"/><line x1="0" y1="10" x2="20" y2="10" stroke="${c}" stroke-width="2"/><circle cx="10" cy="10" r="3" fill="none" stroke="${c}" stroke-width="1.5"/></svg>`
-};
-function cursorSVG(c, shape) { return (CURSOR_SHAPES[shape] || CURSOR_SHAPES.arrow)(c); }
-
-/* ── badge styles ── */
-let myBadgeStyle = 'normal';
+function listenAuditLog() {
+  // Admin sees all events written to Firebase audit node
+  db.ref('audit').limitToLast(80).on('child_added', s => {
+    const d = s.val();
+    const ts = new Date(d.ts);
+    const timeStr = ts.getHours().toString().padStart(2,'0')+':'+ts.getMinutes().toString().padStart(2,'0')+':'+ts.getSeconds().toString().padStart(2,'0');
+    // avoid dupes we just wrote ourselves
+    if (!auditEntries.find(e=>e.ts===timeStr&&e.text===d.text)) {
+      auditEntries.push({ts: timeStr, icon: d.icon, text: d.text});
+      if (auditEntries.length > MAX_AUDIT) auditEntries.shift();
+      renderAuditLog();
+    }
+  });
+}
 
 /* ══════════════════════════════════════════════
    AUTH STATE
 ══════════════════════════════════════════════ */
-let loggedInEmail = null;
-let isAdmin       = false;
+let loggedInEmail=null, isAdmin=false;
 
 function setupAuth() {
-  const loginFormEl    = document.getElementById('login-form');
-  const loggedinAreaEl = document.getElementById('loggedin-area');
-  const loggedinMsgEl  = document.getElementById('loggedin-msg');
-  const authErrorEl    = document.getElementById('auth-error');
-  const hexInputRow    = document.getElementById('hex-input-row');
-  const hexColorInput  = document.getElementById('hexColorInput');
-  const hexPreview     = document.getElementById('hexPreview');
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loggedInEmail = user.email;
-      isAdmin = (user.email === ADMIN_EMAIL);
-      loginFormEl.style.display    = 'none';
-      loggedinAreaEl.style.display = 'flex';
-      loggedinMsgEl.textContent = (isAdmin ? '⚡ admin · ' : '✓ ') + user.email;
-      hexInputRow.style.display = 'flex';
-      hexColorInput.value = myColor;
-      hexPreview.style.background = myColor;
-      // show account-only options
-      document.getElementById('badge-style-row').style.display = 'flex';
-      document.getElementById('shape-row').style.display = 'flex';
-      // increment visit count
-      db.ref('profiles/' + user.uid + '/visits').transaction(v => (v || 0) + 1);
-      // load saved prefs
-      db.ref('profiles/' + user.uid + '/prefs').get().then(snap => {
-        if (!snap.exists()) return;
-        const p = snap.val();
-        if (p.color && isValidHex(p.color)) {
-          myColor = p.color;
-          hexColorInput.value = myColor;
-          hexPreview.style.background = myColor;
-          document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-        }
-        if (p.shape) { myShape = p.shape; selectShape(p.shape); }
-        if (p.badgeStyle) { myBadgeStyle = p.badgeStyle; selectBadge(p.badgeStyle); }
+  const loginFormEl=document.getElementById('login-form'),loggedinAreaEl=document.getElementById('loggedin-area'),loggedinMsgEl=document.getElementById('loggedin-msg'),authErrorEl=document.getElementById('auth-error'),hexInputRow=document.getElementById('hex-input-row'),hexColorInput=document.getElementById('hexColorInput'),hexPreview=document.getElementById('hexPreview');
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      loggedInEmail=user.email;isAdmin=(user.email===ADMIN_EMAIL);
+      loginFormEl.style.display='none';loggedinAreaEl.style.display='flex';
+      loggedinMsgEl.textContent=(isAdmin?'⚡ admin · ':' ✓ ')+user.email;
+      hexInputRow.style.display='flex';hexColorInput.value=myColor;hexPreview.style.background=myColor;
+      document.getElementById('badge-style-row').style.display='flex';
+      document.getElementById('shape-row').style.display='flex';
+      db.ref('profiles/'+user.uid+'/visits').transaction(v=>(v||0)+1);
+      db.ref('profiles/'+user.uid+'/prefs').get().then(snap=>{
+        if(!snap.exists())return;const p=snap.val();
+        if(p.color&&isValidHex(p.color)){myColor=p.color;hexColorInput.value=myColor;hexPreview.style.background=myColor;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));}
+        if(p.shape){myShape=p.shape;selectShape(p.shape);}
+        if(p.badgeStyle){myBadgeStyle=p.badgeStyle;selectBadge(p.badgeStyle);}
       });
     } else {
-      loggedInEmail = null; isAdmin = false;
-      loginFormEl.style.display    = 'flex';
-      loggedinAreaEl.style.display = 'none';
-      hexInputRow.style.display    = 'none';
-      document.getElementById('badge-style-row').style.display = 'none';
-      document.getElementById('shape-row').style.display = 'none';
+      loggedInEmail=null;isAdmin=false;
+      loginFormEl.style.display='flex';loggedinAreaEl.style.display='none';
+      hexInputRow.style.display='none';
+      document.getElementById('badge-style-row').style.display='none';
+      document.getElementById('shape-row').style.display='none';
     }
   });
-
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('authEmail').value.trim();
-    const pass  = document.getElementById('authPassword').value;
-    if (!email || !pass) { authErrorEl.textContent = 'enter email + password.'; return; }
-    try { await auth.signInWithEmailAndPassword(email, pass); authErrorEl.textContent = ''; }
-    catch(e) { authErrorEl.textContent = friendlyAuthError(e.code); }
-  });
-  document.getElementById('signupBtn').addEventListener('click', async () => {
-    const email = document.getElementById('authEmail').value.trim();
-    const pass  = document.getElementById('authPassword').value;
-    if (!email || !pass) { authErrorEl.textContent = 'enter email + password.'; return; }
-    try { await auth.createUserWithEmailAndPassword(email, pass); authErrorEl.textContent = ''; }
-    catch(e) { authErrorEl.textContent = friendlyAuthError(e.code); }
-  });
-  document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
-} // end setupAuth
-
-/* ── badge style picker ── */
-function selectBadge(style) {
-  myBadgeStyle = style;
-  document.querySelectorAll('.badge-opt').forEach(el => {
-    el.classList.toggle('selected', el.dataset.style === style);
-  });
+  document.getElementById('loginBtn').addEventListener('click',async()=>{const email=document.getElementById('authEmail').value.trim(),pass=document.getElementById('authPassword').value;if(!email||!pass){authErrorEl.textContent='enter email + password.';return;}try{await auth.signInWithEmailAndPassword(email,pass);authErrorEl.textContent='';}catch(e){authErrorEl.textContent=friendlyAuthError(e.code);}});
+  document.getElementById('signupBtn').addEventListener('click',async()=>{const email=document.getElementById('authEmail').value.trim(),pass=document.getElementById('authPassword').value;if(!email||!pass){authErrorEl.textContent='enter email + password.';return;}try{await auth.createUserWithEmailAndPassword(email,pass);authErrorEl.textContent='';}catch(e){authErrorEl.textContent=friendlyAuthError(e.code);}});
+  document.getElementById('logoutBtn').addEventListener('click',()=>auth.signOut());
 }
-document.querySelectorAll('.badge-opt').forEach(el => {
-  el.addEventListener('click', () => {
-    selectBadge(el.dataset.style);
-    if (loggedInEmail && auth.currentUser)
-      db.ref('profiles/' + auth.currentUser.uid + '/prefs/badgeStyle').set(el.dataset.style);
-  });
-});
 
-/* ── shape picker ── */
-function selectShape(shape) {
-  myShape = shape;
-  document.querySelectorAll('.shape-opt').forEach(el => {
-    el.classList.toggle('selected', el.dataset.shape === shape);
-  });
-}
-document.querySelectorAll('.shape-opt').forEach(el => {
-  el.addEventListener('click', () => {
-    selectShape(el.dataset.shape);
-    if (loggedInEmail && auth.currentUser)
-      db.ref('profiles/' + auth.currentUser.uid + '/prefs/shape').set(el.dataset.shape);
-  });
-});
+function selectBadge(style){myBadgeStyle=style;document.querySelectorAll('.badge-opt').forEach(el=>el.classList.toggle('selected',el.dataset.style===style));}
+document.querySelectorAll('.badge-opt').forEach(el=>{el.addEventListener('click',()=>{selectBadge(el.dataset.style);if(loggedInEmail&&auth.currentUser)db.ref('profiles/'+auth.currentUser.uid+'/prefs/badgeStyle').set(el.dataset.style);});});
 
-/* hex picker on overlay */
-const hexColorInput = document.getElementById('hexColorInput');
-const hexPreview    = document.getElementById('hexPreview');
-hexColorInput.addEventListener('input', () => {
-  const v = hexColorInput.value.trim();
-  if (isValidHex(v)) {
-    myColor = v;
-    hexPreview.style.background = v;
-    hexPreview.style.outline = v === '#ffffff' ? '1px solid #ccc' : 'none';
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected')); // still have no idea what ts does, this is why ai writes the comments.
-  }
-});
+function selectShape(shape){myShape=shape;document.querySelectorAll('.shape-opt').forEach(el=>el.classList.toggle('selected',el.dataset.shape===shape));}
+document.querySelectorAll('.shape-opt').forEach(el=>{el.addEventListener('click',()=>{selectShape(el.dataset.shape);if(loggedInEmail&&auth.currentUser)db.ref('profiles/'+auth.currentUser.uid+'/prefs/shape').set(el.dataset.shape);});});
 
-const colorRowEl = document.getElementById('color-row');
-COLORS.forEach(c => {
-  const sw = document.createElement('div');
-  sw.className = 'color-swatch' + (c === myColor ? ' selected' : '');
-  sw.style.background = c;
-  if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
-  sw.addEventListener('click', () => {
-    myColor = c;
-    hexColorInput.value = c;
-    hexPreview.style.background = c;
-    hexPreview.style.outline = c === '#ffffff' ? '1px solid #ccc' : 'none';
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-    sw.classList.add('selected');
-  });
-  colorRowEl.appendChild(sw);
-});
+const hexColorInput=document.getElementById('hexColorInput'),hexPreview=document.getElementById('hexPreview');
+hexColorInput.addEventListener('input',()=>{const v=hexColorInput.value.trim();if(isValidHex(v)){myColor=v;hexPreview.style.background=v;hexPreview.style.outline=v==='#ffffff'?'1px solid #ccc':'none';document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));}});
+
+const colorRowEl=document.getElementById('color-row');
+COLORS.forEach(c=>{const sw=document.createElement('div');sw.className='color-swatch'+(c===myColor?' selected':'');sw.style.background=c;if(c==='#ffffff')sw.style.outline='1px solid #ccc';sw.addEventListener('click',()=>{myColor=c;hexColorInput.value=c;hexPreview.style.background=c;hexPreview.style.outline=c==='#ffffff'?'1px solid #ccc':'none';document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));sw.classList.add('selected');});colorRowEl.appendChild(sw);});
 
 /* ══════════════════════════════════════════════
    GAME STATE
 ══════════════════════════════════════════════ */
-let myId = null, myRef = null, myName = '', myCursorEl = null;
-let myX = 0, myY = 0, prevMouseX = 0, prevMouseY = 0;
-let chatOpen = false, chatTimeout = null, lastChatSent = 0;
-const CHAT_COOLDOWN = 5000;
-const others = {};
-const THROTTLE = 40;
-let lastSent = 0;
-const chatMessages = [];
-let followingId = null, followInterval = null;
-let rainbowOn = false, rainbowHue = 0, rainbowInterval = null;
+let myId=null,myRef=null,myName='',myCursorEl=null;
+let myX=0,myY=0,prevMouseX=0,prevMouseY=0;
+let chatOpen=false,chatTimeout=null,lastChatSent=0;
+const CHAT_COOLDOWN=5000;
+const others={};
+const THROTTLE=40;
+let lastSent=0;
+const chatMessages=[];
+let followingId=null,followInterval=null;
+let rainbowOn=false,rainbowHue=0,rainbowInterval=null;
+let isFrozen=false; // am I currently frozen by admin?
+let slowModeOn=false; // is slow mode active?
+let pixelCanvasLocked=false; // is pixel canvas locked?
 
-const overlay        = document.getElementById('overlay');
-const nameInput      = document.getElementById('nameInput');
-const nameError      = document.getElementById('name-error');
-const chatbar        = document.getElementById('chatbar');
-const chatInput      = document.getElementById('chatInput');
-const countEl        = document.getElementById('count');
-const chatHistEl     = document.getElementById('chat-history');
-const chatCooldownEl = document.getElementById('chat-cooldown');
-const chatHintEl     = document.getElementById('chat-hint');
-const cpBtn          = document.getElementById('color-picker-btn');
-const cpPanel        = document.getElementById('color-picker-panel');
-const cpbDot         = document.getElementById('cpb-dot');
-const igSwatchesEl   = document.getElementById('ig-swatches');
-const igHexRow       = document.getElementById('ig-hex-row');
-const igHexInput     = document.getElementById('ig-hex-input');
-const igHexPreview   = document.getElementById('ig-hex-preview');
-const acctBadge      = document.getElementById('acct-badge');
-const kickAllBannerEl= document.getElementById('kick-all-banner');
+const overlay=document.getElementById('overlay'),nameInput=document.getElementById('nameInput'),nameError=document.getElementById('name-error'),chatbar=document.getElementById('chatbar'),chatInput=document.getElementById('chatInput'),countEl=document.getElementById('count'),chatHistEl=document.getElementById('chat-history'),chatCooldownEl=document.getElementById('chat-cooldown'),chatHintEl=document.getElementById('chat-hint'),cpBtn=document.getElementById('color-picker-btn'),cpPanel=document.getElementById('color-picker-panel'),cpbDot=document.getElementById('cpb-dot'),igSwatchesEl=document.getElementById('ig-swatches'),igHexRow=document.getElementById('ig-hex-row'),igHexInput=document.getElementById('ig-hex-input'),igHexPreview=document.getElementById('ig-hex-preview'),acctBadge=document.getElementById('acct-badge'),kickAllBannerEl=document.getElementById('kick-all-banner');
 
 /* ══════════════════════════════════════════════
    IN-GAME COLOR PICKER
 ══════════════════════════════════════════════ */
-function buildIgSwatches() {
-  igSwatchesEl.innerHTML = '';
-  COLORS.forEach(c => {
-    const sw = document.createElement('div');
-    sw.className = 'ig-swatch' + (c === myColor ? ' selected' : '');
-    sw.style.background = c;
-    if (c === '#ffffff') sw.style.outline = '1px solid #ccc';
-    sw.addEventListener('click', () => {
-      applyMyColor(c);
-      igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
-      sw.classList.add('selected');
-      igHexInput.value = c; igHexPreview.style.background = c;
-      cpPanel.style.display = 'none';
-    });
-    igSwatchesEl.appendChild(sw);
-  });
-  if (loggedInEmail) {
-    igHexRow.style.display = 'flex';
-    igHexInput.value = myColor; igHexPreview.style.background = myColor;
-    igHexInput.oninput = () => {
-      const v = igHexInput.value.trim();
-      if (!isValidHex(v)) return;
-      igHexPreview.style.background = v;
-      igHexPreview.style.outline = v === '#ffffff' ? '1px solid #ccc' : 'none';
-      igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s => s.classList.remove('selected'));
-      applyMyColor(v);
-    };
-  } else { igHexRow.style.display = 'none'; }
+function buildIgSwatches(){
+  igSwatchesEl.innerHTML='';
+  COLORS.forEach(c=>{const sw=document.createElement('div');sw.className='ig-swatch'+(c===myColor?' selected':'');sw.style.background=c;if(c==='#ffffff')sw.style.outline='1px solid #ccc';sw.addEventListener('click',()=>{applyMyColor(c);igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s=>s.classList.remove('selected'));sw.classList.add('selected');igHexInput.value=c;igHexPreview.style.background=c;cpPanel.style.display='none';});igSwatchesEl.appendChild(sw);});
+  if(loggedInEmail){igHexRow.style.display='flex';igHexInput.value=myColor;igHexPreview.style.background=myColor;igHexInput.oninput=()=>{const v=igHexInput.value.trim();if(!isValidHex(v))return;igHexPreview.style.background=v;igHexPreview.style.outline=v==='#ffffff'?'1px solid #ccc':'none';igSwatchesEl.querySelectorAll('.ig-swatch').forEach(s=>s.classList.remove('selected'));applyMyColor(v);};}
+  else{igHexRow.style.display='none';}
 }
-
-function applyMyColor(c) {
-  myColor = c;
-  cpbDot.style.background = c;
-  document.getElementById('mob-click-dot').style.background = c;
-  if (!rainbowOn && myCursorEl) {
-    myCursorEl.querySelectorAll('svg path,svg polygon,svg line,svg circle,svg rect').forEach(el => {
-      if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') el.setAttribute('fill', c);
-      if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', strokeFor(c));
-    });
-  }
-  if (myRef) myRef.update({ color: c });
-  if (loggedInEmail && auth.currentUser)
-    db.ref('profiles/' + auth.currentUser.uid + '/prefs/color').set(c);
+function applyMyColor(c){
+  myColor=c;cpbDot.style.background=c;document.getElementById('mob-click-dot').style.background=c;
+  if(!rainbowOn&&myCursorEl){myCursorEl.querySelectorAll('svg path,svg polygon,svg line,svg circle,svg rect').forEach(el=>{if(el.hasAttribute('fill')&&el.getAttribute('fill')!=='none')el.setAttribute('fill',c);if(el.hasAttribute('stroke')&&el.getAttribute('stroke')!=='none')el.setAttribute('stroke',strokeFor(c));});}
+  if(myRef)myRef.update({color:c});
+  if(loggedInEmail&&auth.currentUser)db.ref('profiles/'+auth.currentUser.uid+'/prefs/color').set(c);
 }
-
-cpBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  const open = cpPanel.style.display === 'flex';
-  cpPanel.style.display = open ? 'none' : 'flex';
-  if (!open) buildIgSwatches();
-});
-document.addEventListener('click', () => { cpPanel.style.display = 'none'; });
-cpPanel.addEventListener('click', e => e.stopPropagation());
+cpBtn.addEventListener('click',e=>{e.stopPropagation();const open=cpPanel.style.display==='flex';cpPanel.style.display=open?'none':'flex';if(!open)buildIgSwatches();});
+document.addEventListener('click',()=>{cpPanel.style.display='none';});
+cpPanel.addEventListener('click',e=>e.stopPropagation());
 
 /* ══════════════════════════════════════════════
    RAINBOW CURSOR
 ══════════════════════════════════════════════ */
-function startRainbow() {
-  rainbowOn = true;
-  document.getElementById('ap-rainbow').classList.add('active');
-  rainbowInterval = setInterval(() => {
-    rainbowHue = (rainbowHue + 4) % 360;
-    const c = `hsl(${rainbowHue},100%,55%)`;
-    if (myCursorEl) {
-      myCursorEl.querySelectorAll('svg path,svg polygon,svg line,svg circle,svg rect').forEach(el => {
-        if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') el.setAttribute('fill', c);
-        if (el.hasAttribute('stroke') && el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', '#fff');
-      });
-    }
-    cpbDot.style.background = c;
-  }, 30);
+function startRainbow(){rainbowOn=true;document.getElementById('ap-rainbow').classList.add('active');rainbowInterval=setInterval(()=>{rainbowHue=(rainbowHue+4)%360;const c=`hsl(${rainbowHue},100%,55%)`;if(myCursorEl){myCursorEl.querySelectorAll('svg path,svg polygon,svg line,svg circle,svg rect').forEach(el=>{if(el.hasAttribute('fill')&&el.getAttribute('fill')!=='none')el.setAttribute('fill',c);if(el.hasAttribute('stroke')&&el.getAttribute('stroke')!=='none')el.setAttribute('stroke','#fff');});}cpbDot.style.background=c;},30);}
+function stopRainbow(){rainbowOn=false;clearInterval(rainbowInterval);rainbowInterval=null;document.getElementById('ap-rainbow').classList.remove('active');applyMyColor(myColor);}
+
+/* ══════════════════════════════════════════════
+   ADMIN POWER SYSTEM
+   Powers: kick, ban, mute, freeze, reset_pixel_cd, reset_campfire_cd
+   When a power is active, clicking another user's cursor applies it.
+══════════════════════════════════════════════ */
+let activePower = null; // null | 'kick' | 'ban' | 'mute' | 'freeze' | 'reset_pixel' | 'reset_campfire'
+const powerRingEl    = document.getElementById('admin-power-ring');
+const powerLabelEl   = document.getElementById('admin-power-label');
+const apActiveLabelEl = document.getElementById('ap-active-power-label');
+
+const POWER_META = {
+  kick:            { label: '⚡ KICK mode — click a cursor', color: '#e74c3c', ring: 'kick-mode',    btn: 'ap-kick-cursor' },
+  ban:             { label: '🔨 BAN mode — click a cursor',  color: '#8e44ad', ring: 'ban-mode',     btn: 'ap-ban-cursor' },
+  mute:            { label: '🔇 MUTE mode — click a cursor', color: '#e67e22', ring: 'mute-mode',    btn: 'ap-mute-cursor' },
+  freeze:          { label: '❄️ FREEZE mode — click a cursor', color: '#3498db', ring: 'freeze-mode', btn: 'ap-freeze-cursor' },
+  reset_pixel:     { label: '🔄 PIXEL CD reset — click a cursor', color: '#2ecc71', ring: 'freeze-mode', btn: 'ap-reset-pixel-cd' },
+  reset_campfire:  { label: '🔄 CAMPFIRE CD reset — click a cursor', color: '#f39c12', ring: 'freeze-mode', btn: 'ap-reset-campfire-cd' },
+};
+
+function setActivePower(power) {
+  // toggle off if same
+  if (activePower === power) { clearActivePower(); return; }
+  clearActivePower();
+  activePower = power;
+  const meta = POWER_META[power];
+  powerRingEl.className = 'admin-power-ring'; // reset classes
+  powerRingEl.classList.add(meta.ring);
+  powerRingEl.style.display = 'block';
+  powerLabelEl.style.display = 'block';
+  powerLabelEl.textContent = meta.label;
+  document.body.classList.add('admin-power-active');
+  apActiveLabelEl.textContent = meta.label;
+  // highlight the button
+  document.getElementById(meta.btn).classList.add('active');
+  adminPanel.style.display = 'none';
 }
-function stopRainbow() {
-  rainbowOn = false;
-  clearInterval(rainbowInterval); rainbowInterval = null;
-  document.getElementById('ap-rainbow').classList.remove('active');
-  applyMyColor(myColor);
+
+function clearActivePower() {
+  if (!activePower) return;
+  const meta = POWER_META[activePower];
+  if (meta) document.getElementById(meta.btn).classList.remove('active');
+  activePower = null;
+  powerRingEl.style.display = 'none';
+  powerLabelEl.style.display = 'none';
+  document.body.classList.remove('admin-power-active');
+  apActiveLabelEl.textContent = '';
+}
+
+// Move the power ring with the cursor
+document.addEventListener('mousemove', e => {
+  if (!activePower) return;
+  powerRingEl.style.left = e.clientX + 'px';
+  powerRingEl.style.top  = e.clientY + 'px';
+  powerLabelEl.style.left = e.clientX + 'px';
+  powerLabelEl.style.top  = (e.clientY + 22) + 'px';
+}, {passive: true});
+
+// ESC cancels power
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && activePower) { clearActivePower(); e.stopPropagation(); }
+});
+
+// Apply power when a cursor is clicked
+function applyPowerToUser(targetId, targetName) {
+  if (!activePower || targetId === myId) return;
+  const power = activePower;
+  clearActivePower();
+
+  if (power === 'kick') {
+    doKickUser(targetId, targetName);
+  } else if (power === 'ban') {
+    doBanUser(targetId, targetName);
+  } else if (power === 'mute') {
+    doToggleMute(targetId, targetName);
+  } else if (power === 'freeze') {
+    doToggleFreeze(targetId, targetName);
+  } else if (power === 'reset_pixel') {
+    doResetPixelCooldown(targetId, targetName);
+  } else if (power === 'reset_campfire') {
+    doResetCampfireCooldown(targetId, targetName);
+  }
+}
+
+/* ── kick ── */
+function doKickUser(targetId, targetName) {
+  db.ref('admin_actions').push({ type: 'kick', target: targetId, by: myId, ts: Date.now() });
+  auditLog('⚡', `kicked <strong>${esc(targetName)}</strong>`);
+  showToast(`kicked ${targetName}`);
+}
+
+/* ── ban ── */
+function doBanUser(targetId, targetName) {
+  // store ban by cursor ID + name; they'll be redirected on next action
+  db.ref('bans/'+targetId).set({ name: targetName, by: myId, ts: Date.now() });
+  // also kick them immediately
+  doKickUser(targetId, targetName);
+  auditLog('🔨', `banned <strong>${esc(targetName)}</strong>`);
+  showToast(`banned ${targetName}`);
+}
+
+/* ── mute toggle ── */
+const mutedUsers = {}; // targetId → true
+function doToggleMute(targetId, targetName) {
+  if (mutedUsers[targetId]) {
+    delete mutedUsers[targetId];
+    db.ref('mutes/'+targetId).remove();
+    auditLog('🔊', `unmuted <strong>${esc(targetName)}</strong>`);
+    showToast(`unmuted ${targetName}`);
+  } else {
+    mutedUsers[targetId] = true;
+    db.ref('mutes/'+targetId).set({ name: targetName, by: myId, ts: Date.now() });
+    auditLog('🔇', `muted <strong>${esc(targetName)}</strong>`);
+    showToast(`muted ${targetName}`);
+  }
+  refreshUserList();
+}
+
+/* ── freeze toggle ── */
+const frozenUsers = {}; // targetId → true
+function doToggleFreeze(targetId, targetName) {
+  if (frozenUsers[targetId]) {
+    delete frozenUsers[targetId];
+    db.ref('frozen/'+targetId).remove();
+    const el = document.getElementById('c-'+targetId);
+    if (el) el.classList.remove('frozen-cursor');
+    auditLog('🌡', `unfroze <strong>${esc(targetName)}</strong>`);
+    showToast(`unfroze ${targetName}`);
+  } else {
+    frozenUsers[targetId] = true;
+    db.ref('frozen/'+targetId).set({ name: targetName, by: myId, ts: Date.now() });
+    const el = document.getElementById('c-'+targetId);
+    if (el) el.classList.add('frozen-cursor');
+    auditLog('❄️', `froze <strong>${esc(targetName)}</strong>`);
+    showToast(`froze ${targetName}`);
+  }
+  refreshUserList();
+}
+
+/* ── pixel cooldown reset ── */
+function doResetPixelCooldown(targetId, targetName) {
+  // We need their fingerprint — we store it on the cursor node when they join
+  const o = others[targetId];
+  if (o && o.fingerprint) {
+    db.ref('pixel_cooldowns/'+o.fingerprint).remove();
+    auditLog('🔄', `reset pixel CD for <strong>${esc(targetName)}</strong>`);
+    showToast(`pixel cooldown reset for ${targetName}`);
+  } else {
+    // Fallback: reset by their cursor ID stored fingerprint
+    db.ref('cursors/'+targetId+'/fingerprint').get().then(snap => {
+      if (snap.exists()) {
+        db.ref('pixel_cooldowns/'+snap.val()).remove();
+      }
+      auditLog('🔄', `reset pixel CD for <strong>${esc(targetName)}</strong>`);
+      showToast(`pixel cooldown reset for ${targetName}`);
+    });
+  }
+}
+
+/* ── campfire cooldown reset ── */
+function doResetCampfireCooldown(targetId, targetName) {
+  const o = others[targetId];
+  const profileUid = o ? o.profileUid : null;
+  if (profileUid) {
+    db.ref('campfire_cooldowns/'+profileUid).remove();
+    auditLog('🔄', `reset campfire CD for <strong>${esc(targetName)}</strong>`);
+    showToast(`campfire cooldown reset for ${targetName}`);
+  } else {
+    showToast(`${targetName} has no linked account (campfire needs login)`);
+  }
+}
+
+/* ── listen for admin actions targeting me ── */
+function listenAdminActions() {
+  // Kicks
+  db.ref('admin_actions').on('child_added', s => {
+    const d = s.val();
+    if (Date.now() - d.ts > 10000) return;
+    if (d.type === 'kick' && d.target === myId) {
+      performKickSelf('you were kicked by admin.');
+    }
+  });
+
+  // Bans
+  db.ref('bans/'+myId).on('value', snap => {
+    if (snap.exists()) performKickSelf('you have been banned.');
+  });
+
+  // Mutes (shadow-ban: I can still send, but DB write to chat is intercepted)
+  db.ref('mutes/'+myId).on('value', snap => {
+    window._iAmMuted = snap.exists();
+  });
+
+  // Freeze
+  db.ref('frozen/'+myId).on('value', snap => {
+    isFrozen = snap.exists();
+    const freezeOverlay = document.getElementById('freeze-overlay');
+    const freezeMsg     = document.getElementById('freeze-msg');
+    if (isFrozen) {
+      freezeOverlay.style.display = 'block';
+      freezeMsg.style.display     = 'block';
+      showToast('❄️ you have been frozen');
+    } else {
+      freezeOverlay.style.display = 'none';
+      freezeMsg.style.display     = 'none';
+      showToast('🌡 you have been unfrozen');
+    }
+  });
+
+  // Slow mode
+  db.ref('admin_settings/slow_mode').on('value', snap => {
+    slowModeOn = snap.exists() && snap.val() === true;
+    document.getElementById('slow-mode-banner').style.display = slowModeOn ? 'block' : 'none';
+  });
+
+  // Pixel lock
+  db.ref('admin_settings/pixel_locked').on('value', snap => {
+    pixelCanvasLocked = snap.exists() && snap.val() === true;
+  });
+}
+
+function performKickSelf(msg) {
+  if (myRef) myRef.remove();
+  document.body.classList.remove('in-game');
+  document.body.innerHTML = `<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">${msg}<br><br><a href="" style="color:#000">rejoin</a></div>`;
 }
 
 /* ══════════════════════════════════════════════
-   ADMIN PANEL
+   ADMIN PANEL SETUP
 ══════════════════════════════════════════════ */
 const adminBtn   = document.getElementById('admin-btn');
 const adminPanel = document.getElementById('admin-panel');
+
 function setupAdminUI() {
   adminBtn.style.display = 'block';
-  adminBtn.addEventListener('click', e => { e.stopPropagation(); adminPanel.style.display = adminPanel.style.display === 'flex' ? 'none' : 'flex'; });
-  document.addEventListener('click', () => { adminPanel.style.display = 'none'; });
-  adminPanel.addEventListener('click', e => e.stopPropagation());
-  document.getElementById('ap-kick-all').addEventListener('click', () => { adminPanel.style.display = 'none'; db.ref('admin_kick').set({ ts: Date.now(), by: myId }); });
-  document.getElementById('ap-rainbow').addEventListener('click', () => { adminPanel.style.display = 'none'; rainbowOn ? stopRainbow() : startRainbow(); });
+  adminBtn.addEventListener('click', e => { e.stopPropagation(); adminPanel.style.display = adminPanel.style.display==='flex'?'none':'flex'; });
+  document.addEventListener('click', () => { adminPanel.style.display='none'; });
+  adminPanel.addEventListener('click', e=>e.stopPropagation());
+
+  // Cursor powers
+  document.getElementById('ap-kick-cursor').addEventListener('click',   () => setActivePower('kick'));
+  document.getElementById('ap-ban-cursor').addEventListener('click',    () => setActivePower('ban'));
+  document.getElementById('ap-mute-cursor').addEventListener('click',   () => setActivePower('mute'));
+  document.getElementById('ap-freeze-cursor').addEventListener('click', () => setActivePower('freeze'));
+
+  // Cooldown resets (click-to-target)
+  document.getElementById('ap-reset-pixel-cd').addEventListener('click',    () => setActivePower('reset_pixel'));
+  document.getElementById('ap-reset-campfire-cd').addEventListener('click', () => setActivePower('reset_campfire'));
+
+  // Global toggles
+  document.getElementById('ap-kick-all').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    db.ref('admin_kick').set({ts:Date.now(),by:myId});
+    auditLog('💥','kicked everyone');
+  });
+
+  document.getElementById('ap-slow-mode').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    const btn = document.getElementById('ap-slow-mode');
+    if (slowModeOn) {
+      db.ref('admin_settings/slow_mode').remove();
+      btn.classList.remove('toggle-on');
+      auditLog('🐇','slow mode OFF');
+    } else {
+      db.ref('admin_settings/slow_mode').set(true);
+      btn.classList.add('toggle-on');
+      auditLog('🐢','slow mode ON');
+    }
+  });
+
+  document.getElementById('ap-lock-canvas').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    const btn = document.getElementById('ap-lock-canvas');
+    if (pixelCanvasLocked) {
+      db.ref('admin_settings/pixel_locked').remove();
+      btn.classList.remove('toggle-on');
+      auditLog('🔓','pixel canvas unlocked');
+    } else {
+      db.ref('admin_settings/pixel_locked').set(true);
+      btn.classList.add('toggle-on');
+      auditLog('🔒','pixel canvas locked');
+    }
+  });
+
+  document.getElementById('ap-clear-notes').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    db.ref('notes').remove();
+    auditLog('🗑','cleared all notes');
+    showToast('notes cleared!');
+  });
+
+  // Fun
+  document.getElementById('ap-rainbow').addEventListener('click', () => { adminPanel.style.display='none'; rainbowOn?stopRainbow():startRainbow(); });
   document.getElementById('ap-spawn-block').addEventListener('click', () => {
-    adminPanel.style.display = 'none';
-    db.ref('boxes/ablock_' + Date.now()).set({ label: '🐟', x: myX/vw(), y: myY/vh(), bg: '#fff8f8', grabbedBy: null, adminBlock: true });
+    adminPanel.style.display='none';
+    db.ref('boxes/ablock_'+Date.now()).set({label:'🐟',x:myX/vw(),y:myY/vh(),bg:'#fff8f8',grabbedBy:null,adminBlock:true});
     showToast('block spawned!');
   });
+
+  // Panels
+  document.getElementById('ap-user-list').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    const ulp=document.getElementById('user-list-panel');
+    ulp.style.display=ulp.style.display==='flex'?'none':'flex';
+    if(ulp.style.display==='flex')refreshUserList();
+  });
+  document.getElementById('ap-audit-log').addEventListener('click', () => {
+    adminPanel.style.display='none';
+    const ap=document.getElementById('audit-panel');
+    ap.style.display=ap.style.display==='flex'?'none':'flex';
+    renderAuditLog();
+  });
+
+  document.getElementById('ulp-close').addEventListener('click',()=>document.getElementById('user-list-panel').style.display='none');
+  document.getElementById('audit-close').addEventListener('click',()=>document.getElementById('audit-panel').style.display='none');
+
+  listenAuditLog();
 }
+
 function listenKickAll() {
-  db.ref('admin_kick').on('value', snap => {
-    if (!snap.exists()) return;
-    const d = snap.val();
-    if (!d || !d.ts) return;
-    if (Date.now() - d.ts > 40000) return;
-    if (isAdmin && d.by === myId) return;
+  db.ref('admin_kick').on('value',snap=>{
+    if(!snap.exists())return;const d=snap.val();if(!d||!d.ts)return;
+    if(Date.now()-d.ts>40000)return;
+    if(isAdmin&&d.by===myId)return;
     startKickAllCountdown();
   });
 }
-let kickAllCountdown = null;
-function startKickAllCountdown() {
-  if (kickAllCountdown) return;
-  let s = 10;
-  kickAllBannerEl.style.display = 'block';
-  kickAllBannerEl.textContent = `admin is kicking everyone in ${s}s`;
-  kickAllCountdown = setInterval(() => {
-    s--;
-    if (s <= 0) {
-      clearInterval(kickAllCountdown); kickAllCountdown = null;
-      kickAllBannerEl.style.display = 'none';
-      if (myRef) myRef.remove();
-      document.body.classList.remove('in-game');
-      document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked by admin.<br><br><a href="" style="color:#000">rejoin</a></div>';
-    } else { kickAllBannerEl.textContent = `admin is kicking everyone in ${s}s`; }
-  }, 1000);
+let kickAllCountdown=null;
+function startKickAllCountdown(){
+  if(kickAllCountdown)return;let s=10;
+  kickAllBannerEl.style.display='block';kickAllBannerEl.textContent=`admin is kicking everyone in ${s}s`;
+  kickAllCountdown=setInterval(()=>{s--;if(s<=0){clearInterval(kickAllCountdown);kickAllCountdown=null;kickAllBannerEl.style.display='none';if(myRef)myRef.remove();document.body.classList.remove('in-game');document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked by admin.<br><br><a href="" style="color:#000">rejoin</a></div>';}else{kickAllBannerEl.textContent=`admin is kicking everyone in ${s}s`;}},1000);
+}
+
+/* ══════════════════════════════════════════════
+   USER LIST PANEL
+══════════════════════════════════════════════ */
+function refreshUserList() {
+  const scroll = document.getElementById('user-list-scroll');
+  if (!scroll || document.getElementById('user-list-panel').style.display!=='flex') return;
+  scroll.innerHTML='';
+
+  // Me first
+  const meRow = buildUlpRow(myId, myName, myColor, Date.now(), true);
+  scroll.appendChild(meRow);
+
+  // Others
+  Object.entries(others).forEach(([uid, o]) => {
+    const d = o; // has .x .y .joinedAt .el
+    const nameEl = o.el ? o.el.querySelector('.cn-text') : null;
+    const name   = nameEl ? nameEl.textContent : uid;
+    const colorEl= o.el ? o.el.querySelector('svg path,svg polygon') : null;
+    const color  = colorEl ? (colorEl.getAttribute('fill')||'#888') : '#888';
+    const row = buildUlpRow(uid, name, color, o.joinedAt || Date.now(), false);
+    scroll.appendChild(row);
+  });
+}
+
+function buildUlpRow(uid, name, color, joinedAt, isMe) {
+  const row = document.createElement('div');
+  row.className = 'ulp-row';
+  row.id = 'ulp-row-'+uid;
+
+  const mins = Math.floor((Date.now()-joinedAt)/60000);
+  const timeStr = mins<1?'just joined':mins<60?`${mins}m`:`${Math.floor(mins/60)}h`;
+
+  const dot = `<div class="ulp-dot" style="background:${esc(color)}"></div>`;
+  const muteActive   = !!mutedUsers[uid]  ? ' active' : '';
+  const freezeActive = !!frozenUsers[uid] ? ' active' : '';
+
+  if (isMe) {
+    row.innerHTML = `${dot}<span class="ulp-name">${esc(name)} <span style="color:#3498db;font-size:9px;">(you)</span></span><span class="ulp-meta">${timeStr}</span>`;
+  } else {
+    row.innerHTML = `
+      ${dot}
+      <span class="ulp-name">${esc(name)}</span>
+      <span class="ulp-meta">${timeStr}</span>
+      <div class="ulp-actions">
+        <button class="ulp-btn mute-btn${muteActive}"   onclick="doToggleMute('${uid}','${esc(name)}')">mute</button>
+        <button class="ulp-btn freeze-btn${freezeActive}" onclick="doToggleFreeze('${uid}','${esc(name)}')">freeze</button>
+        <button class="ulp-btn kick-btn"   onclick="doKickUser('${uid}','${esc(name)}')">kick</button>
+        <button class="ulp-btn ban-btn"    onclick="doBanUser('${uid}','${esc(name)}')">ban</button>
+        <button class="ulp-btn" style="color:#f39c12;" onclick="doResetPixelCooldown('${uid}','${esc(name)}')">px↺</button>
+        <button class="ulp-btn" style="color:#e67e22;" onclick="doResetCampfireCooldown('${uid}','${esc(name)}')">cf↺</button>
+      </div>`;
+  }
+  return row;
 }
 
 /* ══════════════════════════════════════════════
    JOIN
 ══════════════════════════════════════════════ */
+function makeFingerprint(){const raw=[navigator.userAgent,screen.width,screen.height,screen.colorDepth,Intl.DateTimeFormat().resolvedOptions().timeZone,navigator.language,navigator.hardwareConcurrency||0].join('|');let h=5381;for(let i=0;i<raw.length;i++)h=((h<<5)+h)^raw.charCodeAt(i);return 'fp_'+(h>>>0).toString(36);}
+
 async function join() {
-  const raw = nameInput.value.trim();
-  if (!raw) { nameInput.focus(); return; }
-  if (hasProfanity(raw)) { nameError.textContent = 'name not allowed.'; return; }
-  const safe = esc(raw).slice(0, 20);
-  nameError.textContent = 'checking...';
-  const snap = await db.ref('cursors').get();
-  const taken = snap.exists() && Object.values(snap.val()).some(v => v.name && v.name.toLowerCase() === safe.toLowerCase());
-  if (taken) { nameError.textContent = 'name already taken.'; return; }
+  const raw=nameInput.value.trim();
+  if(!raw){nameInput.focus();return;}
+  if(hasProfanity(raw)){nameError.textContent='name not allowed.';return;}
+  const safe=esc(raw).slice(0,20);
+  nameError.textContent='checking...';
+  const snap=await db.ref('cursors').get();
+  const taken=snap.exists()&&Object.values(snap.val()).some(v=>v.name&&v.name.toLowerCase()===safe.toLowerCase());
+  if(taken){nameError.textContent='name already taken.';return;}
+  if(loggedInEmail){const hv=hexColorInput.value.trim();if(isValidHex(hv))myColor=hv;}
 
-  if (loggedInEmail) {
-    const hv = hexColorInput.value.trim();
-    if (isValidHex(hv)) myColor = hv;
-  }
+  // check if banned
+  const fp = makeFingerprint();
+  // (Ban is by cursor ID so we skip fingerprint ban for now — ban is effective via cursor ID listener)
 
-  nameError.textContent = '';
-  myName = safe;
-  myId   = db.ref().push().key;
-  myRef  = db.ref('cursors/' + myId);
-  myX = vw() * 0.5; myY = vh() * 0.5;
+  nameError.textContent='';
+  myName=safe;
+  myId=db.ref().push().key;
+  myRef=db.ref('cursors/'+myId);
+  myX=vw()*0.5;myY=vh()*0.5;
 
-  const profileData = loggedInEmail && auth.currentUser ? {
-    uid: auth.currentUser.uid,
-    verified: true,
-    badgeStyle: myBadgeStyle,
-    shape: myShape
-  } : {};
+  const profileData=loggedInEmail&&auth.currentUser?{uid:auth.currentUser.uid,verified:true,badgeStyle:myBadgeStyle,shape:myShape}:{};
 
-  myRef.set({ name: myName, x: 0.5, y: 0.5, msg: '', ts: Date.now(), lastMove: Date.now(), color: myColor, joinedAt: Date.now(), ...profileData });
+  myRef.set({name:myName,x:0.5,y:0.5,msg:'',ts:Date.now(),lastMove:Date.now(),color:myColor,joinedAt:Date.now(),fingerprint:fp,...profileData});
   myRef.onDisconnect().remove();
 
-  overlay.style.display = 'none';
+  overlay.style.display='none';
   document.body.classList.add('in-game');
 
-  myCursorEl = makeCursorEl(myId, myName, myColor, null, myBadgeStyle, myShape, loggedInEmail ? true : false);
-  myCursorEl.style.left = myX + 'px'; myCursorEl.style.top = myY + 'px';
+  myCursorEl=makeCursorEl(myId,myName,myColor,null,myBadgeStyle,myShape,loggedInEmail?true:false);
+  myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';
   document.body.appendChild(myCursorEl);
 
-  cpBtn.style.display = 'flex';
-  cpbDot.style.background = myColor;
-  document.getElementById('mob-click-dot').style.background = myColor;
+  cpBtn.style.display='flex';
+  cpbDot.style.background=myColor;
+  document.getElementById('mob-click-dot').style.background=myColor;
 
-  if (isAdmin) setupAdminUI();
+  if(isAdmin)setupAdminUI();
 
-  if (loggedInEmail) {
-    acctBadge.style.display = 'block';
-    acctBadge.innerHTML = isAdmin ? `<span style="color:#e74c3c;">admin</span>` : `<span style="color:#888;">● logged in</span>`;
-    // save prefs on join
-    if (auth.currentUser) {
-      db.ref('profiles/' + auth.currentUser.uid + '/prefs').update({ color: myColor, shape: myShape, badgeStyle: myBadgeStyle });
-      db.ref('profiles/' + auth.currentUser.uid + '/joinedAt').transaction(v => v || Date.now());
-    }
-    // campfire setup
+  if(loggedInEmail){
+    acctBadge.style.display='block';
+    acctBadge.innerHTML=isAdmin?`<span style="color:#e74c3c;">admin</span>`:`<span style="color:#888;">● logged in</span>`;
+    if(auth.currentUser){db.ref('profiles/'+auth.currentUser.uid+'/prefs').update({color:myColor,shape:myShape,badgeStyle:myBadgeStyle});db.ref('profiles/'+auth.currentUser.uid+'/joinedAt').transaction(v=>v||Date.now());}
     setupCampfire();
   }
 
-  chatHintEl.style.display = 'block';
-  document.getElementById('note-hint').style.display = 'block';
-  setTimeout(() => { chatHintEl.style.opacity='0'; document.getElementById('note-hint').style.opacity='0'; }, 8000);
+  chatHintEl.style.display='block';
+  document.getElementById('note-hint').style.display='block';
+  setTimeout(()=>{chatHintEl.style.opacity='0';document.getElementById('note-hint').style.opacity='0';},8000);
 
-  listenCursors(); listenChat(); listenRipples(); listenBoxes(); listenPokes();
-  listenNotes(); listenApplause(); listenPixelCanvas(); listenKickAll();
-  listenCampfires();
-  trackMouse(); setupChat(); setupClick(); setupBoxes(); setupNotes();
-  setupPixelCanvas(); scheduleIdleKick(); initBalls(); initWarmth(); setupMobileControls();
+  listenCursors();listenChat();listenRipples();listenBoxes();listenPokes();
+  listenNotes();listenApplause();listenPixelCanvas();listenKickAll();
+  listenCampfires();listenAdminActions();
+  trackMouse();setupChat();setupClick();setupBoxes();setupNotes();
+  setupPixelCanvas();scheduleIdleKick();initBalls();initWarmth();setupMobileControls();
 
-  db.ref('cursors').on('value', s => {
-    if (!s.exists()) { countEl.textContent = '0 online'; return; }
-    countEl.textContent = Object.values(s.val()).filter(v => v && v.name).length + ' online';
+  db.ref('cursors').on('value',s=>{
+    if(!s.exists()){countEl.textContent='0 online';return;}
+    countEl.textContent=Object.values(s.val()).filter(v=>v&&v.name).length+' online';
   });
+
+  // Audit: log join
+  auditLog('→', `<strong>${esc(myName)}</strong> joined`);
 }
 
 /* ══════════════════════════════════════════════
    CURSOR ELEMENTS
 ══════════════════════════════════════════════ */
-function applyBadgeStyle(nameEl, style, color) {
+function applyBadgeStyle(nameEl,style,color){
   nameEl.classList.remove('badge-bold','badge-italic','badge-outline','badge-colorful');
-  nameEl.style.background = ''; nameEl.style.color = ''; nameEl.style.border = '';
-  if (style === 'bold')     { nameEl.classList.add('badge-bold'); nameEl.style.background = '#000'; nameEl.style.color = '#fff'; }
-  else if (style === 'italic')  { nameEl.classList.add('badge-italic'); nameEl.style.background = '#000'; nameEl.style.color = '#fff'; }
-  else if (style === 'outline') { nameEl.classList.add('badge-outline'); }
-  else if (style === 'colorful'){ nameEl.classList.add('badge-colorful'); nameEl.style.background = color||'#3498db'; nameEl.style.color = strokeFor(color||'#3498db') === '#fff' ? '#fff' : '#000'; }
-  else { nameEl.style.background = '#000'; nameEl.style.color = '#fff'; } // normal
+  nameEl.style.background='';nameEl.style.color='';nameEl.style.border='';
+  if(style==='bold'){nameEl.classList.add('badge-bold');nameEl.style.background='#000';nameEl.style.color='#fff';}
+  else if(style==='italic'){nameEl.classList.add('badge-italic');nameEl.style.background='#000';nameEl.style.color='#fff';}
+  else if(style==='outline'){nameEl.classList.add('badge-outline');}
+  else if(style==='colorful'){nameEl.classList.add('badge-colorful');nameEl.style.background=color||'#3498db';nameEl.style.color=strokeFor(color||'#3498db')==='#fff'?'#fff':'#000';}
+  else{nameEl.style.background='#000';nameEl.style.color='#fff';}
 }
 
-function makeCursorEl(uid, name, color, joinedAt, badgeStyle, shape, verified) {
-  const el = document.createElement('div');
-  el.className = 'cursor'; el.id = 'c-' + uid;
-  const hitZone = document.createElement('div');
-  hitZone.className = 'cursor-hit-zone';
+function makeCursorEl(uid,name,color,joinedAt,badgeStyle,shape,verified){
+  const el=document.createElement('div');el.className='cursor';el.id='c-'+uid;
+  const hitZone=document.createElement('div');hitZone.className='cursor-hit-zone';
+  const svgStr=cursorSVG(color,shape||'arrow');
+  const checkHtml=verified?`<span class="verified-check">✓</span>`:'';
+  const isMe=(uid===myId);
+  hitZone.innerHTML=svgStr+
+    `<div class="cursor-name">${checkHtml}<span class="cn-text">${esc(name)}</span></div>`+
+    `<div class="cursor-arrival">${joinedAt?formatArrival(joinedAt):''}</div>`+
+    (!isMe?`<div class="profile-card" id="pc-${uid}"><div class="pc-name">${esc(name)}</div><div class="pc-row" id="pc-visits-${uid}">loading...</div><div class="pc-row" id="pc-since-${uid}"></div></div>`:'');
+  const nameEl=hitZone.querySelector('.cursor-name');
+  applyBadgeStyle(nameEl,badgeStyle||'normal',color);
+  const bubble=document.createElement('div');bubble.className='cursor-bubble';
+  el.appendChild(hitZone);el.appendChild(bubble);
 
-  const svgStr = cursorSVG(color, shape || 'arrow');
-  const checkHtml = verified ? `<span class="verified-check">✓</span>` : '';
-  const isMe = (uid === myId);
-  hitZone.innerHTML = svgStr +
-    `<div class="cursor-name">${checkHtml}<span class="cn-text">${esc(name)}</span></div>` +
-    `<div class="cursor-arrival">${joinedAt ? formatArrival(joinedAt) : ''}</div>` +
-    (!isMe ? `<div class="profile-card" id="pc-${uid}"><div class="pc-name">${esc(name)}</div><div class="pc-row" id="pc-visits-${uid}">loading...</div><div class="pc-row" id="pc-since-${uid}"></div></div>` : '');
-
-  const nameEl = hitZone.querySelector('.cursor-name');
-  applyBadgeStyle(nameEl, badgeStyle || 'normal', color);
-
-  const bubble = document.createElement('div');
-  bubble.className = 'cursor-bubble';
-  el.appendChild(hitZone); el.appendChild(bubble);
-
-  hitZone.querySelector('.cursor-name').addEventListener('click', e => { e.stopPropagation(); startFollow(uid, name); });
-  hitZone.addEventListener('click', e => { if (e.target.classList.contains('cursor-name') || e.target.classList.contains('cn-text') || e.target.classList.contains('verified-check')) return; e.stopPropagation(); sendPoke(uid); });
-  hitZone.addEventListener('mouseenter', () => loadProfileCard(uid));
-  el.style.pointerEvents = 'none';
+  // Click handler: if admin power active, apply it; else normal follow/poke
+  hitZone.querySelector('.cursor-name').addEventListener('click',e=>{
+    e.stopPropagation();
+    if(isAdmin&&activePower&&uid!==myId){applyPowerToUser(uid,name);return;}
+    startFollow(uid,name);
+  });
+  hitZone.addEventListener('click',e=>{
+    if(e.target.classList.contains('cursor-name')||e.target.classList.contains('cn-text')||e.target.classList.contains('verified-check'))return;
+    e.stopPropagation();
+    if(isAdmin&&activePower&&uid!==myId){applyPowerToUser(uid,name);return;}
+    sendPoke(uid);
+  });
+  hitZone.addEventListener('mouseenter',()=>loadProfileCard(uid));
+  el.style.pointerEvents='none';
   return el;
 }
 
-function loadProfileCard(uid) {
-  const card = document.getElementById('pc-' + uid);
-  if (!card) return;
-  const d = others[uid];
-  if (!d) return;
-  // load from firebase if they have a uid stored
-  const visitsEl = document.getElementById('pc-visits-' + uid);
-  const sinceEl  = document.getElementById('pc-since-' + uid);
-  if (!d.profileUid) { if (visitsEl) visitsEl.textContent = 'guest'; return; }
-  db.ref('profiles/' + d.profileUid).get().then(snap => {
-    if (!snap.exists()) return;
-    const p = snap.val();
-    if (visitsEl) visitsEl.textContent = `${p.visits || 1} visit${(p.visits||1)===1?'':'s'}`;
-    if (sinceEl && p.joinedAt) {
-      const days = Math.floor((Date.now() - p.joinedAt) / 86400000);
-      sinceEl.textContent = days === 0 ? 'joined today' : `joined ${days}d ago`;
-    }
+function loadProfileCard(uid){
+  const card=document.getElementById('pc-'+uid);if(!card)return;
+  const d=others[uid];if(!d)return;
+  const visitsEl=document.getElementById('pc-visits-'+uid),sinceEl=document.getElementById('pc-since-'+uid);
+  if(!d.profileUid){if(visitsEl)visitsEl.textContent='guest';return;}
+  db.ref('profiles/'+d.profileUid).get().then(snap=>{
+    if(!snap.exists())return;const p=snap.val();
+    if(visitsEl)visitsEl.textContent=`${p.visits||1} visit${(p.visits||1)===1?'':'s'}`;
+    if(sinceEl&&p.joinedAt){const days=Math.floor((Date.now()-p.joinedAt)/86400000);sinceEl.textContent=days===0?'joined today':`joined ${days}d ago`;}
   });
 }
 
-function formatArrival(ts) {
-  const mins = Math.floor((Date.now()-ts)/60000);
-  if (mins < 1) return 'just arrived';
-  if (mins < 60) return `here ${mins}m`;
-  return `here ${Math.floor(mins/60)}h ${mins%60}m`;
-}
-function tickArrivalLabels() {
-  setInterval(() => {
-    Object.entries(others).forEach(([uid, o]) => {
-      if (!o.joinedAt) return;
-      const el = o.el.querySelector('.cursor-arrival');
-      if (el) el.textContent = formatArrival(o.joinedAt);
-    });
-  }, 60000);
-}
+function formatArrival(ts){const mins=Math.floor((Date.now()-ts)/60000);if(mins<1)return'just arrived';if(mins<60)return`here ${mins}m`;return`here ${Math.floor(mins/60)}h ${mins%60}m`;}
+function tickArrivalLabels(){setInterval(()=>{Object.entries(others).forEach(([uid,o])=>{if(!o.joinedAt)return;const el=o.el.querySelector('.cursor-arrival');if(el)el.textContent=formatArrival(o.joinedAt);});},60000);}
 
-const idleTimers = {};
-function listenCursors() {
-  db.ref('cursors').on('child_added', s => {
-    if (s.key === myId) return;
-    const d = s.val();
-    const el = makeCursorEl(s.key, d.name, d.color||'#3498db', d.joinedAt, d.badgeStyle, d.shape, d.verified);
+const idleTimers={};
+function listenCursors(){
+  db.ref('cursors').on('child_added',s=>{
+    if(s.key===myId)return;
+    const d=s.val();
+    const el=makeCursorEl(s.key,d.name,d.color||'#3498db',d.joinedAt,d.badgeStyle,d.shape,d.verified);
     document.body.appendChild(el);
-    others[s.key] = { el, bt: null, x: d.x||0.5, y: d.y||0.5, joinedAt: d.joinedAt||Date.now(), profileUid: d.uid||null };
-    move(el, d.x, d.y);
-    if (d.msg) showBubble(s.key, d.msg);
-    scheduleIdle(s.key, d.lastMove||d.ts);
+    others[s.key]={el,bt:null,x:d.x||0.5,y:d.y||0.5,joinedAt:d.joinedAt||Date.now(),profileUid:d.uid||null,fingerprint:d.fingerprint||null};
+    move(el,d.x,d.y);
+    if(d.msg)showBubble(s.key,d.msg);
+    scheduleIdle(s.key,d.lastMove||d.ts);
+    // apply freeze state if they're already frozen
+    if(frozenUsers[s.key])el.classList.add('frozen-cursor');
+    // audit
+    auditLog('→',`<strong>${esc(d.name)}</strong> joined`);
+    refreshUserList();
   });
-  db.ref('cursors').on('child_changed', s => {
-    if (s.key === myId) return;
-    const d = s.val();
-    if (!others[s.key]) {
-      const el = makeCursorEl(s.key, d.name, d.color||'#3498db', d.joinedAt, d.badgeStyle, d.shape, d.verified);
+  db.ref('cursors').on('child_changed',s=>{
+    if(s.key===myId)return;
+    const d=s.val();
+    if(!others[s.key]){
+      const el=makeCursorEl(s.key,d.name,d.color||'#3498db',d.joinedAt,d.badgeStyle,d.shape,d.verified);
       document.body.appendChild(el);
-      others[s.key] = { el, bt: null, x: d.x||0.5, y: d.y||0.5, joinedAt: d.joinedAt||Date.now(), profileUid: d.uid||null };
+      others[s.key]={el,bt:null,x:d.x||0.5,y:d.y||0.5,joinedAt:d.joinedAt||Date.now(),profileUid:d.uid||null,fingerprint:d.fingerprint||null};
     }
-    others[s.key].x = d.x||0.5; others[s.key].y = d.y||0.5;
-    others[s.key].profileUid = d.uid||null;
-    // update cursor SVG color+shape
-    const svgWrap = others[s.key].el.querySelector('.cursor-hit-zone');
-    const oldSvg  = svgWrap.querySelector('svg');
-    const c = d.color||'#3498db';
-    if (oldSvg) oldSvg.outerHTML = cursorSVG(c, d.shape||'arrow');
-    // update badge
-    const nameEl = others[s.key].el.querySelector('.cursor-name');
-    if (nameEl) applyBadgeStyle(nameEl, d.badgeStyle||'normal', c);
-    move(others[s.key].el, d.x, d.y);
+    others[s.key].x=d.x||0.5;others[s.key].y=d.y||0.5;
+    others[s.key].profileUid=d.uid||null;
+    others[s.key].fingerprint=d.fingerprint||null;
+    const svgWrap=others[s.key].el.querySelector('.cursor-hit-zone'),oldSvg=svgWrap.querySelector('svg'),c=d.color||'#3498db';
+    if(oldSvg)oldSvg.outerHTML=cursorSVG(c,d.shape||'arrow');
+    const nameEl=others[s.key].el.querySelector('.cursor-name');
+    if(nameEl)applyBadgeStyle(nameEl,d.badgeStyle||'normal',c);
+    move(others[s.key].el,d.x,d.y);
     others[s.key].el.classList.remove('idle');
-    if (d.msg !== undefined) updateBubbleProximity(s.key, d.msg);
-    scheduleIdle(s.key, d.lastMove||d.ts);
+    if(d.msg!==undefined)updateBubbleProximity(s.key,d.msg);
+    scheduleIdle(s.key,d.lastMove||d.ts);
   });
-  db.ref('cursors').on('child_removed', s => {
-    if (others[s.key]) { spawnGhost(others[s.key]); others[s.key].el.remove(); delete others[s.key]; }
-    if (idleTimers[s.key]) { clearTimeout(idleTimers[s.key]); delete idleTimers[s.key]; }
-    if (followingId === s.key) stopFollow();
+  db.ref('cursors').on('child_removed',s=>{
+    if(others[s.key]){spawnGhost(others[s.key]);others[s.key].el.remove();delete others[s.key];}
+    if(idleTimers[s.key]){clearTimeout(idleTimers[s.key]);delete idleTimers[s.key];}
+    if(followingId===s.key)stopFollow();
+    auditLog('←',`cursor left`);
+    refreshUserList();
   });
   tickArrivalLabels();
 }
 
-function scheduleIdle(uid, lastMove) {
-  if (idleTimers[uid]) clearTimeout(idleTimers[uid]);
-  const rem = Math.max(0, 30000 - (Date.now()-lastMove));
-  idleTimers[uid] = setTimeout(() => { if (others[uid]) others[uid].el.classList.add('idle'); }, rem);
-}
-function move(el, nx, ny) { el.style.left = (nx * vw()) + 'px'; el.style.top = (ny * vh()) + 'px'; }
+function scheduleIdle(uid,lastMove){if(idleTimers[uid])clearTimeout(idleTimers[uid]);const rem=Math.max(0,30000-(Date.now()-lastMove));idleTimers[uid]=setTimeout(()=>{if(others[uid])others[uid].el.classList.add('idle');},rem);}
+function move(el,nx,ny){el.style.left=(nx*vw())+'px';el.style.top=(ny*vh())+'px';}
 
-/* ── proximity bubble ── */
-const BUBBLE_MAX_DIST = 200;
-function distTo(uid) {
-  const o = others[uid]; if (!o) return Infinity;
-  return Math.hypot(o.x*vw()-myX, o.y*vh()-myY);
+const BUBBLE_MAX_DIST=200;
+function distTo(uid){const o=others[uid];if(!o)return Infinity;return Math.hypot(o.x*vw()-myX,o.y*vh()-myY);}
+function updateBubbleProximity(uid,msg){
+  const entry=others[uid];if(!entry)return;
+  const bubble=entry.el.querySelector('.cursor-bubble');
+  if(!msg){bubble.classList.remove('show');return;}
+  const effectiveDist=myCampfireRadius>0?CAMPFIRE_RADIUS:BUBBLE_MAX_DIST;
+  const d=distTo(uid),visible=d<effectiveDist;
+  bubble.textContent=msg;bubble.style.opacity=visible?Math.max(0.2,1-d/effectiveDist).toFixed(2):'0';
+  if(visible){bubble.classList.add('show');if(entry.bt)clearTimeout(entry.bt);entry.bt=setTimeout(()=>bubble.classList.remove('show'),6000);}
+  else bubble.classList.remove('show');
 }
-function updateBubbleProximity(uid, msg) {
-  const entry = others[uid]; if (!entry) return;
-  const bubble = entry.el.querySelector('.cursor-bubble');
-  if (!msg) { bubble.classList.remove('show'); return; }
+function refreshAllBubbles(){Object.keys(others).forEach(uid=>{const entry=others[uid];if(!entry)return;const bubble=entry.el.querySelector('.cursor-bubble');if(!bubble.textContent)return;updateBubbleProximity(uid,bubble.textContent);});}
+function showBubble(uid,msg){updateBubbleProximity(uid,msg);}
 
-  // campfire extends bubble range
-  const effectiveDist = myCampfireRadius > 0 ? CAMPFIRE_RADIUS : BUBBLE_MAX_DIST;
-  const d = distTo(uid), visible = d < effectiveDist;
-  bubble.textContent = msg;
-  bubble.style.opacity = visible ? Math.max(0.2, 1-d/effectiveDist).toFixed(2) : '0';
-  if (visible) {
-    bubble.classList.add('show');
-    if (entry.bt) clearTimeout(entry.bt);
-    entry.bt = setTimeout(() => bubble.classList.remove('show'), 6000);
-  } else bubble.classList.remove('show');
-}
-function refreshAllBubbles() {
-  Object.keys(others).forEach(uid => {
-    const entry = others[uid]; if (!entry) return;
-    const bubble = entry.el.querySelector('.cursor-bubble');
-    if (!bubble.textContent) return;
-    updateBubbleProximity(uid, bubble.textContent);
-  });
-}
-function showBubble(uid, msg) { updateBubbleProximity(uid, msg); }
-
-/* ── idle kick ── */
-const IDLE_WARN = 2.5 * 60 * 1000;
-let kickWarnTimer=null, kickTimer=null, kickCountdownInt=null;
-const kickWarningEl   = document.getElementById('kick-warning');
-const kickCountdownEl = document.getElementById('kick-countdown');
-function resetIdleKick() {
-  kickWarningEl.style.display = 'none';
-  if (kickWarnTimer)    { clearTimeout(kickWarnTimer);    kickWarnTimer=null; }
-  if (kickTimer)        { clearTimeout(kickTimer);        kickTimer=null; }
-  if (kickCountdownInt) { clearInterval(kickCountdownInt); kickCountdownInt=null; }
+const IDLE_WARN=2.5*60*1000;
+let kickWarnTimer=null,kickTimer=null,kickCountdownInt=null;
+const kickWarningEl=document.getElementById('kick-warning'),kickCountdownEl=document.getElementById('kick-countdown');
+function resetIdleKick(){
+  kickWarningEl.style.display='none';
+  if(kickWarnTimer){clearTimeout(kickWarnTimer);kickWarnTimer=null;}
+  if(kickTimer){clearTimeout(kickTimer);kickTimer=null;}
+  if(kickCountdownInt){clearInterval(kickCountdownInt);kickCountdownInt=null;}
   scheduleIdleKick();
 }
-function scheduleIdleKick() {
-  kickWarnTimer = setTimeout(() => {
-    kickWarningEl.style.display = 'block';
-    let s=30; kickCountdownEl.textContent=s;
-    kickCountdownInt = setInterval(() => { s--; kickCountdownEl.textContent=s; if(s<=0) clearInterval(kickCountdownInt); }, 1000);
-    kickTimer = setTimeout(kickPlayer, 30000);
-  }, IDLE_WARN);
-}
-function kickPlayer() {
-  if (myRef) myRef.remove();
-  document.body.classList.remove('in-game');
-  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';
-}
+function scheduleIdleKick(){kickWarnTimer=setTimeout(()=>{kickWarningEl.style.display='block';let s=30;kickCountdownEl.textContent=s;kickCountdownInt=setInterval(()=>{s--;kickCountdownEl.textContent=s;if(s<=0)clearInterval(kickCountdownInt);},1000);kickTimer=setTimeout(kickPlayer,30000);},IDLE_WARN);}
+function kickPlayer(){if(myRef)myRef.remove();document.body.classList.remove('in-game');document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:13px;background:#fff;flex-direction:column;gap:8px;">you were kicked for being idle.<br><br><a href="" style="color:#000">rejoin</a></div>';}
 
-/* ── mouse + ball collision ── */
-const BALL_HIT_RADIUS = 55, BALL_HIT_FORCE = 0.018;
-function trackMouse() {
-  document.addEventListener('mousemove', e => {
+const BALL_HIT_RADIUS=55,BALL_HIT_FORCE=0.018;
+function trackMouse(){
+  document.addEventListener('mousemove',e=>{
+    if(isFrozen)return; // frozen: ignore mouse movement
     resetIdleKick();
-    prevMouseX=myX; prevMouseY=myY;
-    myX=e.clientX; myY=e.clientY;
-    if (myCursorEl) { myCursorEl.style.left=e.clientX+'px'; myCursorEl.style.top=e.clientY+'px'; }
-    refreshAllBubbles();
-    applyBallCollision();
-    updateCampfireVeil();
-    const now=Date.now();
-    if(now-lastSent<THROTTLE) return;
-    lastSent=now;
-    myRef.update({x:e.clientX/vw(), y:e.clientY/vh(), lastMove:now});
+    prevMouseX=myX;prevMouseY=myY;
+    myX=e.clientX;myY=e.clientY;
+    if(myCursorEl){myCursorEl.style.left=e.clientX+'px';myCursorEl.style.top=e.clientY+'px';}
+    refreshAllBubbles();applyBallCollision();updateCampfireVeil();
+    const now=Date.now();if(now-lastSent<THROTTLE)return;lastSent=now;
+    myRef.update({x:e.clientX/vw(),y:e.clientY/vh(),lastMove:now});
   });
 }
-function applyBallCollision() {
-  if (!amBallMaster) return;
-  const dvx=(myX-prevMouseX)/vw(), dvy=(myY-prevMouseY)/vh(), cs=Math.hypot(dvx,dvy);
-  for (let i=0;i<BALL_COUNT;i++) {
-    const b=ballPhysics[i]; if(!b) continue;
-    const bx=b.x*vw(), by=b.y*vh(), sz=BALL_SIZES[i], d=Math.hypot(bx-myX,by-myY);
-    if (d<BALL_HIT_RADIUS+sz/2 && d>0) {
-      const nx=(bx-myX)/d, ny=(by-myY)/d, f=BALL_HIT_FORCE+cs*1.2;
-      b.vx+=nx*f; b.vy+=ny*f;
-      const spd=Math.hypot(b.vx,b.vy);
-      if(spd>0.025){b.vx=(b.vx/spd)*0.025;b.vy=(b.vy/spd)*0.025;}
-    }
-  }
+function applyBallCollision(){
+  if(!amBallMaster)return;
+  const dvx=(myX-prevMouseX)/vw(),dvy=(myY-prevMouseY)/vh(),cs=Math.hypot(dvx,dvy);
+  for(let i=0;i<BALL_COUNT;i++){const b=ballPhysics[i];if(!b)continue;const bx=b.x*vw(),by=b.y*vh(),sz=BALL_SIZES[i],d=Math.hypot(bx-myX,by-myY);if(d<BALL_HIT_RADIUS+sz/2&&d>0){const nx=(bx-myX)/d,ny=(by-myY)/d,f=BALL_HIT_FORCE+cs*1.2;b.vx+=nx*f;b.vy+=ny*f;const spd=Math.hypot(b.vx,b.vy);if(spd>0.025){b.vx=(b.vx/spd)*0.025;b.vy=(b.vy/spd)*0.025;}}}
 }
 
-/* ── ripple ── */
-function setupClick() {
-  document.addEventListener('click', e => {
-    if (!myId||chatOpen||followingId) return;
-    if (e.target.classList.contains('cursor-name')||e.target.classList.contains('cn-text')) return;
-    if (e.target.closest('.cursor-hit-zone')) return;
-    if (e.target.closest('#mobile-controls')) return;
-    spawnRipple(e.clientX, e.clientY, myColor);
-    db.ref('ripples').push({x:e.clientX/vw(), y:e.clientY/vh(), color:myColor, ts:Date.now()});
-    db.ref('ripples').orderByChild('ts').endAt(Date.now()-5000).limitToFirst(50).get().then(snap=>{ if(snap.exists()) snap.forEach(c=>c.ref.remove()); });
+function setupClick(){
+  document.addEventListener('click',e=>{
+    if(!myId||chatOpen||followingId)return;
+    if(e.target.classList.contains('cursor-name')||e.target.classList.contains('cn-text'))return;
+    if(e.target.closest('.cursor-hit-zone'))return;
+    if(e.target.closest('#mobile-controls'))return;
+    if(isFrozen)return; // no clicking while frozen
+    spawnRipple(e.clientX,e.clientY,myColor);
+    db.ref('ripples').push({x:e.clientX/vw(),y:e.clientY/vh(),color:myColor,ts:Date.now()});
+    db.ref('ripples').orderByChild('ts').endAt(Date.now()-5000).limitToFirst(50).get().then(snap=>{if(snap.exists())snap.forEach(c=>c.ref.remove());});
   });
 }
-function spawnRipple(cx,cy,color) {
-  const el=document.createElement('div'); el.className='ripple';
-  el.style.left=cx+'px'; el.style.top=cy+'px';
-  el.style.borderColor=color==='#ffffff'?'#ccc':color;
-  document.body.appendChild(el); el.addEventListener('animationend',()=>el.remove());
-}
-function listenRipples() {
-  db.ref('ripples').on('child_added', s=>{ const d=s.val(); if(Date.now()-d.ts>2000) return; spawnRipple(d.x*vw(),d.y*vh(),d.color); });
-}
+function spawnRipple(cx,cy,color){const el=document.createElement('div');el.className='ripple';el.style.left=cx+'px';el.style.top=cy+'px';el.style.borderColor=color==='#ffffff'?'#ccc':color;document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+function listenRipples(){db.ref('ripples').on('child_added',s=>{const d=s.val();if(Date.now()-d.ts>2000)return;spawnRipple(d.x*vw(),d.y*vh(),d.color);});}
 
 /* ══════════════════════════════════════════════
-   CAMPFIRE  (account-only)
+   CAMPFIRE
 ══════════════════════════════════════════════ */
-const CAMPFIRE_RADIUS   = 220; // px — extended proximity range
-const CAMPFIRE_COOLDOWN = 3600000; // 1 hour in ms
-let myCampfireRadius = 0; // >0 when I'm inside any campfire
-let campfireTimerInt = null;
-const campfireEls = {}; // key → { el, ringEl }
+const CAMPFIRE_RADIUS=220,CAMPFIRE_COOLDOWN=3600000;
+let myCampfireRadius=0,campfireTimerInt=null;
+const campfireEls={};
 
-function setupCampfire() {
-  if (!loggedInEmail) return;
-  // check cooldown
-  const uid = auth.currentUser.uid;
-  const timerEl = document.getElementById('campfire-timer');
-  db.ref('campfire_cooldowns/' + uid).get().then(snap => {
-    if (snap.exists()) {
-      const elapsed = Date.now() - snap.val();
-      if (elapsed < CAMPFIRE_COOLDOWN) {
-        startCampfireCooldownUI(CAMPFIRE_COOLDOWN - elapsed);
-      } else {
-        timerEl.textContent = '🔥 campfire ready (double-right-click)';
-        timerEl.style.display = 'block';
-      }
-    } else {
-      timerEl.textContent = '🔥 campfire ready (double-right-click)';
-      timerEl.style.display = 'block';
-    }
+function setupCampfire(){
+  if(!loggedInEmail)return;
+  const uid=auth.currentUser.uid,timerEl=document.getElementById('campfire-timer');
+  db.ref('campfire_cooldowns/'+uid).get().then(snap=>{
+    if(snap.exists()){const elapsed=Date.now()-snap.val();if(elapsed<CAMPFIRE_COOLDOWN){startCampfireCooldownUI(CAMPFIRE_COOLDOWN-elapsed);}else{timerEl.textContent='🔥 campfire ready (double-right-click)';timerEl.style.display='block';}}
+    else{timerEl.textContent='🔥 campfire ready (double-right-click)';timerEl.style.display='block';}
   });
-
-  // double right-click to place campfire
-  let lastRightClick = 0;
-  document.addEventListener('contextmenu', e => {
-    if (!loggedInEmail) return;
-    const now = Date.now();
-    if (now - lastRightClick < 400) {
-      // double right-click — place campfire
-      e.preventDefault();
-      placeCampfire(e.clientX, e.clientY);
-    }
-    lastRightClick = now;
-  }, true); // capture phase so we can also suppress if too fast
+  let lastRightClick=0;
+  document.addEventListener('contextmenu',e=>{
+    if(!loggedInEmail)return;
+    const now=Date.now();
+    if(now-lastRightClick<400){e.preventDefault();placeCampfire(e.clientX,e.clientY);}
+    lastRightClick=now;
+  },true);
 }
-
-function placeCampfire(cx, cy) {
-  if (!loggedInEmail || !auth.currentUser) return;
-  const uid = auth.currentUser.uid;
-  // check cooldown
-  db.ref('campfire_cooldowns/' + uid).get().then(snap => {
-    if (snap.exists() && Date.now() - snap.val() < CAMPFIRE_COOLDOWN) {
-      showToast('campfire on cooldown!'); return;
-    }
-    const key = 'cf_' + myId + '_' + Date.now();
-    db.ref('campfires/' + key).set({
-      x: cx / vw(), y: cy / vh(),
-      color: myColor,
-      by: myName,
-      ts: Date.now(),
-      ttl: Date.now() + 1800000 // 30 minute lifetime
-    });
-    db.ref('campfire_cooldowns/' + uid).set(Date.now());
+function placeCampfire(cx,cy){
+  if(!loggedInEmail||!auth.currentUser)return;
+  const uid=auth.currentUser.uid;
+  db.ref('campfire_cooldowns/'+uid).get().then(snap=>{
+    if(snap.exists()&&Date.now()-snap.val()<CAMPFIRE_COOLDOWN){showToast('campfire on cooldown!');return;}
+    const key='cf_'+myId+'_'+Date.now();
+    db.ref('campfires/'+key).set({x:cx/vw(),y:cy/vh(),color:myColor,by:myName,ts:Date.now(),ttl:Date.now()+1800000});
+    db.ref('campfire_cooldowns/'+uid).set(Date.now());
     startCampfireCooldownUI(CAMPFIRE_COOLDOWN);
     showToast('🔥 campfire placed!');
+    auditLog('🔥',`<strong>${esc(myName)}</strong> placed a campfire`);
   });
 }
-
-function startCampfireCooldownUI(remaining) {
-  const timerEl = document.getElementById('campfire-timer');
-  timerEl.style.display = 'block';
-  const startedAt = Date.now();
-  if (campfireTimerInt) clearInterval(campfireTimerInt);
-  campfireTimerInt = setInterval(() => {
-    const left = Math.max(0, remaining - (Date.now() - startedAt));
-    if (left <= 0) {
-      clearInterval(campfireTimerInt);
-      timerEl.textContent = '🔥 campfire ready (double-right-click)';
-      return;
-    }
-    const m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
-    timerEl.textContent = `🔥 next campfire in ${m}m ${s}s`;
-  }, 1000);
+function startCampfireCooldownUI(remaining){
+  const timerEl=document.getElementById('campfire-timer');timerEl.style.display='block';
+  const startedAt=Date.now();if(campfireTimerInt)clearInterval(campfireTimerInt);
+  campfireTimerInt=setInterval(()=>{const left=Math.max(0,remaining-(Date.now()-startedAt));if(left<=0){clearInterval(campfireTimerInt);timerEl.textContent='🔥 campfire ready (double-right-click)';return;}const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);timerEl.textContent=`🔥 next campfire in ${m}m ${s}s`;},1000);
 }
-
-function listenCampfires() {
-  db.ref('campfires').on('child_added', s => renderCampfire(s.key, s.val()));
-  db.ref('campfires').on('child_removed', s => removeCampfire(s.key));
-
-  // prune expired campfires every minute
-  setInterval(() => {
-    db.ref('campfires').orderByChild('ttl').endAt(Date.now()).get().then(snap => {
-      if (snap.exists()) snap.forEach(c => c.ref.remove());
-    });
-  }, 60000);
+function listenCampfires(){
+  db.ref('campfires').on('child_added',s=>renderCampfire(s.key,s.val()));
+  db.ref('campfires').on('child_removed',s=>removeCampfire(s.key));
+  setInterval(()=>{db.ref('campfires').orderByChild('ttl').endAt(Date.now()).get().then(snap=>{if(snap.exists())snap.forEach(c=>c.ref.remove());});},60000);
 }
-
-function renderCampfire(key, d) {
-  if (campfireEls[key]) return;
-  if (d.ttl && Date.now() > d.ttl) return;
-
-  const el = document.createElement('div');
-  el.className = 'campfire-el'; el.id = 'cf-' + key;
-  el.style.left = (d.x * vw()) + 'px';
-  el.style.top  = (d.y * vh()) + 'px';
-  el.innerHTML = `<img src="campfire.gif" alt="campfire" title="${esc(d.by)}'s campfire">`;
-  document.body.appendChild(el);
-
-  // ring showing radius
-  const DIAM = CAMPFIRE_RADIUS * 2;
-  const ringEl = document.createElement('div');
-  ringEl.className = 'campfire-ring';
-  ringEl.style.left  = (d.x * vw()) + 'px';
-  ringEl.style.top   = (d.y * vh()) + 'px';
-  ringEl.style.width  = DIAM + 'px';
-  ringEl.style.height = DIAM + 'px';
-  ringEl.style.borderColor = d.color === '#ffffff' ? '#ccc' : d.color;
-  document.body.appendChild(ringEl);
-
-  campfireEls[key] = { el, ringEl, x: d.x, y: d.y, color: d.color };
-
-  // auto-remove when TTL hits
-  const rem = d.ttl - Date.now();
-  if (rem > 0) setTimeout(() => { db.ref('campfires/' + key).remove(); }, rem);
-
+function renderCampfire(key,d){
+  if(campfireEls[key])return;if(d.ttl&&Date.now()>d.ttl)return;
+  const el=document.createElement('div');el.className='campfire-el';el.id='cf-'+key;el.style.left=(d.x*vw())+'px';el.style.top=(d.y*vh())+'px';el.innerHTML=`<img src="campfire.gif" alt="campfire" title="${esc(d.by)}'s campfire">`;document.body.appendChild(el);
+  const DIAM=CAMPFIRE_RADIUS*2;const ringEl=document.createElement('div');ringEl.className='campfire-ring';ringEl.style.left=(d.x*vw())+'px';ringEl.style.top=(d.y*vh())+'px';ringEl.style.width=DIAM+'px';ringEl.style.height=DIAM+'px';ringEl.style.borderColor=d.color==='#ffffff'?'#ccc':d.color;document.body.appendChild(ringEl);
+  campfireEls[key]={el,ringEl,x:d.x,y:d.y,color:d.color};
+  const rem=d.ttl-Date.now();if(rem>0)setTimeout(()=>{db.ref('campfires/'+key).remove();},rem);
   updateCampfireVeil();
 }
-
-function removeCampfire(key) {
-  if (!campfireEls[key]) return;
-  campfireEls[key].el.remove();
-  campfireEls[key].ringEl.remove();
-  delete campfireEls[key];
-  updateCampfireVeil();
-}
-
-function updateCampfireVeil() {
-  const veilEl = document.getElementById('campfire-veil');
-  let inside = false;
-  let activeCf = null;
-  for (const key in campfireEls) {
-    const cf = campfireEls[key];
-    const cfX = cf.x * vw(), cfY = cf.y * vh();
-    if (Math.hypot(myX - cfX, myY - cfY) < CAMPFIRE_RADIUS) { inside = true; activeCf = cf; break; }
-  }
-  myCampfireRadius = inside ? CAMPFIRE_RADIUS : 0;
-
-  if (inside && activeCf) {
-    // radial gradient: transparent circle where the campfire is, dark everywhere else
-    const cfX = activeCf.x * vw(), cfY = activeCf.y * vh();
-    const r = CAMPFIRE_RADIUS;
-    veilEl.style.background = `radial-gradient(circle ${r}px at ${cfX}px ${cfY}px, transparent 0%, transparent 70%, rgba(0,0,0,0.45) 100%)`;
-    veilEl.style.opacity = '1';
-  } else {
-    veilEl.style.opacity = '0';
-  }
+function removeCampfire(key){if(!campfireEls[key])return;campfireEls[key].el.remove();campfireEls[key].ringEl.remove();delete campfireEls[key];updateCampfireVeil();}
+function updateCampfireVeil(){
+  const veilEl=document.getElementById('campfire-veil');let inside=false,activeCf=null;
+  for(const key in campfireEls){const cf=campfireEls[key];const cfX=cf.x*vw(),cfY=cf.y*vh();if(Math.hypot(myX-cfX,myY-cfY)<CAMPFIRE_RADIUS){inside=true;activeCf=cf;break;}}
+  myCampfireRadius=inside?CAMPFIRE_RADIUS:0;
+  if(inside&&activeCf){const cfX=activeCf.x*vw(),cfY=activeCf.y*vh(),r=CAMPFIRE_RADIUS;veilEl.style.background=`radial-gradient(circle ${r}px at ${cfX}px ${cfY}px, transparent 0%, transparent 70%, rgba(0,0,0,0.45) 100%)`;veilEl.style.opacity='1';}
+  else{veilEl.style.opacity='0';}
 }
 
 /* ══════════════════════════════════════════════
    MOBILE CONTROLS
 ══════════════════════════════════════════════ */
-function setupMobileControls() {
-  const joystickBase = document.getElementById('joystick-base');
-  const joystickKnob = document.getElementById('joystick-knob');
-  const mobClickBtn  = document.getElementById('mob-click-btn');
-  const mobClapBtn   = document.getElementById('mob-clap-btn');
-  const mobChatBtn   = document.getElementById('mob-chat-btn');
-
-  const JOYSTICK_RADIUS = 29, KNOB_RADIUS = 11, MAX_OFFSET = JOYSTICK_RADIUS - KNOB_RADIUS;
-  const SPEED = 0.004;
-  let joyActive=false, joyId=null, joyDx=0, joyDy=0, joyRaf=null;
-
-  function getBaseCenter() { const r=joystickBase.getBoundingClientRect(); return {cx:r.left+r.width/2,cy:r.top+r.height/2}; }
-  function updateKnob(dx,dy) { joystickKnob.style.left=(50+dx*MAX_OFFSET/JOYSTICK_RADIUS*50)+'%'; joystickKnob.style.top=(50+dy*MAX_OFFSET/JOYSTICK_RADIUS*50)+'%'; joystickKnob.style.transform='translate(-50%,-50%)'; }
-
-  function joyTick() {
-    if (!joyActive||!myRef) { joyRaf=null; return; }
-    if (Math.abs(joyDx)>0.05||Math.abs(joyDy)>0.05) {
-      resetIdleKick();
-      prevMouseX=myX; prevMouseY=myY;
-      myX=Math.max(0,Math.min(vw(),myX+joyDx*SPEED*vw()));
-      myY=Math.max(0,Math.min(vh(),myY+joyDy*SPEED*vh()));
-      if(myCursorEl){myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';}
-      refreshAllBubbles(); applyBallCollision(); updateCampfireVeil();
-      const now=Date.now();
-      if(now-lastSent>=THROTTLE){lastSent=now;myRef.update({x:myX/vw(),y:myY/vh(),lastMove:now});}
-    }
+function setupMobileControls(){
+  const joystickBase=document.getElementById('joystick-base'),joystickKnob=document.getElementById('joystick-knob'),mobClickBtn=document.getElementById('mob-click-btn'),mobClapBtn=document.getElementById('mob-clap-btn'),mobChatBtn=document.getElementById('mob-chat-btn');
+  const JOYSTICK_RADIUS=29,KNOB_RADIUS=11,MAX_OFFSET=JOYSTICK_RADIUS-KNOB_RADIUS,SPEED=0.004;
+  let joyActive=false,joyId=null,joyDx=0,joyDy=0,joyRaf=null;
+  function getBaseCenter(){const r=joystickBase.getBoundingClientRect();return{cx:r.left+r.width/2,cy:r.top+r.height/2};}
+  function updateKnob(dx,dy){joystickKnob.style.left=(50+dx*MAX_OFFSET/JOYSTICK_RADIUS*50)+'%';joystickKnob.style.top=(50+dy*MAX_OFFSET/JOYSTICK_RADIUS*50)+'%';joystickKnob.style.transform='translate(-50%,-50%)';}
+  function joyTick(){
+    if(!joyActive||!myRef){joyRaf=null;return;}
+    if(isFrozen){joyRaf=requestAnimationFrame(joyTick);return;} // frozen: no movement
+    if(Math.abs(joyDx)>0.05||Math.abs(joyDy)>0.05){resetIdleKick();prevMouseX=myX;prevMouseY=myY;myX=Math.max(0,Math.min(vw(),myX+joyDx*SPEED*vw()));myY=Math.max(0,Math.min(vh(),myY+joyDy*SPEED*vh()));if(myCursorEl){myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';}refreshAllBubbles();applyBallCollision();updateCampfireVeil();const now=Date.now();if(now-lastSent>=THROTTLE){lastSent=now;myRef.update({x:myX/vw(),y:myY/vh(),lastMove:now});}}
     joyRaf=requestAnimationFrame(joyTick);
   }
-
-  joystickBase.addEventListener('touchstart',e=>{
-    e.preventDefault(); if(joyActive) return;
-    const t=e.changedTouches[0]; joyId=t.identifier; joyActive=true;
-    joystickBase.classList.add('active');
-    const{cx,cy}=getBaseCenter(), rx=t.clientX-cx, ry=t.clientY-cy;
-    const dist=Math.min(Math.hypot(rx,ry),MAX_OFFSET), angle=Math.atan2(ry,rx);
-    joyDx=Math.cos(angle)*dist/MAX_OFFSET; joyDy=Math.sin(angle)*dist/MAX_OFFSET;
-    updateKnob(joyDx*MAX_OFFSET/(MAX_OFFSET/JOYSTICK_RADIUS),joyDy*MAX_OFFSET/(MAX_OFFSET/JOYSTICK_RADIUS));
-    if(!joyRaf) joyRaf=requestAnimationFrame(joyTick);
-  },{passive:false});
-
-  document.addEventListener('touchmove',e=>{
-    if(!joyActive) return;
-    for(const t of e.changedTouches){
-      if(t.identifier!==joyId) continue; e.preventDefault();
-      const{cx,cy}=getBaseCenter(), rx=t.clientX-cx, ry=t.clientY-cy, dist=Math.hypot(rx,ry);
-      if(dist===0){joyDx=0;joyDy=0;updateKnob(0,0);return;}
-      const clamped=Math.min(dist,MAX_OFFSET), angle=Math.atan2(ry,rx);
-      joyDx=Math.cos(angle)*clamped/MAX_OFFSET; joyDy=Math.sin(angle)*clamped/MAX_OFFSET;
-      updateKnob(Math.cos(angle)*clamped,Math.sin(angle)*clamped);
-    }
-  },{passive:false});
-
-  function endJoy(e){
-    for(const t of e.changedTouches){ if(t.identifier===joyId){ joyActive=false;joyId=null;joyDx=0;joyDy=0; joystickBase.classList.remove('active'); joystickKnob.style.left='50%';joystickKnob.style.top='50%';joystickKnob.style.transform='translate(-50%,-50%)'; } }
-  }
-  document.addEventListener('touchend',endJoy,{passive:true});
-  document.addEventListener('touchcancel',endJoy,{passive:true});
-
-  mobClickBtn.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();mobClickBtn.classList.add('pressed');spawnRipple(myX,myY,myColor);db.ref('ripples').push({x:myX/vw(),y:myY/vh(),color:myColor,ts:Date.now()});resetIdleKick();},{passive:false});
+  joystickBase.addEventListener('touchstart',e=>{e.preventDefault();if(joyActive)return;const t=e.changedTouches[0];joyId=t.identifier;joyActive=true;joystickBase.classList.add('active');const{cx,cy}=getBaseCenter(),rx=t.clientX-cx,ry=t.clientY-cy,dist=Math.min(Math.hypot(rx,ry),MAX_OFFSET),angle=Math.atan2(ry,rx);joyDx=Math.cos(angle)*dist/MAX_OFFSET;joyDy=Math.sin(angle)*dist/MAX_OFFSET;updateKnob(joyDx*MAX_OFFSET/(MAX_OFFSET/JOYSTICK_RADIUS),joyDy*MAX_OFFSET/(MAX_OFFSET/JOYSTICK_RADIUS));if(!joyRaf)joyRaf=requestAnimationFrame(joyTick);},{passive:false});
+  document.addEventListener('touchmove',e=>{if(!joyActive)return;for(const t of e.changedTouches){if(t.identifier!==joyId)continue;e.preventDefault();const{cx,cy}=getBaseCenter(),rx=t.clientX-cx,ry=t.clientY-cy,dist=Math.hypot(rx,ry);if(dist===0){joyDx=0;joyDy=0;updateKnob(0,0);return;}const clamped=Math.min(dist,MAX_OFFSET),angle=Math.atan2(ry,rx);joyDx=Math.cos(angle)*clamped/MAX_OFFSET;joyDy=Math.sin(angle)*clamped/MAX_OFFSET;updateKnob(Math.cos(angle)*clamped,Math.sin(angle)*clamped);}},{passive:false});
+  function endJoy(e){for(const t of e.changedTouches){if(t.identifier===joyId){joyActive=false;joyId=null;joyDx=0;joyDy=0;joystickBase.classList.remove('active');joystickKnob.style.left='50%';joystickKnob.style.top='50%';joystickKnob.style.transform='translate(-50%,-50%)';}}}
+  document.addEventListener('touchend',endJoy,{passive:true});document.addEventListener('touchcancel',endJoy,{passive:true});
+  mobClickBtn.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();mobClickBtn.classList.add('pressed');if(!isFrozen){spawnRipple(myX,myY,myColor);db.ref('ripples').push({x:myX/vw(),y:myY/vh(),color:myColor,ts:Date.now()});}resetIdleKick();},{passive:false});
   mobClickBtn.addEventListener('touchend',e=>{e.preventDefault();mobClickBtn.classList.remove('pressed');},{passive:false});
   mobClapBtn.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();mobClapBtn.classList.add('pressed');sendClap();resetIdleKick();},{passive:false});
   mobClapBtn.addEventListener('touchend',e=>{e.preventDefault();mobClapBtn.classList.remove('pressed');},{passive:false});
@@ -1335,47 +1492,18 @@ function setupMobileControls() {
 /* ══════════════════════════════════════════════
    BALLS
 ══════════════════════════════════════════════ */
-const BALL_COUNT=5,BALL_COLORS=['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6'],BALL_SIZES=[28,20,24,18,22];
-const BALL_FRICTION=0.985;
-const ballEls={}; let amBallMaster=false, ballPhysics={};
+const BALL_COUNT=5,BALL_COLORS=['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6'],BALL_SIZES=[28,20,24,18,22],BALL_FRICTION=0.985;
+const ballEls={};let amBallMaster=false,ballPhysics={};
 function initBalls(){
-  db.ref('balls').get().then(snap=>{
-    if(!snap.exists()){
-      const init={};
-      for(let i=0;i<BALL_COUNT;i++){init[i]={x:.1+Math.random()*.8,y:.1+Math.random()*.8,vx:(Math.random()-.5)*.003,vy:(Math.random()-.5)*.003};ballPhysics[i]={...init[i]};}
-      db.ref('balls').set(init);
-    }
-  });
-  for(let i=0;i<BALL_COUNT;i++){
-    const el=document.createElement('div');el.className='ball';const sz=BALL_SIZES[i];
-    el.style.cssText=`width:${sz}px;height:${sz}px;background:${BALL_COLORS[i]};opacity:.55;left:50%;top:50%;`;
-    document.body.appendChild(el);ballEls[i]=el;
-  }
+  db.ref('balls').get().then(snap=>{if(!snap.exists()){const init={};for(let i=0;i<BALL_COUNT;i++){init[i]={x:.1+Math.random()*.8,y:.1+Math.random()*.8,vx:(Math.random()-.5)*.003,vy:(Math.random()-.5)*.003};ballPhysics[i]={...init[i]};}db.ref('balls').set(init);}});
+  for(let i=0;i<BALL_COUNT;i++){const el=document.createElement('div');el.className='ball';const sz=BALL_SIZES[i];el.style.cssText=`width:${sz}px;height:${sz}px;background:${BALL_COLORS[i]};opacity:.55;left:50%;top:50%;`;document.body.appendChild(el);ballEls[i]=el;}
   const syncBall=s=>{const d=s.val(),el=ballEls[s.key];if(!el)return;const sz=BALL_SIZES[s.key];el.style.left=(d.x*vw()-sz/2)+'px';el.style.top=(d.y*vh()-sz/2)+'px';if(amBallMaster)ballPhysics[s.key]={...d};};
-  db.ref('balls').on('child_changed',syncBall);
-  db.ref('balls').on('child_added',s=>{syncBall(s);ballPhysics[s.key]={...s.val()};});
-  db.ref('.info/connected').on('value',snap=>{
-    if(!snap.val())return;
-    db.ref('ballmaster').transaction(cur=>{if(!cur){amBallMaster=true;return myId;}return undefined;},(err,committed)=>{if(committed){amBallMaster=true;db.ref('ballmaster').onDisconnect().remove();runBallPhysics();}});
-  });
+  db.ref('balls').on('child_changed',syncBall);db.ref('balls').on('child_added',s=>{syncBall(s);ballPhysics[s.key]={...s.val()};});
+  db.ref('.info/connected').on('value',snap=>{if(!snap.val())return;db.ref('ballmaster').transaction(cur=>{if(!cur){amBallMaster=true;return myId;}return undefined;},(err,committed)=>{if(committed){amBallMaster=true;db.ref('ballmaster').onDisconnect().remove();runBallPhysics();}});});
 }
 function runBallPhysics(){
   if(!amBallMaster)return;
-  setInterval(()=>{
-    const W=vw(),H=vh(),updates={};
-    for(let i=0;i<BALL_COUNT;i++){
-      const b=ballPhysics[i];if(!b)continue;
-      b.vx*=BALL_FRICTION;b.vy*=BALL_FRICTION;
-      const spd=Math.hypot(b.vx,b.vy);
-      if(spd<.0008){const a=Math.random()*Math.PI*2;b.vx+=Math.cos(a)*.001;b.vy+=Math.sin(a)*.001;}
-      b.x+=b.vx;b.y+=b.vy;
-      if(b.x<.03){b.x=.03;b.vx=Math.abs(b.vx);}if(b.x>.97){b.x=.97;b.vx=-Math.abs(b.vx);}
-      if(b.y<.03){b.y=.03;b.vy=Math.abs(b.vy);}if(b.y>.97){b.y=.97;b.vy=-Math.abs(b.vy);}
-      updates[i]={x:b.x,y:b.y,vx:b.vx,vy:b.vy};
-      ballEls[i].style.left=(b.x*W-BALL_SIZES[i]/2)+'px';ballEls[i].style.top=(b.y*H-BALL_SIZES[i]/2)+'px';
-    }
-    db.ref('balls').update(updates);
-  },80);
+  setInterval(()=>{const W=vw(),H=vh(),updates={};for(let i=0;i<BALL_COUNT;i++){const b=ballPhysics[i];if(!b)continue;b.vx*=BALL_FRICTION;b.vy*=BALL_FRICTION;const spd=Math.hypot(b.vx,b.vy);if(spd<.0008){const a=Math.random()*Math.PI*2;b.vx+=Math.cos(a)*.001;b.vy+=Math.sin(a)*.001;}b.x+=b.vx;b.y+=b.vy;if(b.x<.03){b.x=.03;b.vx=Math.abs(b.vx);}if(b.x>.97){b.x=.97;b.vx=-Math.abs(b.vx);}if(b.y<.03){b.y=.03;b.vy=Math.abs(b.vy);}if(b.y>.97){b.y=.97;b.vy=-Math.abs(b.vy);}updates[i]={x:b.x,y:b.y,vx:b.vx,vy:b.vy};ballEls[i].style.left=(b.x*W-BALL_SIZES[i]/2)+'px';ballEls[i].style.top=(b.y*H-BALL_SIZES[i]/2)+'px';}db.ref('balls').update(updates);},80);
 }
 
 /* ══════════════════════════════════════════════
@@ -1384,93 +1512,39 @@ function runBallPhysics(){
 const BOX_LABELS=['','','','','','','','','',''];
 const BOX_BGS=['#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec','#fff','#fff4e6','#e8f5e9','#e3f2fd','#fce4ec'];
 let dragState=null;
-function setupBoxes(){
-  db.ref('boxes').get().then(snap=>{
-    if(!snap.exists()){
-      const init={};
-      BOX_LABELS.forEach((lbl,i)=>{init[i]={label:lbl,x:.1+(i*.18),y:.15+(i%2)*.08,bg:BOX_BGS[i],grabbedBy:null};});
-      db.ref('boxes').set(init);
-    }
-  });
-}
-function listenBoxes(){
-  db.ref('boxes').on('child_added',s=>renderBox(s.key,s.val()));
-  db.ref('boxes').on('child_changed',s=>renderBox(s.key,s.val()));
-  db.ref('boxes').on('child_removed',s=>{const el=document.getElementById('box-'+s.key);if(el)el.remove();});
-}
-function renderBox(key,d){
-  let el=document.getElementById('box-'+key);
-  if(!el){el=document.createElement('div');el.className='dbox';el.id='box-'+key;el.addEventListener('mousedown',e=>startDrag(e,key));document.body.appendChild(el);}
-  el.textContent=d.label;el.style.background=d.bg||'#fff';el.style.left=(d.x*vw())+'px';el.style.top=(d.y*vh())+'px';
-  if(d.adminBlock){el.classList.add('admin-block');el.style.cursor='default';}
-  else if(d.grabbedBy&&d.grabbedBy!==myId){el.classList.add('grabbed');el.style.cursor='not-allowed';}
-  else if(!d.grabbedBy){el.classList.remove('grabbed','admin-block');el.style.cursor='grab';}
-}
-function startDrag(e,key){
-  if(dragState)return;e.stopPropagation();
-  const el=document.getElementById('box-'+key);if(!el)return;
-  if(el.classList.contains('admin-block')&&!isAdmin)return;
-  const rect=el.getBoundingClientRect(),offX=e.clientX-rect.left,offY=e.clientY-rect.top;
-  db.ref('boxes/'+key).transaction(d=>{if(!d)return d;if(d.adminBlock&&!isAdmin)return;if(d.grabbedBy&&d.grabbedBy!==myId)return;d.grabbedBy=myId;return d;},(err,committed)=>{
-    if(!committed)return;dragState={key,offX,offY};el.style.cursor='grabbing';db.ref('boxes/'+key+'/grabbedBy').onDisconnect().set(null);
-  });
-}
+function setupBoxes(){db.ref('boxes').get().then(snap=>{if(!snap.exists()){const init={};BOX_LABELS.forEach((lbl,i)=>{init[i]={label:lbl,x:.1+(i*.18),y:.15+(i%2)*.08,bg:BOX_BGS[i],grabbedBy:null};});db.ref('boxes').set(init);}});}
+function listenBoxes(){db.ref('boxes').on('child_added',s=>renderBox(s.key,s.val()));db.ref('boxes').on('child_changed',s=>renderBox(s.key,s.val()));db.ref('boxes').on('child_removed',s=>{const el=document.getElementById('box-'+s.key);if(el)el.remove();});}
+function renderBox(key,d){let el=document.getElementById('box-'+key);if(!el){el=document.createElement('div');el.className='dbox';el.id='box-'+key;el.addEventListener('mousedown',e=>startDrag(e,key));document.body.appendChild(el);}el.textContent=d.label;el.style.background=d.bg||'#fff';el.style.left=(d.x*vw())+'px';el.style.top=(d.y*vh())+'px';if(d.adminBlock){el.classList.add('admin-block');el.style.cursor='default';}else if(d.grabbedBy&&d.grabbedBy!==myId){el.classList.add('grabbed');el.style.cursor='not-allowed';}else if(!d.grabbedBy){el.classList.remove('grabbed','admin-block');el.style.cursor='grab';}}
+function startDrag(e,key){if(dragState)return;e.stopPropagation();const el=document.getElementById('box-'+key);if(!el)return;if(el.classList.contains('admin-block')&&!isAdmin)return;const rect=el.getBoundingClientRect(),offX=e.clientX-rect.left,offY=e.clientY-rect.top;db.ref('boxes/'+key).transaction(d=>{if(!d)return d;if(d.adminBlock&&!isAdmin)return;if(d.grabbedBy&&d.grabbedBy!==myId)return;d.grabbedBy=myId;return d;},(err,committed)=>{if(!committed)return;dragState={key,offX,offY};el.style.cursor='grabbing';db.ref('boxes/'+key+'/grabbedBy').onDisconnect().set(null);});}
 document.addEventListener('mousemove',e=>{if(!dragState)return;const{key,offX,offY}=dragState;db.ref('boxes/'+key).update({x:Math.max(0,Math.min(.95,(e.clientX-offX)/vw())),y:Math.max(0,Math.min(.92,(e.clientY-offY)/vh()))});});
 document.addEventListener('mouseup',()=>{if(!dragState)return;const key=dragState.key;dragState=null;db.ref('boxes/'+key).update({grabbedBy:null});const el=document.getElementById('box-'+key);if(el&&!el.classList.contains('admin-block')){el.classList.remove('grabbed');el.style.cursor='grab';}});
 
-/* ── poke ── */
 function sendPoke(targetId){if(!myId||targetId===myId)return;db.ref('pokes').push({to:targetId,from:myId,fromName:myName,color:myColor,ts:Date.now()});}
 function listenPokes(){db.ref('pokes').on('child_added',s=>{const d=s.val();if(Date.now()-d.ts>3000||d.to!==myId)return;spawnPokeRipple(myX,myY,d.color);showToast(esc(d.fromName)+' poked you');});}
 function spawnPokeRipple(cx,cy,color){for(let i=0;i<3;i++)setTimeout(()=>{const el=document.createElement('div');el.className='poke-ripple';el.style.left=cx+'px';el.style.top=cy+'px';el.style.borderColor=color==='#ffffff'?'#ccc':color;document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());},i*120);}
 
-/* ── follow ── */
 const followBanner=document.getElementById('follow-banner'),followNameEl=document.getElementById('follow-name');
-function startFollow(uid,name){
-  if(followingId===uid){stopFollow();return;}
-  stopFollow();followingId=uid;followNameEl.textContent=name;followBanner.style.display='block';
-  const el=document.getElementById('c-'+uid);if(el)el.classList.add('being-followed');
-  followInterval=setInterval(()=>{
-    const o=others[followingId];if(!o){stopFollow();return;}
-    myX+=(o.x*vw()-myX)*.12;myY+=(o.y*vh()-myY)*.12;
-    if(myCursorEl){myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';}
-    refreshAllBubbles();updateCampfireVeil();
-    const now=Date.now();if(now-lastSent>THROTTLE){lastSent=now;myRef.update({x:myX/vw(),y:myY/vh(),lastMove:now});}
-  },30);
-}
-function stopFollow(){
-  if(followingId){const el=document.getElementById('c-'+followingId);if(el)el.classList.remove('being-followed');}
-  followingId=null;followBanner.style.display='none';if(followInterval){clearInterval(followInterval);followInterval=null;}
-}
+function startFollow(uid,name){if(followingId===uid){stopFollow();return;}stopFollow();followingId=uid;followNameEl.textContent=name;followBanner.style.display='block';const el=document.getElementById('c-'+uid);if(el)el.classList.add('being-followed');followInterval=setInterval(()=>{const o=others[followingId];if(!o){stopFollow();return;}myX+=(o.x*vw()-myX)*.12;myY+=(o.y*vh()-myY)*.12;if(myCursorEl){myCursorEl.style.left=myX+'px';myCursorEl.style.top=myY+'px';}refreshAllBubbles();updateCampfireVeil();const now=Date.now();if(now-lastSent>THROTTLE){lastSent=now;myRef.update({x:myX/vw(),y:myY/vh(),lastMove:now});}},30);}
+function stopFollow(){if(followingId){const el=document.getElementById('c-'+followingId);if(el)el.classList.remove('being-followed');}followingId=null;followBanner.style.display='none';if(followInterval){clearInterval(followInterval);followInterval=null;}}
 
-/* ── toast ── */
-function showToast(msg){
-  const el=document.createElement('div');
-  el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:12px;background:#111;color:#fff;padding:4px 12px;z-index:900;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';
-  el.textContent=msg;document.body.appendChild(el);
-  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),500);},2500);
-}
+function showToast(msg){const el=document.createElement('div');el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:12px;background:#111;color:#fff;padding:4px 12px;z-index:900;pointer-events:none;opacity:1;transition:opacity 0.5s;white-space:nowrap;';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),500);},2500);}
 
-/* ── chat ── */
+/* ══════════════════════════════════════════════
+   CHAT  (shadow-mute support)
+══════════════════════════════════════════════ */
 function listenChat(){
-  db.ref('chat').limitToLast(20).on('child_added',s=>{const d=s.val();chatMessages.push(d);if(chatMessages.length>20)chatMessages.shift();renderChatHistory();});
-}
-function renderChatHistory(){
-  chatHistEl.innerHTML='';
-  chatMessages.forEach(m=>{
-    const div=document.createElement('div');div.className='chat-hist-msg';
-    const t=new Date(m.ts),timeStr=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-    const nameColor=(m.color==='#ffffff'||m.color==='#f1c40f')?'#888':esc(m.color);
-    div.innerHTML=`<span class="chat-who" style="color:${nameColor}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;
-    chatHistEl.appendChild(div);
+  db.ref('chat').limitToLast(20).on('child_added',s=>{
+    const d=s.val();
+    // shadow mute: don't show messages from muted users TO OTHERS
+    // (muted user sees their own messages; everyone else sees them filtered on the sender side)
+    chatMessages.push(d);if(chatMessages.length>20)chatMessages.shift();renderChatHistory();
+    // audit log chat
+    auditLog('💬',`<strong>${esc(d.name)}</strong>: ${esc(d.text.slice(0,40))}${d.text.length>40?'…':''}`);
   });
-  chatHistEl.scrollTop=chatHistEl.scrollHeight;
 }
+function renderChatHistory(){chatHistEl.innerHTML='';chatMessages.forEach(m=>{const div=document.createElement('div');div.className='chat-hist-msg';const t=new Date(m.ts),timeStr=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');const nameColor=(m.color==='#ffffff'||m.color==='#f1c40f')?'#888':esc(m.color);div.innerHTML=`<span class="chat-who" style="color:${nameColor}">${esc(m.name)}</span><span class="chat-time">${timeStr}</span> ${esc(m.text)}`;chatHistEl.appendChild(div);});chatHistEl.scrollTop=chatHistEl.scrollHeight;}
 function setupChat(){
-  document.addEventListener('keydown',e=>{
-    if(overlay.style.display!=='none')return;
-    if(e.key==='Escape'){if(followingId){stopFollow();return;}if(chatOpen)closeChat();}
-    if(e.key==='/'&&!chatOpen){e.preventDefault();openChat();}
-  });
+  document.addEventListener('keydown',e=>{if(overlay.style.display!=='none')return;if(e.key==='Escape'){if(activePower){clearActivePower();return;}if(followingId){stopFollow();return;}if(chatOpen)closeChat();}if(e.key==='/'&&!chatOpen){e.preventDefault();openChat();}});
   chatInput.addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();if(e.key==='Escape')closeChat();e.stopPropagation();});
 }
 function openChat(){chatOpen=true;chatbar.style.display='flex';renderChatHistory();chatHistEl.scrollTop=chatHistEl.scrollHeight;setTimeout(()=>chatInput.focus(),20);chatHintEl.style.display='none';}
@@ -1479,17 +1553,24 @@ function sendChat(){
   const msg=chatInput.value.trim();if(!msg){closeChat();return;}
   if(hasProfanity(msg)){chatInput.value='';chatInput.placeholder='keep it clean!';setTimeout(()=>chatInput.placeholder='say something...',2000);return;}
   const now=Date.now();
-  if(now-lastChatSent<CHAT_COOLDOWN){const wait=Math.ceil((CHAT_COOLDOWN-(now-lastChatSent))/1000);chatCooldownEl.textContent=`wait ${wait}s`;setTimeout(()=>chatCooldownEl.textContent='',1200);return;}
+  const effectiveCooldown = slowModeOn ? 30000 : CHAT_COOLDOWN;
+  if(now-lastChatSent<effectiveCooldown){const wait=Math.ceil((effectiveCooldown-(now-lastChatSent))/1000);chatCooldownEl.textContent=`wait ${wait}s`;setTimeout(()=>chatCooldownEl.textContent='',1200);return;}
   lastChatSent=now;resetIdleKick();
   const bubble=myCursorEl.querySelector('.cursor-bubble');bubble.textContent=msg;bubble.classList.add('show');
   if(chatTimeout)clearTimeout(chatTimeout);
   chatTimeout=setTimeout(()=>{bubble.classList.remove('show');myRef.update({msg:''});},6000);
   myRef.update({msg,ts:now});
-  db.ref('chat').push({name:myName,text:msg,ts:now,color:myColor});
+  // shadow mute: if muted, still show locally but don't push to DB for others
+  if(!window._iAmMuted) {
+    db.ref('chat').push({name:myName,text:msg,ts:now,color:myColor});
+  }
+  // (if muted, local bubble still shows, but no DB write — only I see it)
   closeChat();
 }
 
-/* ── notes ── */
+/* ══════════════════════════════════════════════
+   NOTES
+══════════════════════════════════════════════ */
 const noteComposer=document.getElementById('note-composer'),noteTextarea=document.getElementById('note-text');
 let notePendingX=0,notePendingY=0;
 const NOTE_TTL=10*60*1000;
@@ -1497,8 +1578,6 @@ function setupNotes(){
   document.addEventListener('contextmenu',e=>{
     if(!myId)return;
     if(e.target.closest('.dbox,.note-pin,#chatbar,#overlay,#color-picker-panel,#admin-panel'))return;
-    // single right-click: notes. double right-click handled in campfire.
-    // we let this through for notes (campfire uses capture phase with its own handler)
     e.preventDefault();
     notePendingX=e.clientX/vw();notePendingY=e.clientY/vh();
     noteComposer.style.left=Math.min(e.clientX,vw()-220)+'px';noteComposer.style.top=Math.min(e.clientY,vh()-120)+'px';
@@ -1513,16 +1592,12 @@ function postNote(){
   const txt=noteTextarea.value.trim();if(!txt||hasProfanity(txt)){if(hasProfanity(txt))noteTextarea.placeholder='keep it clean!';noteTextarea.value='';setTimeout(()=>noteTextarea.placeholder='write something...',1500);return;}
   db.ref('notes').push({x:notePendingX,y:notePendingY,text:txt,author:myName,color:myColor,ts:Date.now()});
   noteComposer.style.display='none';noteTextarea.value='';
+  auditLog('📝',`<strong>${esc(myName)}</strong> pinned a note`);
 }
-function listenNotes(){
-  db.ref('notes').get().then(snap=>{if(!snap.exists())return;snap.forEach(s=>renderNote(s.key,s.val()));});
-  db.ref('notes').on('child_added',s=>renderNote(s.key,s.val()));
-  db.ref('notes').on('child_removed',s=>{const el=document.getElementById('note-'+s.key);if(el)el.remove();});
-}
+function listenNotes(){db.ref('notes').get().then(snap=>{if(!snap.exists())return;snap.forEach(s=>renderNote(s.key,s.val()));});db.ref('notes').on('child_added',s=>renderNote(s.key,s.val()));db.ref('notes').on('child_removed',s=>{const el=document.getElementById('note-'+s.key);if(el)el.remove();});}
 function renderNote(key,d){
   if(document.getElementById('note-'+key))return;if(Date.now()-d.ts>NOTE_TTL)return;
-  const el=document.createElement('div');el.className='note-pin';el.id='note-'+key;
-  el.style.left=(d.x*vw())+'px';el.style.top=(d.y*vh())+'px';
+  const el=document.createElement('div');el.className='note-pin';el.id='note-'+key;el.style.left=(d.x*vw())+'px';el.style.top=(d.y*vh())+'px';
   const hc=d.color==='#ffffff'?'#ccc':(d.color||'#e74c3c');
   el.innerHTML=`<div class="note-card">${esc(d.text)}<span class="note-author">— ${esc(d.author)}</span></div><div class="note-pin-head" style="background:${hc}"></div><div class="note-stem"></div>`;
   document.body.appendChild(el);
@@ -1530,52 +1605,33 @@ function renderNote(key,d){
   setTimeout(()=>{el.style.transition='opacity 1s';el.style.opacity='0';setTimeout(()=>el.remove(),1000);},Math.max(0,rem));
 }
 
-/* ── warmth ── */
-function initWarmth(){
-  const canvas=document.getElementById('warmth-canvas');canvas.width=vw();canvas.height=vh();
-  window.addEventListener('resize',()=>{canvas.width=vw();canvas.height=vh();});
-  setInterval(drawWarmth,200);
-}
-function drawWarmth(){
-  const canvas=document.getElementById('warmth-canvas'),ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const pos=[{x:myX,y:myY}];Object.values(others).forEach(o=>pos.push({x:o.x*canvas.width,y:o.y*canvas.height}));
-  if(pos.length<2)return;
-  pos.forEach(p=>{
-    const nearby=pos.filter(q=>q!==p&&Math.hypot(q.x-p.x,q.y-p.y)<160);if(!nearby.length)return;
-    const intensity=Math.min(1,nearby.length/3),r=100+intensity*60;
-    const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
-    grad.addColorStop(0,`rgba(255,160,60,${.5*intensity})`);grad.addColorStop(1,'rgba(255,160,60,0)');
-    ctx.fillStyle=grad;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
-  });
-}
+/* ══════════════════════════════════════════════
+   WARMTH
+══════════════════════════════════════════════ */
+function initWarmth(){const canvas=document.getElementById('warmth-canvas');canvas.width=vw();canvas.height=vh();window.addEventListener('resize',()=>{canvas.width=vw();canvas.height=vh();});setInterval(drawWarmth,200);}
+function drawWarmth(){const canvas=document.getElementById('warmth-canvas'),ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const pos=[{x:myX,y:myY}];Object.values(others).forEach(o=>pos.push({x:o.x*canvas.width,y:o.y*canvas.height}));if(pos.length<2)return;pos.forEach(p=>{const nearby=pos.filter(q=>q!==p&&Math.hypot(q.x-p.x,q.y-p.y)<160);if(!nearby.length)return;const intensity=Math.min(1,nearby.length/3),r=100+intensity*60;const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);grad.addColorStop(0,`rgba(255,160,60,${.5*intensity})`);grad.addColorStop(1,'rgba(255,160,60,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();});}
 
-/* ── applause ── */
+/* ══════════════════════════════════════════════
+   APPLAUSE
+══════════════════════════════════════════════ */
 let lastClap=0;const CLAP_COOLDOWN=1500;
-function listenApplause(){
-  db.ref('applause').on('child_added',s=>{const d=s.val();if(Date.now()-d.ts>3000)return;spawnClapFloat(d.x*vw(),d.y*vh());});
-  db.ref('applause').orderByChild('ts').on('value',snap=>{if(!snap.exists())return;const now=Date.now(),recent=[];snap.forEach(c=>{if(now-c.val().ts<2000)recent.push(c.val());});if(recent.length>=3)triggerBurst();});
-}
+function listenApplause(){db.ref('applause').on('child_added',s=>{const d=s.val();if(Date.now()-d.ts>3000)return;spawnClapFloat(d.x*vw(),d.y*vh());});db.ref('applause').orderByChild('ts').on('value',snap=>{if(!snap.exists())return;const now=Date.now(),recent=[];snap.forEach(c=>{if(now-c.val().ts<2000)recent.push(c.val());});if(recent.length>=3)triggerBurst();});}
 function sendClap(){const now=Date.now();if(now-lastClap<CLAP_COOLDOWN)return;lastClap=now;spawnClapFloat(myX,myY);db.ref('applause').push({x:myX/vw(),y:myY/vh(),by:myId,ts:now});db.ref('applause').orderByChild('ts').endAt(now-10000).get().then(snap=>{if(snap.exists())snap.forEach(c=>c.ref.remove());});}
 function spawnClapFloat(cx,cy){const el=document.createElement('div');el.className='clap-float';el.textContent='👏';el.style.left=(cx-10)+'px';el.style.top=(cy-10)+'px';document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
 let burstCooldown=false;
 function triggerBurst(){if(burstCooldown)return;burstCooldown=true;setTimeout(()=>burstCooldown=false,3000);for(let i=0;i<8;i++)setTimeout(()=>{const el=document.createElement('div');el.className='clap-burst';el.textContent='👏';el.style.left=(10+Math.random()*80)+'vw';el.style.top=(10+Math.random()*80)+'vh';document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());},i*80);}
 document.addEventListener('dblclick',e=>{if(!myId)return;if(e.target.closest('.dbox,.note-pin,#chatbar,#overlay,.cursor-name'))return;sendClap();});
 
-/* ── ghost ── */
-function spawnGhost(entry){
-  const bubble=entry.el.querySelector('.cursor-bubble'),lastMsg=bubble?bubble.textContent:'';
-  const nameEl=entry.el.querySelector('.cursor-name'),svgEl=entry.el.querySelector('svg');if(!svgEl)return;
-  const ghost=document.createElement('div');ghost.className='ghost-cursor';ghost.style.left=entry.el.style.left;ghost.style.top=entry.el.style.top;
-  const nc=svgEl.querySelector('path,polygon,line')?.getAttribute('fill')||'#888';
-  ghost.innerHTML=svgEl.outerHTML+`<div class="ghost-name" style="background:${nc==='#ffffff'?'#ccc':nc}">${nameEl.textContent} ✦</div>`+(lastMsg?`<div class="ghost-bubble">${esc(lastMsg)}</div>`:'');
-  document.body.appendChild(ghost);ghost.addEventListener('animationend',()=>ghost.remove());
-}
+/* ══════════════════════════════════════════════
+   GHOST
+══════════════════════════════════════════════ */
+function spawnGhost(entry){const bubble=entry.el.querySelector('.cursor-bubble'),lastMsg=bubble?bubble.textContent:'';const nameEl=entry.el.querySelector('.cursor-name'),svgEl=entry.el.querySelector('svg');if(!svgEl)return;const ghost=document.createElement('div');ghost.className='ghost-cursor';ghost.style.left=entry.el.style.left;ghost.style.top=entry.el.style.top;const nc=svgEl.querySelector('path,polygon,line')?.getAttribute('fill')||'#888';ghost.innerHTML=svgEl.outerHTML+`<div class="ghost-name" style="background:${nc==='#ffffff'?'#ccc':nc}">${nameEl.textContent} ✦</div>`+(lastMsg?`<div class="ghost-bubble">${esc(lastMsg)}</div>`:'');document.body.appendChild(ghost);ghost.addEventListener('animationend',()=>ghost.remove());}
 
-/* ── pixel canvas ── */
+/* ══════════════════════════════════════════════
+   PIXEL CANVAS
+══════════════════════════════════════════════ */
 const GRID_W=64,GRID_H=64,CELL_PX=10,PIXEL_COOLDOWN_MS=3600000;
 let pixelCanvasEl,pixelCtx,pixelGrid={},myFingerprint='',canPlacePixel=true,pixelCooldownTimer=null;
-function makeFingerprint(){const raw=[navigator.userAgent,screen.width,screen.height,screen.colorDepth,Intl.DateTimeFormat().resolvedOptions().timeZone,navigator.language,navigator.hardwareConcurrency||0].join('|');let h=5381;for(let i=0;i<raw.length;i++)h=((h<<5)+h)^raw.charCodeAt(i);return 'fp_'+(h>>>0).toString(36);}
 function setupPixelCanvas(){
   pixelCanvasEl=document.getElementById('pixel-canvas-el');pixelCanvasEl.width=GRID_W*CELL_PX;pixelCanvasEl.height=GRID_H*CELL_PX;pixelCtx=pixelCanvasEl.getContext('2d');myFingerprint=makeFingerprint();
   const toggle=document.getElementById('pixel-toggle'),panel=document.getElementById('pixel-panel');
@@ -1584,26 +1640,33 @@ function setupPixelCanvas(){
   document.getElementById('pixel-close').addEventListener('click',()=>{panel.style.display='none';toggle.style.display='block';});
   db.ref('pixel_cooldowns/'+myFingerprint).get().then(snap=>{if(snap.exists()){const elapsed=Date.now()-snap.val();if(elapsed<PIXEL_COOLDOWN_MS){canPlacePixel=false;startCooldownUI(PIXEL_COOLDOWN_MS-elapsed);}}});
   pixelCanvasEl.addEventListener('click',e=>{
-    if(!canPlacePixel)return;
+    if(!canPlacePixel){showToast('pixel cooldown active!');return;}
+    // check locked
+    if(pixelCanvasLocked){
+      const el=document.getElementById('pixel-locked-msg');
+      if(el){el.remove();}
+      const msg=document.createElement('div');msg.id='pixel-locked-msg';msg.textContent='🔒 pixel canvas is locked by admin';document.body.appendChild(msg);
+      setTimeout(()=>{if(msg.parentNode)msg.remove();},2500);
+      return;
+    }
     const rect=pixelCanvasEl.getBoundingClientRect(),gx=Math.floor((e.clientX-rect.left)*GRID_W/rect.width),gy=Math.floor((e.clientY-rect.top)*GRID_H/rect.height);
     if(gx<0||gx>=GRID_W||gy<0||gy>=GRID_H)return;
     const color=myColor==='#ffffff'?'#eeeeee':myColor;
     db.ref('pixels/'+gx+'_'+gy).set({color,by:myName,ts:Date.now()});db.ref('pixel_cooldowns/'+myFingerprint).set(Date.now());
     canPlacePixel=false;startCooldownUI(PIXEL_COOLDOWN_MS);showToast('pixel placed! come back in 1 hour');
+    auditLog('🎨',`<strong>${esc(myName)}</strong> placed pixel at (${gx},${gy})`);
   });
 }
 function startCooldownUI(remaining){const msgEl=document.getElementById('pixel-cooldown-msg'),startedAt=Date.now();function tick(){const left=Math.max(0,remaining-(Date.now()-startedAt));if(left<=0){canPlacePixel=true;msgEl.textContent='your turn!';return;}msgEl.textContent=`next pixel in ${Math.floor(left/60000)}m ${Math.floor((left%60000)/1000)}s`;pixelCooldownTimer=setTimeout(tick,1000);}tick();}
-function listenPixelCanvas(){
-  db.ref('pixels').get().then(snap=>{if(!snap.exists())return;snap.forEach(s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});});
-  db.ref('pixels').on('child_added',s=>{if(pixelGrid[s.key])return;const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});
-  db.ref('pixels').on('child_changed',s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});
-}
+function listenPixelCanvas(){db.ref('pixels').get().then(snap=>{if(!snap.exists())return;snap.forEach(s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});});db.ref('pixels').on('child_added',s=>{if(pixelGrid[s.key])return;const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});db.ref('pixels').on('child_changed',s=>{const d=s.val(),[gx,gy]=s.key.split('_').map(Number);pixelGrid[s.key]=d.color;drawCell(gx,gy,d.color);});}
 function drawCell(gx,gy,color){if(!pixelCtx)return;pixelCtx.fillStyle=color;pixelCtx.fillRect(gx*CELL_PX,gy*CELL_PX,CELL_PX,CELL_PX);pixelCtx.strokeStyle='rgba(0,0,0,0.06)';pixelCtx.lineWidth=.5;pixelCtx.strokeRect(gx*CELL_PX,gy*CELL_PX,CELL_PX,CELL_PX);}
 
-/* ── boot ── */
-document.getElementById('joinBtn').addEventListener('click', join);
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') join(); });
-setTimeout(() => nameInput.focus(), 50);
+/* ══════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════ */
+document.getElementById('joinBtn').addEventListener('click',join);
+nameInput.addEventListener('keydown',e=>{if(e.key==='Enter')join();});
+setTimeout(()=>nameInput.focus(),50);
 </script>
 </body>
 </html>
